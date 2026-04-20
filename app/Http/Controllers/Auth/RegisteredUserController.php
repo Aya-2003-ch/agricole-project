@@ -24,27 +24,42 @@ class RegisteredUserController extends Controller
 
     /**
      * Handle an incoming registration request.
-     *
-     * @throws \Illuminate\Validation\ValidationException
      */
     public function store(Request $request): RedirectResponse
     {
+        //  validation
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'role' => ['required', 'string'], //  role
         ]);
 
+        // create user
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'role' => $request->role, 
         ]);
 
         event(new Registered($user));
 
         Auth::login($user);
 
-        return redirect(route('dashboard', absolute: false));
+        //  redirect حسب role 
+        if ($user->role == 'farmer') {
+            return redirect('/dashboard/farmer');
+        }
+
+        if ($user->role == 'veterinaire') {
+            return redirect('/dashboard/vet');
+        }
+
+        if ($user->role == 'distributeur') {
+            return redirect('/dashboard/distributeur');
+        }
+
+        return redirect(route('dashboard'));
     }
 }

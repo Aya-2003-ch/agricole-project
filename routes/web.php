@@ -19,13 +19,20 @@ Route::get('/distributeur/dashboard', [DistributeurController::class, 'dashboard
 // route
 Route::resource('produit_agris', ProduitAgriController::class);
 
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->name('dashboard');
+
 Route::get('/veterinaire', function () {
     return view('welcome');
 });
 
-Route::get('/homev', function () {
-    return view('dashboard');
+Route::get('/home', function () {
+    return view('home');
 });
+Route::get('/contact', function () {
+    return view('contact');
+})->name('contact');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
