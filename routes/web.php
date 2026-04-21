@@ -33,7 +33,27 @@ Route::get('/home', function () {
 Route::get('/contact', function () {
     return view('contact');
 })->name('contact');
+// routes/web.php
 
+// صفحات Dashboard حسب الـ role
+Route::get('/dashboard/ferme', function () {
+    return view('ferme.dashboard');
+})->name('ferme.dashboard')->middleware('auth');
+    
+
+Route::get('/dashboard/veterinaire', function () {
+    return view('veterinaire.dashboard');
+})->name('veterinaire.dashboard')->middleware('auth');
+
+Route::get('/dashboard/distributeur', function () {
+    return view('distributeur.dashboard');
+})->name('distributeur.dashboard')->middleware('auth');
+
+
+// Produits
+Route::resource('produit_agris', ProduitAgriController::class);
+
+// Profile
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

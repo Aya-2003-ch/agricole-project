@@ -71,13 +71,13 @@ button:hover {
         <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
     </div>
 
-    <!-- 🌿 ROLE  -->
+    <!-- ROLE  -->
     <div class="mt-4">
-        <x-input-label for="role" value="Type de compte" />
+        <x-input-label for="role" value="role" />
 
         <select name="role" id="role" class="block mt-1 w-full" required>
             <option value="">-- اختر  صفتك --</option>
-            <option value="farmer"> فلاح</option>
+            <option value="ferme"> فلاح</option>
             <option value="veterinaire"> بيطري</option>
             <option value="distributeur"> موزع</option>
         </select>
