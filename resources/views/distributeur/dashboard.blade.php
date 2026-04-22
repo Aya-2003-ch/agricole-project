@@ -4,53 +4,67 @@
 <meta charset="UTF-8">
 <title>لوحة الموزع</title>
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
 <style>
-body {
+* {
     margin: 0;
-    font-family: Arial;
-    background: #f4f6f9;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
 }
 
-/* Sidebar */
+body {
+    background: #f4f7f6;
+}
+
+/* SIDEBAR (نفس البيطري) */
 .sidebar {
-    width: 220px;
+    width: 240px;
     height: 100vh;
-    background: #2c3e50;
+    background: linear-gradient(180deg, #14532d, #16a34a);
     position: fixed;
     color: white;
-    padding-top: 20px;
+    padding: 20px;
 }
 
 .sidebar h2 {
     text-align: center;
+    margin-bottom: 40px;
 }
 
 .sidebar a {
-    display: block;
-    padding: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    margin-bottom: 10px;
     color: white;
     text-decoration: none;
+    border-radius: 8px;
+    transition: 0.3s;
 }
 
 .sidebar a:hover {
-    background: #34495e;
+    background: rgba(255,255,255,0.2);
 }
 
-/* Content */
+/* CONTENT */
 .content {
-    margin-left: 220px;
-    padding: 20px;
+    margin-left: 240px;
+    padding: 30px;
 }
 
-/* Header */
+/* HEADER */
 .header {
     background: white;
-    padding: 15px;
-    border-radius: 10px;
-    margin-bottom: 20px;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 25px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
 }
 
-/* Cards */
+/* CARDS */
 .cards {
     display: flex;
     gap: 20px;
@@ -60,133 +74,79 @@ body {
     flex: 1;
     background: white;
     padding: 20px;
-    border-radius: 10px;
+    border-radius: 15px;
     text-align: center;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    transition: 0.3s;
 }
 
-/* Sections */
-.section {
-    margin-top: 20px;
-    background: white;
-    padding: 15px;
-    border-radius: 10px;
+.card:hover {
+    transform: translateY(-5px);
 }
 
-/* Buttons */
-.btn {
-    padding: 8px 12px;
-    background: green;
-    color: white;
-    border: none;
-    border-radius: 5px;
-}
-
-/* Table */
-table {
-    width: 100%;
-    margin-top: 10px;
-    border-collapse: collapse;
-}
-
-th, td {
-    padding: 10px;
-    border-bottom: 1px solid #ddd;
-    text-align: center;
-}
-
-th {
-    background: #27ae60;
-    color: white;
+.card i {
+    font-size: 30px;
+    color: #16a34a;
+    margin-bottom: 10px;
 }
 </style>
 </head>
 
 <body>
 
-<!-- Sidebar -->
+<!-- SIDEBAR -->
 <div class="sidebar">
-    <h2>الموزع</h2>
 
-    <a href="#">🏠 الرئيسية</a>
-    <a href="#">📦 المنتجات</a>
-    <a href="#">🛒 الطلبات</a>
+    <h2>📦 الموزع</h2>
+
+    <a href="#"><i class="fas fa-home"></i> الرئيسية</a>
+
+    <!-- إدارة المنتجات -->
+    <a href="{{ route('produits.index') }}">
+        <i class="fas fa-box"></i> إدارة المنتجات
+    </a>
+
+    <!-- صفحتي -->
+    <a href="{{ route('profil') }}">
+        <i class="fas fa-user"></i> صفحتي
+    </a>
+
+    <!-- تسجيل الخروج -->
+    <a href="{{ route('logout') }}"
+       onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+        <i class="fas fa-right-from-bracket"></i> تسجيل الخروج
+    </a>
+
+    <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display:none;">
+        @csrf
+    </form>
+
 </div>
 
-<!-- Content -->
+<!-- CONTENT -->
 <div class="content">
 
-    <!-- Header -->
+    <!-- HEADER -->
     <div class="header">
-        <h2>لوحة التحكم</h2>
+        <h2>👋 مرحبا بك في لوحة الموزع</h2>
         <p>Gestion de Stock</p>
     </div>
 
-    <!-- Cards -->
+    <!-- CARDS (ديناميكيين لاحقاً من Laravel) -->
     <div class="cards">
+
         <div class="card">
+            <i class="fas fa-box"></i>
             <h3>عدد المنتجات</h3>
-            <p>12</p>
+            <p>{{ $totalProduits ?? '...' }}</p>
         </div>
 
         <div class="card">
-            <h3>طلبات جديدة</h3>
-            <p>5</p>
+            <i class="fas fa-shopping-cart"></i>
+            <h3>الطلبات الجديدة</h3>
+            <p>{{ $totalCommandes ?? '...' }}</p>
         </div>
 
-        <div class="card">
-            <h3>نفذ المخزون</h3>
-            <p>2</p>
-        </div>
-    </div>
-
-    <!-- Gestion de Stock -->
-    <div class="section">
-        <h3>📦 إدارة المخزون</h3>
-
-        <table>
-            <tr>
-                <th>اسم المنتج</th>
-                <th>الكمية</th>
-                <th>السعر</th>
-                <th>الإجراء</th>
-            </tr>
-
-            <tr>
-                <td>دواء 1</td>
-                <td>20</td>
-                <td>500 DA</td>
-                <td><button class="btn">تعديل</button></td>
-            </tr>
-
-            <tr>
-                <td>دواء 2</td>
-                <td>0</td>
-                <td>300 DA</td>
-                <td><button class="btn">إضافة</button></td>
-            </tr>
-        </table>
-    </div>
-
-    <!-- Commandes -->
-    <div class="section">
-        <h3>🛒 الطلبات</h3>
-
-        <table>
-            <tr>
-                <th>اسم الفلاح</th>
-                <th>المنتج</th>
-                <th>الحالة</th>
-                <th>الإجراء</th>
-            </tr>
-
-            <tr>
-                <td>محمد</td>
-                <td>دواء 1</td>
-                <td>في الانتظار</td>
-                <td><button class="btn">قبول</button></td>
-            </tr>
-        </table>
     </div>
 
 </div>

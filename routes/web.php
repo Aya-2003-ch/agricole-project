@@ -1,11 +1,14 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
+
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProduitAgriController;
+use App\Http\Controllers\ProduitController;
 use App\Http\Controllers\VeterinaireController;
 use App\Http\Controllers\FermeController;
 use App\Http\Controllers\DistributeurController;
+use App\Http\Controllers\ConsultationController;
+use App\Http\Controllers\ProfileController;
 Route::get('/produit-agri', [ProduitAgriController::class, 'index'])->name('produit_agri.index');
 Route::post('/produit-agri', [ProduitAgriController::class, 'store'])->name('produit_agri.store');
 Route::get('/produit-agri/{id}/edit', [ProduitAgriController::class, 'edit'])->name('produit_agri.edit');
@@ -15,9 +18,11 @@ Route::get('/veterinaire/dashboard', [VeterinaireController::class, 'dashboard']
 Route::get('/veterinaire/consultations', [VeterinaireController::class, 'consultations']);
 Route::get('/ferme/dashboard', [FermeController::class, 'dashboard']);
 Route::get('/distributeur/dashboard', [DistributeurController::class, 'dashboard']);
-
-// route
+Route::get('/profil', [ProfilController::class, 'profil'])->name('profil');
+Route::get('/produit', [ProduitController::class, 'index'])->name('produits.index');
 Route::resource('produit_agris', ProduitAgriController::class);
+// route
+Route::resource('consultation', ConsultationController::class);
 
 Route::get('/dashboard', function () {
     return view('dashboard');
@@ -48,6 +53,8 @@ Route::get('/dashboard/veterinaire', function () {
 Route::get('/dashboard/distributeur', function () {
     return view('distributeur.dashboard');
 })->name('distributeur.dashboard')->middleware('auth');
+Route::get('/veterinaire/consultations', [VeterinaireController::class, 'consultations'])
+    ->name('veterinaire.consultations');
 
 
 // Produits

@@ -1,14 +1,15 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Models\Consultation;
 use Illuminate\Http\Request;
 
 class VeterinaireController extends Controller
 {
     public function dashboard()
 {
-    return view('veterinaire.dashboard');
+    $consultations = Consultation::with('user')->latest()->get();
+    return view('veterinaire.dashboard',compact('consultations'));
 }
 
 public function consultations()
