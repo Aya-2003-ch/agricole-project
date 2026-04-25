@@ -14,13 +14,11 @@ return new class extends Migration
       Schema::create('commandes', function (Blueprint $table) {
     $table->bigIncrements('id');
     $table->unsignedBigInteger('id_user');
-    $table->unsignedBigInteger('livreur_id');
 
     $table->foreign('id_user')
      ->references('id')->on('users')->onDelete('cascade');
 
-    $table->foreign('livreur_id')
-      ->references('id')->on('livreurs')->onDelete('cascade');
+    
     $table->date('date_commande');
     $table->string('statut');
     

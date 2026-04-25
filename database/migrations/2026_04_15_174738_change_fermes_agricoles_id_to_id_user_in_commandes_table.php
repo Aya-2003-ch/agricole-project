@@ -11,9 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('commandes', function (Blueprint $table) {
-            $table->renameColumn('fermes_agricoles_id','id_user');
-        });
+        // نتحققوا إذا العمود القديم كاين قبل ما نبدلوه، هكذا ما يصرى حتى Error
+        if (Schema::hasColumn('commandes', 'fermes_agricoles_id')) {
+            Schema::table('commandes', function (Blueprint $table) {
+                $table->renameColumn('fermes_agricoles_id', 'id_user');
+            });
+        }
     }
 
     /**
@@ -21,8 +24,10 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('commandes', function (Blueprint $table) {
-           $table->renameColumn('i_user','fermes_agricoles_id');  
-        });
+        if (Schema::hasColumn('commandes', 'id_user')) {
+            Schema::table('commandes', function (Blueprint $table) {
+               $table->renameColumn('id_user', 'fermes_agricoles_id');  
+            });
+        }
     }
 };

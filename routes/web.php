@@ -17,8 +17,28 @@ Route::get('/contact', function () { return view('contact'); })->name('contact')
 // 2. الروابط المحمية (لازم تسجيل دخول)
 Route::middleware(['auth'])->group(function () {
     
-    // صفحة الداشبورد العامة (اختيارية)
-    Route::get('/dashboard', function () { return view('dashboard'); })->name('dashboard');
+    Route::get('/check-role', function () {
+        return "User Role is: " . auth()->user()->role;
+    });
+
+    // التوجيه الذكي (العقل تاع السيستيم اللي يفرق بين المستخدمين)
+    Route::get('/dashboard', function () {
+        $user = auth()->user();
+
+        if ($user->role == 'farmer' || $user->role == 'فلاح') {
+            return redirect()->route('ferme.dashboard');
+        } 
+
+        if ($user->role == 'veterinaire' || $user->role == 'بيطرى' || $user->role == 'بيطري') {
+            return redirect()->route('veterinaire.dashboard');
+        }
+
+        if ($user->role == 'distributeur' || $user->role == 'موزع') {
+            return redirect()->route('distributeur.dashboard');
+        }
+
+        return view('dashboard'); 
+    })->name('dashboard');
 
     // داشبورد الطبيب البيطري
     Route::get('/veterinaire/dashboard', [VeterinaireController::class, 'dashboard'])->name('veterinaire.dashboard');

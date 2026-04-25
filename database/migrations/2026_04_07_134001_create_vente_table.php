@@ -15,12 +15,11 @@ return new class extends Migration
     $table->bigIncrements('id');
 
     $table->unsignedBigInteger('commande_id');
-    $table->unsignedBigInteger('livreur_id');
+    
     $table->unsignedBigInteger('store_id');
 
     $table->foreign('commande_id')->references('id')->on('commandes')->onDelete('cascade');
-    $table->foreign('livreur_id')->references('id')->on('livreurs')->onDelete('cascade');
-    $table->foreign('stores_id')->references('id')->on('stores')->onDelete('cascade');
+    $table->foreign('store_id')->references('id')->on('stores')->onDelete('cascade');
 
     $table->integer('qte');
     $table->decimal('prix', 10, 2);
