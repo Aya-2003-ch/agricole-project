@@ -21,14 +21,14 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', function () { return view('dashboard'); })->name('dashboard');
 
     // داشبورد الطبيب البيطري
-    Route::get('/veterinaire/dashboard', [VeterinaireController::class, 'dashboard'])->name('vet.dashboard');
+    Route::get('/veterinaire/dashboard', [VeterinaireController::class, 'dashboard'])->name('veterinaire.dashboard');
     Route::get('/veterinaire/consultations', [VeterinaireController::class, 'consultations'])->name('veterinaire.consultations');
 
     // داشبورد الفلاح
-    Route::get('/ferme/dashboard', [FermeController::class, 'dashboard'])->name('farmer.dashboard');
+    Route::get('/ferme/dashboard', [FermeController::class, 'dashboard'])->name('ferme.dashboard');
 
     // داشبورد الموزع
-    Route::get('/distributeur/dashboard', [DistributeurController::class, 'dashboard'])->name('distrib.dashboard');
+    Route::get('/distributeur/dashboard', [DistributeurController::class, 'dashboard'])->name('distributeur.dashboard');
 
     // البروفايل (خدمة آية)
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

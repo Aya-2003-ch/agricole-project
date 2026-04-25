@@ -134,7 +134,7 @@ body {
     <a href="{{ route('veterinaire.consultations') }}">
         <i class="fas fa-notes-medical"></i> الاستشارات
     </a>
-    <a href="{{ route('profil') }}">
+    <a href="{{ route('profile.edit') }}">
     <i class="fas fa-user"></i> صفحتي
 </a>
 

@@ -107,7 +107,7 @@ body {
     </a>
 
     <!-- صفحتي -->
-    <a href="{{ route('profil') }}">
+    <a href="{{ route('profile.edit') }}">
         <i class="fas fa-user"></i> صفحتي
     </a>
 
