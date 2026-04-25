@@ -47,19 +47,19 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        //  redirect حسب role 
-        if ($user->role == 'farmer') {
-            return redirect('/dashboard/farmer');
-        }
-
-        if ($user->role == 'veterinaire') {
-            return redirect('/dashboard/vet');
-        }
-
-        if ($user->role == 'distributeur') {
-            return redirect('/dashboard/distributeur');
-        }
-
-        return redirect(route('dashboard'));
-    }
+// الروابط هادو جبتهم من ملف الـ web.php تاعك باش ما نغلطوش
+if ($user->role == 'farmer') {
+    return redirect('/ferme/dashboard'); 
 }
+
+if ($user->role == 'veterinaire') {
+    return redirect('/veterinaire/dashboard'); 
+}
+
+if ($user->role == 'distributeur') {
+    return redirect('/distributeur/dashboard');
+} // هادا تاع الـ if الأخير
+
+        return redirect('/dashboard');
+    } 
+    }

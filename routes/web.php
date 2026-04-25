@@ -11,11 +11,13 @@ Route::post('/produit-agri', [ProduitAgriController::class, 'store'])->name('pro
 Route::get('/produit-agri/{id}/edit', [ProduitAgriController::class, 'edit'])->name('produit_agri.edit');
 Route::put('/produit-agri/{id}', [ProduitAgriController::class, 'update'])->name('produit_agri.update');
 Route::delete('/produit-agri/{id}', [ProduitAgriController::class, 'destroy'])->name('produit_agri.destroy');
-Route::get('/veterinaire/dashboard', [VeterinaireController::class, 'dashboard']);
-Route::get('/veterinaire/consultations', [VeterinaireController::class, 'consultations']);
-Route::get('/ferme/dashboard', [FermeController::class, 'dashboard']);
-Route::get('/distributeur/dashboard', [DistributeurController::class, 'dashboard']);
 
+ 
+// هادو هوما السطور اللي لازم تعدليهم في ملفك:
+Route::get('/veterinaire/dashboard', [VeterinaireController::class, 'dashboard'])->name('vet.dashboard');
+Route::get('/veterinaire/consultations', [VeterinaireController::class, 'consultations']);
+Route::get('/ferme/dashboard', [FermeController::class, 'dashboard'])->name('farmer.dashboard');
+Route::get('/distributeur/dashboard', [DistributeurController::class, 'dashboard'])->name('distrib.dashboard');
 // route
 Route::resource('produit_agris', ProduitAgriController::class);
 
