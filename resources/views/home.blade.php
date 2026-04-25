@@ -4,54 +4,65 @@
 <meta charset="UTF-8">
 <title>AgroDz</title>
 
+<!-- Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
 <style>
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Arial', sans-serif;
+    font-family: 'Poppins', sans-serif;
 }
 
-/* BACKGROUND */
 body {
-    background: #f4f7f5;
-    color: #2c3e50;
+    background: #f1f5f3;
+    color: #1e293b;
 }
 
-/* NAVBAR */
+/* NAVBAR GLASS */
 nav {
-    background: linear-gradient(90deg, #1e7d4f, #27ae60);
-    padding: 15px 40px;
+    position: sticky;
+    top: 0;
+    backdrop-filter: blur(10px);
+    background: rgba(255,255,255,0.7);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    color: white;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    padding: 15px 40px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+    z-index: 100;
 }
 
 nav h2 {
-    font-size: 22px;
+    color: #16a34a;
 }
 
-nav a {
-    color: white;
-    text-decoration: none;
+.nav-icons a {
     margin-left: 20px;
-    font-weight: bold;
+    font-size: 18px;
+    color: #374151;
     transition: 0.3s;
 }
 
-nav a:hover {
-    color: #d1f7dc;
+.nav-icons a:hover {
+    color: #16a34a;
+    transform: scale(1.2);
 }
 
 /* HERO */
 .hero {
-    background: linear-gradient(135deg, #27ae60, #2ecc71);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 90px 50px;
+    background: linear-gradient(135deg, #16a34a, #4ade80);
     color: white;
-    text-align: center;
-    padding: 100px 20px;
-    border-radius: 0 0 40px 40px;
+    border-radius: 0 0 50px 50px;
+}
+
+.hero-text {
+    max-width: 50%;
 }
 
 .hero h1 {
@@ -60,113 +71,121 @@ nav a:hover {
 }
 
 .hero p {
-    font-size: 18px;
-    opacity: 0.9;
     margin-bottom: 25px;
+    font-size: 18px;
 }
 
 .btn {
     padding: 12px 25px;
-    border: none;
     border-radius: 30px;
+    border: none;
+    margin-right: 10px;
     cursor: pointer;
     font-weight: bold;
-    margin: 10px;
     transition: 0.3s;
     text-decoration: none;
-    display: inline-block;
 }
 
 .btn-white {
     background: white;
-    color: #27ae60;
+    color: #16a34a;
 }
 
-.btn-white:hover {
-    background: #eafaf1;
-    transform: scale(1.05);
-}
-
-.btn-green {
-    background: #145a32;
+.btn-dark {
+    background: #064e3b;
     color: white;
 }
 
-.btn-green:hover {
-    background: #0f3d22;
+.btn:hover {
     transform: scale(1.05);
 }
 
-/* SECTION */
+/* SERVICES */
 .section {
-    padding: 60px 20px;
+    padding: 80px 50px;
     text-align: center;
 }
 
 .section h2 {
-    margin-bottom: 30px;
-    font-size: 28px;
-    color: #1e7d4f;
+    font-size: 32px;
+    margin-bottom: 40px;
+    color: #16a34a;
 }
 
 /* CARDS */
 .cards {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 25px;
 }
 
 .card {
     background: white;
-    width: 260px;
     padding: 25px;
-    border-radius: 15px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    border-radius: 18px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.05);
     transition: 0.3s;
+    position: relative;
+    overflow: hidden;
+}
+
+.card::before {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 5px;
+    top: 0;
+    left: 0;
+    background: linear-gradient(90deg, #16a34a, #4ade80);
 }
 
 .card:hover {
-    transform: translateY(-8px);
+    transform: translateY(-10px);
+}
+
+.card i {
+    font-size: 28px;
+    margin-bottom: 10px;
+    color: #16a34a;
 }
 
 .card h3 {
     margin-bottom: 10px;
-    color: #27ae60;
+}
+
+.card p {
+    font-size: 14px;
+    color: #555;
 }
 
 /* CTA */
 .cta {
-    background: linear-gradient(90deg, #eafaf1, #ffffff);
-    padding: 60px 20px;
     text-align: center;
-    margin-top: 40px;
+    padding: 70px;
+    background: linear-gradient(135deg, #dcfce7, #ffffff);
 }
 
 .cta h2 {
     margin-bottom: 10px;
-    color: #1e7d4f;
 }
 
 /* FOOTER */
 footer {
-    background: #1e2a2f;
+    background: #0f172a;
     color: white;
     text-align: center;
     padding: 20px;
-    margin-top: 40px;
-    font-size: 14px;
 }
 
 /* RESPONSIVE */
-@media (max-width: 768px) {
-    .hero h1 {
-        font-size: 30px;
+@media(max-width: 768px) {
+    .hero {
+        flex-direction: column;
+        text-align: center;
     }
 
-    .cards {
-        flex-direction: column;
-        align-items: center;
+    .hero-text {
+        max-width: 100%;
     }
 }
 </style>
@@ -174,66 +193,89 @@ footer {
 
 <body>
 
-<!-- NAVBAR -->
+<!-- NAVBAR ICONS -->
 <nav>
     <h2>🌿 AgroDz</h2>
-    <div>
-        <a href="#">Accueil</a>
-        <a href="#">Produits</a>
-        <a href="{{ route('contact') }}">Contact</a>
-        <a href="{{ route('login') }}">Connexion</a>
-        <a href="{{ route('register') }}">Inscription</a>
+
+    <div class="nav-icons">
+        <a href="#"><i class="fas fa-home"></i></a>
+        <a href="#"><i class="fas fa-box"></i></a>
+        <a href="#"><i class="fas fa-envelope"></i></a>
+        <a href="{{ route('login') }}"><i class="fas fa-user"></i></a>
+        <a href="{{ route('register') }}"><i class="fas fa-user-plus"></i></a>
     </div>
 </nav>
 
 <!-- HERO -->
 <div class="hero">
-    <h1>AgroDz 🌱 منصة الفلاحة الذكية في الجزائر</h1>
-    <p>بيع منتجاتك،توسيع زبائنك ومبيعاتك, الوصول لاقرب بيطري وموزع لك, مراقبة ومتابعة الامراض الحيوانية عن بعد   </p>
+    <div class="hero-text">
+        <h1>AgroDz 🐄🌿</h1>
+        <p>منصة ذكية تجمع الفلاحين، الموزعين، والأطباء البيطريين</p>
 
-    <a href="{{ route('login') }}" class="btn btn-white">Se connecter</a>
-    <a href="{{ route('register') }}" class="btn btn-green">Créer un compte</a>
+        <a href="{{ route('login') }}" class="btn btn-white">Se connecter</a>
+        <a href="{{ route('register') }}" class="btn btn-dark">Créer un compte</a>
+    </div>
+
+    <div>
+        <i class="fas fa-leaf" style="font-size:120px;"></i>
+    </div>
 </div>
 
 <!-- SERVICES -->
 <div class="section">
-    <h2> خدماتنا</h2>
+    <h2>خدماتنا</h2>
 
     <div class="cards">
+
         <div class="card">
-            <h3>🌾 بيع المنتجات</h3>
-            <p>بيع مباشر وسريع بين الموزع والمستهلك</p>
+            <i class="fas fa-shopping-basket"></i>
+            <h3>بيع المنتجات</h3>
+            <p>بيع المنتجات الفلاحية الحيوانية و النباتية</p>
+        </div>
+        <div class="card">
+            <i class="fas fa-warehouse"></i>
+            <h3>إدارة المخزون</h3>
+            <p>تحكم كامل في الكميات والأسعار</p>
         </div>
 
         <div class="card">
-            <h3>📦 إدارة ذكية</h3>
-            <p>تحكم كامل في المخزون والمنتجات</p>
+            <i class="fas fa-truck"></i>
+            <h3>التوصيل</h3>
+            <p>تنظيم الطلبات مع الموزعين</p>
         </div>
 
         <div class="card">
-            <h3>🚚 التوصيل</h3>
-            <p>تنظيم الطلبات والتوصيل بسهولة</p>
+            <i class="fas fa-stethoscope"></i>
+            <h3>بيطري</h3>
+            <p>استشارات طبية للحيوانات</p>
         </div>
 
         <div class="card">
-            <h3>👨‍🌾 دعم الفلاحين</h3>
-            <p>   مرافقة رقمية لتسهيل حياة الفلاحين </p>
+            <i class="fas fa-chart-line"></i>
+            <h3>إحصائيات</h3>
+            <p>تحليل الأداء والمبيعات</p>
         </div>
+
+        <div class="card">
+            <i class="fas fa-users"></i>
+            <h3>شبكة</h3>
+            <p>ربط جميع الفاعلين في الفلاحة</p>
+        </div>
+
     </div>
 </div>
 
 <!-- CTA -->
 <div class="cta">
-    <h2>ابدأ رحلتك مع AgroDz 🚀</h2>
-    <p>انضم الآن واستفد من خدماتنا </p>
-
-    <br><br>
-    <a href="{{ route('register') }}" class="btn btn-green">إنشاء حساب</a>
+    <h2>🚀 ابدأ الآن</h2>
+    <p>أنشئ حسابك وابدأ رحلتك</p>
+    <br>
+    <a href="{{ route('register') }}" class="btn btn-dark">إنشاء حساب</a>
 </div>
 
 <!-- FOOTER -->
 <footer>
-    © 2026 AgroDz - منصة فلاحية جزائرية 🌿
+    © 2026 AgroDz
 </footer>
 
 </body>
