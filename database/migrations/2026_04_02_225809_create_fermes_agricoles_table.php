@@ -15,6 +15,12 @@ return new class extends Migration
         $table->bigIncrements('id');
         $table->string('nom');
         $table->string('localisation');
+        
+        // --- حطيهم هنا داخل الأقواس ---
+        $table->double('latitude')->nullable();
+        $table->double('longitude')->nullable();
+        // ----------------------------
+
         $table->timestamps();
         $table->softDeletes();
     });

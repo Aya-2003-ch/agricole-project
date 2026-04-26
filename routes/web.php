@@ -49,7 +49,8 @@ Route::middleware(['auth'])->group(function () {
 
     // داشبورد الفلاح
     Route::get('/ferme/dashboard', [FermeController::class, 'dashboard'])->name('ferme.dashboard');
-
+// الطريق لحفظ معلومات المزرعة مع الخريطة
+Route::post('/ferme/store', [FermeController::class, 'store'])->name('ferme.store');
     // داشبورد الموزع
     Route::get('/distributeur/dashboard', [DistributeurController::class, 'dashboard'])->name('distributeur.dashboard');
     Route::get('distributeur/profile', [DistributeurController::class, 'profile'])->name('distributeur.profile');
