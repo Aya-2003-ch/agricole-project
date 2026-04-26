@@ -60,7 +60,7 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // إدارة المنتجات والاستشارات (Resources)
-    Route::resource('produit_agris', ProduitAgriController::class);
+    Route::resource('produit', ProduitController::class);
     Route::resource('consultation', ConsultationController::class);
     Route::get('/produit', [ProduitController::class, 'index'])->name('produits.index');
 });

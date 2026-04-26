@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\Store;
 use App\Models\Produit;
 use Illuminate\Http\Request;
+use Illuminate\Fondation\Auth\Access\AuthorizesRequest;
 
 class ProduitController extends Controller
 {
+    use AuthorizesRequests;
     // affichage + recherche
     public function index(Request $request)
     {
