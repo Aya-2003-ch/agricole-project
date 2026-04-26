@@ -21,7 +21,7 @@ class StorePolicy
      */
     public function create(User $user): bool
     {
-        return $user ->id == $store->distributeur_id;
+       return true;
     }
 
     /**

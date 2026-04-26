@@ -7,6 +7,16 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
+    .welcome {
+    font-size: 24px;
+    font-weight: bold;
+    color: #14532d;
+    margin-bottom: 10px;
+    background: #dcfce7;
+    padding: 10px 15px;
+    border-radius: 10px;
+    display: inline-block;
+}
 * {
     margin: 0;
     padding: 0;
@@ -134,7 +144,7 @@ body {
     <a href="{{ route('veterinaire.consultations') }}">
         <i class="fas fa-notes-medical"></i> الاستشارات
     </a>
-    <a href="{{ route('profile.edit') }}">
+    <a href="{{ route('veterinaire.profile') }}">
     <i class="fas fa-user"></i> صفحتي
 </a>
 
@@ -154,7 +164,9 @@ body {
 
     <!-- HEADER -->
     <div class="header">
-        <h2>مرحبا 👨‍⚕️</h2>
+        <h2 class="welcome">
+     👋 مرحبا {{ Auth::user()->name }}
+     </h2>
         <p>إدارة الاستشارات والطلبات بسهولة</p>
     </div>
 

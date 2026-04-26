@@ -25,41 +25,44 @@ class RegisteredUserController extends Controller
     /**
      * Handle an incoming registration request.
      */
-    public function store(Request $request): RedirectResponse
-    {
-        //  validation
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'role' => ['required', 'string'], //  role
-        ]);
+public function store(Request $request): RedirectResponse
+{
+    // validation
+    $request->validate([
+        'name' => ['required', 'string', 'max:255'],
+        'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users'],
+        'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        'role' => ['required', 'string'],
+    ]);
 
-        // create user
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => $request->role, 
-        ]);
+    // create user
+    $user = User::create([
+        'name' => $request->name,
+        'email' => $request->email,
+        'password' => Hash::make($request->password),
+        'role' => $request->role,
+    ]);
 
-        event(new Registered($user));
+    event(new Registered($user));
 
-        Auth::login($user);
+    Auth::login($user);
 
-// الروابط هادو جبتهم من ملف الـ web.php تاعك باش ما نغلطوش
-if ($user->role == 'farmer') {
-    return redirect('/ferme/dashboard'); 
-}
+    // 💥 message personnalisée
+    $message = 'مرحبا ' . $user->name . ' 👋';
 
-if ($user->role == 'veterinaire') {
-    return redirect('/veterinaire/dashboard'); 
-}
-
-if ($user->role == 'distributeur') {
-    return redirect('/distributeur/dashboard');
-} // هادا تاع الـ if الأخير
-
-        return redirect('/dashboard');
-    } 
+    // 🔥 redirect حسب role + message
+    if ($user->role == 'farmer') {
+        return redirect('/ferme/dashboard')->with('success', $message);
     }
+
+    if ($user->role == 'veterinaire') {
+        return redirect('/veterinaire/dashboard')->with('success', $message);
+    }
+
+    if ($user->role == 'distributeur') {
+        return redirect('/distributeur/dashboard')->with('success', $message);
+    }
+
+    return redirect('/dashboard')->with('success', $message);
+}
+}

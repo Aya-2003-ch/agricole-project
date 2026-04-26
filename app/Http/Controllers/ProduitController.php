@@ -6,7 +6,7 @@ use App\Models\Store;
 use App\Models\Produit;
 use Illuminate\Http\Request;
 
-class ProduitAgriController extends Controller
+class ProduitController extends Controller
 {
     // affichage + recherche
     public function index(Request $request)
@@ -52,7 +52,7 @@ class ProduitAgriController extends Controller
     public function update(Request $request, $id)
     { 
         $store=Store::findOrFail($id);
-        $this-> authorize('update', Store::class);
+        $this-> authorize('update', Store);
         $produit = Store::findOrFail($id);
 
         $produit->update([
@@ -61,14 +61,14 @@ class ProduitAgriController extends Controller
             'date_exp' => $request->date_exp,
         ]);
 
-        return redirect()->route('produit_agri.index');
+        return redirect()->route('produits.index');
     }
 
     // delete
     public function destroy($id)
     {
          $store=Store::findOrFail($id);
-        $this-> authorize('delete', Store::class);
+        $this-> authorize('delete', Store);
         $store ->delete();
         return redirect()->back();
     }

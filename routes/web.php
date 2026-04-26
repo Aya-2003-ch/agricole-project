@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\ProduitAgriController;
 use App\Http\Controllers\ProduitController;
 use App\Http\Controllers\VeterinaireController;
 use App\Http\Controllers\FermeController;
@@ -9,13 +8,16 @@ use App\Http\Controllers\DistributeurController;
 use App\Http\Controllers\ConsultationController;
 use App\Http\Controllers\ProfileController;
 
+
 // 1. الصفحات العامة
 Route::get('/', function () { return view('welcome'); });
-Route::get('/home', function () { return view('home'); });
+Route::get('/home', function () { return view('home'); })->name('home');
 Route::get('/contact', function () { return view('contact'); })->name('contact');
-
+Route::resource('produits', ProduitController::class);
 // 2. الروابط المحمية (لازم تسجيل دخول)
 Route::middleware(['auth'])->group(function () {
+    Route::get('/distributeur/dashboard', [DistributeurController::class, 'dashboard']);
+    Route::resource('produits', ProduitController::class);
     
     Route::get('/check-role', function () {
         return "User Role is: " . auth()->user()->role;
@@ -43,12 +45,14 @@ Route::middleware(['auth'])->group(function () {
     // داشبورد الطبيب البيطري
     Route::get('/veterinaire/dashboard', [VeterinaireController::class, 'dashboard'])->name('veterinaire.dashboard');
     Route::get('/veterinaire/consultations', [VeterinaireController::class, 'consultations'])->name('veterinaire.consultations');
+    Route::get('/veterinaire/profile', [VeterinaireController::class, 'profile'])->name('veterinaire.profile');
 
     // داشبورد الفلاح
     Route::get('/ferme/dashboard', [FermeController::class, 'dashboard'])->name('ferme.dashboard');
 
     // داشبورد الموزع
     Route::get('/distributeur/dashboard', [DistributeurController::class, 'dashboard'])->name('distributeur.dashboard');
+    Route::get('distributeur/profile', [DistributeurController::class, 'profile'])->name('distributeur.profile');
 
     // البروفايل (خدمة آية)
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

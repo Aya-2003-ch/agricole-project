@@ -10,4 +10,9 @@ class DistributeurController extends Controller
 {
     return view('distributeur.dashboard');
 }
+ public function profile()
+{
+    return view('distributeur.profile', ['user' => auth()->user()]);
+}
+
 }

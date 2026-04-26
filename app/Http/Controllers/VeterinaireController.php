@@ -16,4 +16,10 @@ public function consultations()
 {
     return view('veterinaire.consultations');
 }
+public function profile()
+{
+    return view('veterinaire.profile',[
+        'user' => auth()->user()
+    ]);
+}
 }

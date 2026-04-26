@@ -68,14 +68,14 @@
 <h2 style="text-align:center;">Gestion Store</h2>
 
 <!-- RECHERCHE -->
-<form method="GET" action="{{ route('produit_agri.index') }}">
+<form method="GET" action="{{ route('produits.index') }}">
     <input type="text" name="search" placeholder="Rechercher produit...">
     <button type="submit" class="add">Rechercher</button>
 </form>
 
 <!-- AJOUT (Policy: create) -->
 @can('create', App\Models\Store::class)
-<form method="POST" action="{{ route('produit_agri.store') }}">
+<form method="POST" action="{{ route('produits.store') }}">
     @csrf
 
     <select name="produit_id">

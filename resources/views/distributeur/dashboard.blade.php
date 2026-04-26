@@ -7,6 +7,16 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
+    .welcome {
+    font-size: 24px;
+    font-weight: bold;
+    color: #14532d;
+    margin-bottom: 10px;
+    background: #dcfce7;
+    padding: 10px 15px;
+    border-radius: 10px;
+    display: inline-block;
+}
 * {
     margin: 0;
     padding: 0;
@@ -107,15 +117,19 @@ body {
     </a>
 
     <!-- صفحتي -->
-    <a href="{{ route('profile.edit') }}">
+    <a href="{{ route('distributeur.profile') }}">
         <i class="fas fa-user"></i> صفحتي
     </a>
 
     <!-- تسجيل الخروج -->
     <a href="{{ route('logout') }}"
-       onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-        <i class="fas fa-right-from-bracket"></i> تسجيل الخروج
-    </a>
+   onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+    <i class="fas fa-right-from-bracket"></i> تسجيل الخروج
+  </a>
+
+  <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display:none;">
+    @csrf
+  </form>
 
     <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display:none;">
         @csrf
@@ -128,7 +142,9 @@ body {
 
     <!-- HEADER -->
     <div class="header">
-        <h2>👋 مرحبا بك في لوحة الموزع</h2>
+        <h2 class="welcome">
+    👋 مرحبا {{ Auth::user()->name }}
+      </h2>
         <p>Gestion de Stock</p>
     </div>
 
