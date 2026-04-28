@@ -5,17 +5,19 @@ namespace App\Http\Controllers;
 use App\Models\Store;
 use App\Models\Produit;
 use Illuminate\Http\Request;
-use Illuminate\Fondation\Auth\Access\AuthorizesRequest;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class ProduitController extends Controller
 {
     use AuthorizesRequests;
-    // affichage + recherche
+
+    // 📊 عرض + بحث + BONUS (غير منتجات الموزع)
     public function index(Request $request)
     {
         $search = $request->search;
 
-        $produits = Store::with('produit')
+        $produits = Store::where('distributeur_id', auth()->id()) // 🔥 BONUS
+            ->with('produit')
             ->when($search, function ($query) use ($search) {
                 $query->whereHas('produit', function ($q) use ($search) {
                     $q->where('nom', 'like', '%' . $search . '%');
@@ -28,50 +30,73 @@ class ProduitController extends Controller
         return view('produits.index', compact('produits', 'allProduits'));
     }
 
-    // ajouter
+    // ➕ ajouter
     public function store(Request $request)
     {
-        $this-> authorize('create', Store::class);
-        Store::create([
-            'produit_id' => $request->produit_id,
-            'distributeur_id' => auth()->id(),
-            'quantite' => $request->quantite,
-            'prix' => $request->prix,
-            'date_exp' => $request->date_exp,
+        // ✅ validation
+        $request->validate([
+            'produit_id' => 'required|exists:produits,id',
+            'quantite'   => 'required|numeric|min:1',
+            'prix'       => 'required|numeric|min:0',
+            'date_exp'   => 'nullable|date',
         ]);
 
-        return redirect()->back();
+        $this->authorize('create', Store::class);
+
+        Store::create([
+            'produit_id'      => $request->produit_id,
+            'distributeur_id' => auth()->id(), // 🔥 مربوط بالموزع
+            'quantite'        => $request->quantite,
+            'prix'            => $request->prix,
+            'date_exp'        => $request->date_exp,
+        ]);
+
+        return redirect()->back()->with('success', 'تمت الإضافة بنجاح');
     }
 
-    // edit
+    // ✏️ edit
     public function edit($id)
     {
-        $produit = Store::findOrFail($id);
-        return view('produits.edit', compact('produit'));
+        $store = Store::findOrFail($id);
+
+        $this->authorize('update', $store);
+
+        return view('produits.edit', compact('store'));
     }
 
-    // update
+    // 🔄 update
     public function update(Request $request, $id)
-    { 
-        $store=Store::findOrFail($id);
-        $this-> authorize('update', Store);
-        $produit = Store::findOrFail($id);
+    {
+        $store = Store::findOrFail($id);
 
-        $produit->update([
+        $this->authorize('update', $store);
+
+        // validation
+        $request->validate([
+            'quantite' => 'required|numeric|min:1',
+            'prix'     => 'required|numeric|min:0',
+            'date_exp' => 'nullable|date',
+        ]);
+
+        $store->update([
             'quantite' => $request->quantite,
-            'prix' => $request->prix,
+            'prix'     => $request->prix,
             'date_exp' => $request->date_exp,
         ]);
 
-        return redirect()->route('produits.index');
+        return redirect()->route('produits.index')
+                         ->with('success', 'تم التعديل بنجاح');
     }
 
-    // delete
+    // ❌ delete
     public function destroy($id)
     {
-         $store=Store::findOrFail($id);
-        $this-> authorize('delete', Store);
-        $store ->delete();
-        return redirect()->back();
+        $store = Store::findOrFail($id);
+
+        $this->authorize('delete', $store);
+
+        $store->delete();
+
+        return redirect()->back()->with('success', 'تم الحذف بنجاح');
     }
 }

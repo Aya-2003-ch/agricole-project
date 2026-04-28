@@ -4,7 +4,7 @@
     <title>Gestion Store</title>
 
     <style>
-       * {
+* {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -40,7 +40,6 @@ th, td {
 th {
     background: linear-gradient(90deg, #27894e, #16a34a);
     color: white;
-    font-weight: bold;
 }
 
 td {
@@ -57,19 +56,11 @@ form {
     margin-top: 20px;
 }
 
-
-input, select {
+input {
     padding: 10px;
     margin: 5px;
     border-radius: 8px;
     border: 1px solid #ccc;
-    outline: none;
-    transition: 0.3s;
-}
-
-input:focus, select:focus {
-    border-color: #16a34a;
-    box-shadow: 0 0 5px rgba(65, 165, 102, 0.3);
 }
 
 /* BUTTONS */
@@ -78,49 +69,12 @@ button {
     border-radius: 8px;
     font-weight: bold;
     cursor: pointer;
-    transition: 0.3s;
 }
 
-/* ADD */
-.add {
-    background: linear-gradient(90deg, #29ad5a, #22c55e);
-}
-
-.add:hover {
-    transform: scale(1.05);
-}
-
-/* DELETE */
-.delete {
-    background: linear-gradient(90deg, #dc2626, #ef4444);
-}
-
-.delete:hover {
-    transform: scale(1.05);
-}
-
-/* EDIT */
-.edit {
-    background: linear-gradient(90deg, #f59e0b, #fbbf24);
-}
-
-.edit:hover {
-    transform: scale(1.05);
-}
-
-/* VIEW */
-.view {
-    background: linear-gradient(90deg, #2563eb, #3b82f6);
-}
-
-.view:hover {
-    transform: scale(1.05);
-}
-
-/* DETAILS */
-#details- {
-    transition: 0.3s;
-}
+.add { background: #22c55e; color:white; }
+.delete { background: #ef4444; color:white; }
+.edit { background: #f59e0b; color:white; }
+.view { background: #3b82f6; color:white; }
 
 /* MODAL */
 .modal {
@@ -129,23 +83,15 @@ button {
     top: 0; left: 0;
     width: 100%; height: 100%;
     background: rgba(0,0,0,0.6);
-    backdrop-filter: blur(4px);
 }
 
 .modal-content {
     background: white;
-    width: 320px;
+    width: 300px;
     margin: 15% auto;
-    padding: 25px;
-    border-radius: 15px;
+    padding: 20px;
+    border-radius: 10px;
     text-align: center;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-}
-
-.modal-content p {
-    margin-bottom: 20px;
-    font-weight: bold;
-    color: #333;
 }
     </style>
 </head>
@@ -154,31 +100,33 @@ button {
 
 <h2 style="text-align:center;">Gestion Store</h2>
 
-<!-- RECHERCHE -->
+<!-- 🔍 RECHERCHE -->
 <form method="GET" action="{{ route('produits.index') }}">
     <input type="text" name="search" placeholder="Rechercher produit...">
     <button type="submit" class="add">بحث</button>
 </form>
 
-<!-- AJOUT (Policy: create) -->
+<!-- ➕ AJOUT -->
 @can('create', App\Models\Store::class)
 <form method="POST" action="{{ route('produits.store') }}">
     @csrf
-   <h3 style="margin-bottom:15px; color:#14532d;">
-        ➕ إضافة منتج جديد
-    </h3>
+
+    <h3 style="color:#14532d;">إضافة منتج</h3>
+
+    <!-- autocomplete -->
     <input list="produitsList" id="produitInput" placeholder="اكتب اسم المنتج">
 
-<datalist id="produitsList">
-    @foreach($allProduits as $prod)
-        <option value="{{ $prod->nom }}" data-id="{{ $prod->id }}"></option>
-    @endforeach
-</datalist>
+    <datalist id="produitsList">
+        @foreach($allProduits as $prod)
+            <option value="{{ $prod->nom }}" data-id="{{ $prod->id }}"></option>
+        @endforeach
+    </datalist>
 
-<input type="hidden" name="produit_id" id="produit_id">
+    <!-- important -->
+    <input type="hidden" name="produit_id" id="produit_id" required>
 
-    <input type="number" name="quantite" placeholder="Quantité">
-    <input type="number" name="prix" placeholder="Prix">
+    <input type="number" name="quantite" placeholder="Quantité" required>
+    <input type="number" name="prix" placeholder="Prix" required>
     <input type="date" name="date_exp">
 
     <button class="add">اضافة</button>
@@ -187,75 +135,62 @@ button {
 
 <!-- 📊 TABLE -->
 <table>
-    <tr>
-        <th>Nom</th>
-        <th>Détails</th>
-        <th>Actions</th>
-    </tr>
+<tr>
+    <th>Nom</th>
+    <th>Détails</th>
+    <th>Actions</th>
+</tr>
 
-    @foreach($produits as $p)
-    <tr>
-        <!-- Nom -->
-        <td>{{ $p->produit->nom }}</td>
+@foreach($produits as $p)
+<tr>
+    <td>{{ $p->produit->nom }}</td>
 
-        <!-- View (Policy: view) -->
-        <td>
-            @can('view', $p)
-                <button class="view" onclick="toggleDetails({{ $p->id }})">
-                    View
-                </button>
+    <td>
+        <button class="view" onclick="toggleDetails({{ $p->id }})">View</button>
 
-                <div id="details-{{ $p->id }}" style="display:none; margin-top:10px;">
-                    <p><strong>Quantité:</strong> {{ $p->quantite }}</p>
-                    <p><strong>Prix:</strong> {{ $p->prix }}</p>
-                </div>
-            @else
-                ❌ Non autorisé
-            @endcan
-        </td>
+        <div id="details-{{ $p->id }}" style="display:none;">
+            <p>Quantité: {{ $p->quantite }}</p>
+            <p>Prix: {{ $p->prix }}</p>
+        </div>
+    </td>
 
-        <!-- Actions -->
-        <td>
+    <td>
+        <!-- edit -->
+        <a href="{{ route('produits.edit', $p->id) }}">
+            <button class="edit">Modifier</button>
+        </a>
 
-            <!-- Modifier -->
-            @can('update', $p)
-                <a href="{{ route('produit_agri.edit', $p->id) }}">
-                    <button class="edit">Modifier</button>
-                </a>
-            @endcan
+        <!-- delete -->
+        <form method="POST"
+              action="{{ route('produits.destroy', $p->id) }}"
+              style="display:inline;">
+            @csrf
+            @method('DELETE')
 
-            /* Supprimer*/ 
-            @can('delete', $p)
-                <form method="POST"
-                      action="{{ route('produit_agri.destroy', $p->id) }}"
-                      style="display:inline;">
-                    @csrf
-                    @method('DELETE')
-
-                    <button type="button" class="delete"
-                        onclick="openModal(this.closest('form'))">
-                        Supprimer
-                    </button>
-                </form>
-            @endcan
-
-        </td>
-    </tr>
-    @endforeach
+            <button type="button" class="delete"
+                onclick="openModal(this.closest('form'))">
+                Supprimer
+            </button>
+        </form>
+    </td>
+</tr>
+@endforeach
 
 </table>
 
-// Modal 
+<!-- MODAL -->
 <div id="confirmModal" class="modal">
     <div class="modal-content">
-        <p>هل أنت متأكد من الحذف؟</p>
+        <p>هل أنت متأكد؟</p>
         <button onclick="confirmDelete()" class="delete">نعم</button>
-        <button onclick="closeModal()" class="edit">إلغاء</button>
+        <button onclick="closeModal()" class="edit">لا</button>
     </div>
 </div>
 
 <script>
+// modal
 let deleteForm;
+
 function openModal(form) {
     deleteForm = form;
     document.getElementById('confirmModal').style.display = 'block';
@@ -269,17 +204,14 @@ function confirmDelete() {
     deleteForm.submit();
 }
 
+// details
 function toggleDetails(id) {
     let div = document.getElementById('details-' + id);
-
-    if (div.style.display === 'none') {
-        div.style.display = 'block';
-    } else {
-        div.style.display = 'none';
-    }
+    div.style.display = (div.style.display === 'none') ? 'block' : 'none';
 }
-// autocomplete produit
-document.getElementById('produitInput').addEventListener('input', function () {
+
+// 🔥 autocomplete FIX
+document.getElementById('produitInput').addEventListener('change', function () {
     let input = this.value;
     let options = document.querySelectorAll('#produitsList option');
     let hiddenInput = document.getElementById('produit_id');
@@ -287,10 +219,15 @@ document.getElementById('produitInput').addEventListener('input', function () {
     hiddenInput.value = '';
 
     options.forEach(option => {
-        if (option.value === input) {
+        if (option.value.trim().toLowerCase() === input.trim().toLowerCase()) {
             hiddenInput.value = option.dataset.id;
         }
     });
+
+    if (hiddenInput.value === '') {
+        alert('⚠️ اختار منتج من القائمة');
+        this.value = '';
+    }
 });
 </script>
 
