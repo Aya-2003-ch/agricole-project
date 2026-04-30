@@ -9,7 +9,7 @@ class Distributeur extends Model
 {
     use SoftDeletes;
     
-    protected $fillable = ['user_id','nom', 'tele', 'localisation'];
+    protected $fillable = ['user_id','nom', 'telephone', 'localisation'];
 
     public function produits()
     {

@@ -27,8 +27,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', function () {
         $user = auth()->user();
 
-        if ($user->role == 'farmer' || $user->role == 'فلاح') {
-            return redirect()->route('ferme.dashboard');
+        if ($user->role == 'eleveur' || $user->role == 'فلاح') {
+            return redirect()->route('eleveur.dashboard');
         } 
 
         if ($user->role == 'veterinaire' || $user->role == 'بيطرى' || $user->role == 'بيطري') {
@@ -46,14 +46,18 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/veterinaire/dashboard', [VeterinaireController::class, 'dashboard'])->name('veterinaire.dashboard');
     Route::get('/veterinaire/consultations', [VeterinaireController::class, 'consultations'])->name('veterinaire.consultations');
     Route::get('/veterinaire/profile', [VeterinaireController::class, 'profile'])->name('veterinaire.profile');
+     Route::post('/veterinaire/store', [VeterinaireController::class, 'store'])
+    ->name('veterinaire.store');
 
     // داشبورد الفلاح
-    Route::get('/ferme/dashboard', [FermeController::class, 'dashboard'])->name('ferme.dashboard');
+    Route::get('/eleveur/dashboard', [eleveurController::class, 'dashboard'])->name('eleveur.dashboard');
 // الطريق لحفظ معلومات المزرعة مع الخريطة
-Route::post('/ferme/store', [FermeController::class, 'store'])->name('ferme.store');
+Route::post('/eleveur/store', [EleveurController::class, 'store'])->name('eleveur.store');
     // داشبورد الموزع
     Route::get('/distributeur/dashboard', [DistributeurController::class, 'dashboard'])->name('distributeur.dashboard');
     Route::get('distributeur/profile', [DistributeurController::class, 'profile'])->name('distributeur.profile');
+    Route::post('/distributeur/store', [DistributeurController::class, 'store'])
+    ->name('distributeur.store');
 
     // البروفايل (خدمة آية)
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

@@ -10,9 +10,10 @@ class Veterinaire extends Model
     use softDeletes;
     
     protected $fillable = [
+        'user_id',
         'nom',
         'telephone',
-        'adresse',
+        'address',
     ];
 
     public function consultations()

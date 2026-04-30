@@ -20,7 +20,7 @@ return new class extends Migration
     $table->enum('role', ['distributeur', 'veterinaire', 'eleveur']);
 
     // ✅ الجدد
-    $table->string('phone')->nullable();
+    $table->string('telephone')->nullable();
     $table->string('address')->nullable();
 
     $table->string('password');

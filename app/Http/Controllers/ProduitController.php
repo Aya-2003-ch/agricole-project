@@ -6,17 +6,20 @@ use App\Models\Store;
 use App\Models\Produit;
 use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Auth;
 
 class ProduitController extends Controller
 {
     use AuthorizesRequests;
 
-    // 📊 عرض + بحث + BONUS (غير منتجات الموزع)
+    // 📊 عرض + بحث
     public function index(Request $request)
     {
         $search = $request->search;
 
-        $produits = Store::where('distributeur_id', auth()->id()) // 🔥 BONUS
+        $distributeur = Auth::user()->distributeur; // 👈 مهم
+
+        $produits = Store::where('distributeur_id', $distributeur->id)
             ->with('produit')
             ->when($search, function ($query) use ($search) {
                 $query->whereHas('produit', function ($q) use ($search) {
@@ -33,7 +36,6 @@ class ProduitController extends Controller
     // ➕ ajouter
     public function store(Request $request)
     {
-        // ✅ validation
         $request->validate([
             'produit_id' => 'required|exists:produits,id',
             'quantite'   => 'required|numeric|min:1',
@@ -43,9 +45,11 @@ class ProduitController extends Controller
 
         $this->authorize('create', Store::class);
 
+        $distributeur = Auth::user()->distributeur; // 👈 مهم
+
         Store::create([
             'produit_id'      => $request->produit_id,
-            'distributeur_id' => $distributeur()->id(), //  مربوط بالموزع
+            'distributeur_id' => $distributeur->id, // ✅ صحيح
             'quantite'        => $request->quantite,
             'prix'            => $request->prix,
             'date_exp'        => $request->date_exp,
@@ -71,7 +75,6 @@ class ProduitController extends Controller
 
         $this->authorize('update', $store);
 
-        // validation
         $request->validate([
             'quantite' => 'required|numeric|min:1',
             'prix'     => 'required|numeric|min:0',

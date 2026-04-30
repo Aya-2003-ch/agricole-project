@@ -58,11 +58,11 @@ button:hover {
 
     <!-- PHONE -->
     <div class="mt-4">
-        <x-input-label for="phone" value="رقم الهاتف" />
-        <x-text-input id="phone" class="block mt-1 w-full"
-            type="text" name="phone"
-            :value="old('phone')" required />
-        <x-input-error :messages="$errors->get('phone')" class="mt-2" />
+        <x-input-label for="telephone" value="رقم الهاتف" />
+        <x-text-input id="telephone" class="block mt-1 w-full"
+            type="text" name="telephone"
+            :value="old('telephone')" required />
+        <x-input-error :messages="$errors->get('telephone')" class="mt-2" />
     </div>
 
     <!-- ADDRESS -->

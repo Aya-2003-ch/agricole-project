@@ -15,8 +15,8 @@ return new class extends Migration
             $table->bigIncrements('id');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('nom')->nullable();
-            $table->string('tele')->nullable();
-            $table->string('localisation')->nullable();
+            $table->string('telephone')->nullable();
+            $table->string('address')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

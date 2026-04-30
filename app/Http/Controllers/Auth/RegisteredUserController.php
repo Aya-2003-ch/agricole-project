@@ -7,12 +7,9 @@ use App\Models\User;
 use App\Models\Distributeur;
 use App\Models\Veterinaire;
 use App\Models\Eleveur;
-
-use Illuminate\Auth\Events\Registered;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Rules;
+use Illuminate\Support\Facades\Hash;
 
 class RegisteredUserController extends Controller
 {
@@ -21,61 +18,67 @@ class RegisteredUserController extends Controller
         return view('auth.register');
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request)
     {
-        // ✅ VALIDATION (مهم)
         $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-
-            // 🔥 role محدد فقط
-            'role' => ['required', 'in:distributeur,veterinaire,eleveur'],
-
-            // ✅ الجدد
-            'phone' => ['required', 'string', 'max:20'],
-            'address' => ['required', 'string', 'max:255'],
+            'name' => 'required',
+            'email' => 'required|email|unique:users',
+            'password' => 'required|confirmed',
+            'role' => 'required',
+            'telephone' => 'required',
+            'address' => 'required',
         ]);
 
-        // ✅ CREATE USER
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => bcrypt($request->password),
-            'role' => $request->role,
-            'phone' => $request->phone,
-            'address' => $request->address,
-        ]);
+        // 1️⃣ Create User
+          $user = new User();
 
-        // 🔥 AUTO CREATION حسب role
-        switch ($user->role) {
+         $user->name = $request->name;
+         $user->email = $request->email;
+         $user->password = Hash::make($request->password);
+         $user->telephone = $request->telephone;
+         $user->address = $request->address;
+         $user->role = $request->role;
 
-            case 'distributeur':
-                Distributeur::create([
-                    'user_id' => $user->id,
-                ]);
-                break;
+         $user->save(); // 👈 أهم سطر
 
-            case 'veterinaire':
-                Veterinaire::create([
-                    'user_id' => $user->id,
-                ]);
-                break;
-
-            case 'eleveur':
-                Eleveur::create([
-                    'user_id' => $user->id,
-                ]);
-                break;
+        // 2️⃣ Role tables
+        if ($request->role === 'distributeur') {
+            Distributeur::create([
+                'user_id' => $user->id,
+                'nom' => $request->name,
+                'telephone' => $request->telephone,
+                'address' => $request->address,
+            ]);
         }
 
-        event(new Registered($user));
+        if ($request->role === 'veterinaire') {
+            Veterinaire::create([
+                'user_id' => $user->id,
+                'nom' => $request->name,
+                'telephone' => $request->telephone,
+                'address' => $request->address,
+                'specialite' => 'general',
+            ]);
+        }
 
+        if ($request->role === 'eleveur') {
+            Eleveur::create([
+                'user_id' => $user->id,
+                'nom' => $request->name,
+                'telephone' => $request->telephone,
+                'ferme' => $request->address,
+            ]);
+        }
+
+        // 3️⃣ Login
         Auth::login($user);
 
-        // 💬 message
-        $message = 'مرحبا ' . $user->name . ' 👋';
-
-        return redirect('/dashboard')->with('success', $message);
+        // 4️⃣ Redirect
+        return match ($user->role) {
+            'veterinaire' => redirect()->route('veterinaire.dashboard'),
+            'distributeur' => redirect()->route('distributeur.dashboard'),
+            'eleveur' => redirect()->route('eleveur.dashboard'),
+            default => redirect('/'),
+        };
     }
 }

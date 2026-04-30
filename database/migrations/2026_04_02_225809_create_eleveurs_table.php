@@ -11,11 +11,11 @@ return new class extends Migration
      */
    public function up()
 {
-    Schema::create('fermes_agricoles', function (Blueprint $table) {
+    Schema::create('eleveurs', function (Blueprint $table) {
         $table->bigIncrements('id');
         $table->foreignId('user_id')->constrained()->onDelete('cascade');
         $table->string('nom');
-        $table->string('localisation');
+        $table->string('address');
         
         // --- حطيهم هنا داخل الأقواس ---
         $table->double('latitude')->nullable();

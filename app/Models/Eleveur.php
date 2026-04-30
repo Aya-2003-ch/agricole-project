@@ -10,6 +10,7 @@ class FermeAgricole extends Model
     use softDeletes;
     
     protected $fillable = [
+        'user_id',
         'nom',
         'localisation',
     ];

@@ -14,7 +14,7 @@ return new class extends Migration
     Schema::create('consultations', function (Blueprint $table) {
         $table->bigIncrements('id');
 
-        $table->unsignedBigInteger('ferme_id');
+        $table->unsignedBigInteger('eleveur_id');
         $table->unsignedBigInteger('veterinaire_id');
 
         $table->date('date_demande');
@@ -22,7 +22,7 @@ return new class extends Migration
 
         $table->text('motif');
         $table->string('degree');
-        $table->foreign('ferme_id')->references('id')->on('fermes_agricoles')->onDelete('cascade');
+        $table->foreign('eleveur_id')->references('id')->on('eleveurs')->onDelete('cascade');
         $table->foreign('veterinaire_id')->references('id')->on('veterinaires')->onDelete('cascade');;
         $table->timestamps();
         $table->softDeletes();
