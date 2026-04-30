@@ -45,7 +45,7 @@ class ProduitController extends Controller
 
         Store::create([
             'produit_id'      => $request->produit_id,
-            'distributeur_id' => auth()->id(), // 🔥 مربوط بالموزع
+            'distributeur_id' => $distributeur()->id(), //  مربوط بالموزع
             'quantite'        => $request->quantite,
             'prix'            => $request->prix,
             'date_exp'        => $request->date_exp,

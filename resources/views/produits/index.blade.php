@@ -116,11 +116,14 @@ button {
     <!-- autocomplete -->
     <input list="produitsList" id="produitInput" placeholder="اكتب اسم المنتج">
 
-    <datalist id="produitsList">
-        @foreach($allProduits as $prod)
-            <option value="{{ $prod->nom }}" data-id="{{ $prod->id }}"></option>
-        @endforeach
-    </datalist>
+    <select name="produit_id" required>
+    <option value="">-- اختر المنتج --</option>
+    @foreach($allProduits as $prod)
+        <option value="{{ $prod->id }}">
+            {{ $prod->nom }}
+        </option>
+    @endforeach
+</select>
 
     <!-- important -->
     <input type="hidden" name="produit_id" id="produit_id" required>
