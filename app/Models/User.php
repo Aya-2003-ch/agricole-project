@@ -1,9 +1,13 @@
 <?php
 
 namespace App\Models;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use App\Models\Distributeur;
+use App\Models\Veterinaire;
+use App\Models\Eleveur;
 
 class User extends Authenticatable
 {
@@ -14,6 +18,8 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'phone',
+        'address',
     ];
 
     protected $hidden = [
@@ -29,9 +35,21 @@ class User extends Authenticatable
         ];
     }
 
-    // 🔗 العلاقة المهمة
+    // 🔗 علاقة مع distributeur
     public function distributeur()
     {
         return $this->hasOne(Distributeur::class);
+    }
+
+    // 🔗 علاقة مع vétérinaire
+    public function veterinaire()
+    {
+        return $this->hasOne(Veterinaire::class);
+    }
+
+    // 🔗 علاقة مع éleveur
+    public function eleveur()
+    {
+        return $this->hasOne(Eleveur::class);
     }
 }

@@ -13,6 +13,7 @@ return new class extends Migration
 {
     Schema::create('fermes_agricoles', function (Blueprint $table) {
         $table->bigIncrements('id');
+        $table->foreignId('user_id')->constrained()->onDelete('cascade');
         $table->string('nom');
         $table->string('localisation');
         

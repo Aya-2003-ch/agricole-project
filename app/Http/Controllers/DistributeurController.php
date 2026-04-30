@@ -14,5 +14,16 @@ class DistributeurController extends Controller
 {
     return view('distributeur.profile', ['user' => auth()->user()]);
 }
+public function store(Request $request)
+    {
+        Distributeur::create([
+            'user_id' => auth()->id(),
+            'nom' => $request->nom,
+            'tele' => $request->tele,
+            'localisation' => $request->localisation,
+        ]);
+
+        return redirect()->back()->with('success', 'تم إنشاء الموزع بنجاح');
+    }
 
 }

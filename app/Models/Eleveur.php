@@ -16,7 +16,7 @@ class FermeAgricole extends Model
 
     public function consultations()
     {
-        return $this->hasMany(Consultation::class, 'id_ferme');
+        return $this->hasMany(Consultation::class, 'id_eleveur');
     }
 
 }

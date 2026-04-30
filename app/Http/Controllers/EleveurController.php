@@ -3,14 +3,14 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\FermeAgricole; // تأكدي بلي المودل مسمي هكذا
+use App\Models\Eleveur; // تأكدي بلي المودل مسمي هكذا
 
-class FermeController extends Controller
+class EleveurController extends Controller
 {
     // 1. هادي تفتح برك الصفحة
     public function dashboard()
     {
-        return view('ferme.dashboard');
+        return view('eleveur.dashboard');
     }
 
     // 2. هادي هي "المهمة" اللي تحفظ المعلومات والخريطة
@@ -24,15 +24,15 @@ class FermeController extends Controller
         ]);
 
         // نكرييو مزرعة جديدة في الداتابيز
-        $ferme = new FermeAgricole();
-        $ferme->nom = $request->nom;
-        $ferme->localisation = $request->localisation ?? 'غير محدد';
+        $eleveur = new Eleveur();
+        $eleveur->nom = $request->nom;
+        $eleveur->localisation = $request->localisation ?? 'غير محدد';
         
         // هنا نربطو الإحداثيات اللي جاو من الخريطة
-        $ferme->latitude = $request->latitude;
-        $ferme->longitude = $request->longitude;
+        $eleveur->latitude = $request->latitude;
+        $eleveur->longitude = $request->longitude;
 
-        $ferme->save();
+        $eleveur->save();
 
         return redirect()->back()->with('success', 'تم حفظ موقع المزرعة بنجاح!');
     }

@@ -4,65 +4,78 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Distributeur;
+use App\Models\Veterinaire;
+use App\Models\Eleveur;
+
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
-use Illuminate\View\View;
 
 class RegisteredUserController extends Controller
 {
-    /**
-     * Display the registration view.
-     */
-    public function create(): View
+    public function create()
     {
         return view('auth.register');
     }
 
-    /**
-     * Handle an incoming registration request.
-     */
-public function store(Request $request): RedirectResponse
-{
-    // validation
-    $request->validate([
-        'name' => ['required', 'string', 'max:255'],
-        'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users'],
-        'password' => ['required', 'confirmed', Rules\Password::defaults()],
-        'role' => ['required', 'string'],
-    ]);
+    public function store(Request $request): RedirectResponse
+    {
+        // ✅ VALIDATION (مهم)
+        $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
 
-    // create user
-    $user = User::create([
-        'name' => $request->name,
-        'email' => $request->email,
-        'password' => Hash::make($request->password),
-        'role' => $request->role,
-    ]);
+            // 🔥 role محدد فقط
+            'role' => ['required', 'in:distributeur,veterinaire,eleveur'],
 
-    event(new Registered($user));
+            // ✅ الجدد
+            'phone' => ['required', 'string', 'max:20'],
+            'address' => ['required', 'string', 'max:255'],
+        ]);
 
-    Auth::login($user);
+        // ✅ CREATE USER
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => bcrypt($request->password),
+            'role' => $request->role,
+            'phone' => $request->phone,
+            'address' => $request->address,
+        ]);
 
-    // 💥 message personnalisée
-    $message = 'مرحبا ' . $user->name . ' 👋';
+        // 🔥 AUTO CREATION حسب role
+        switch ($user->role) {
 
-    // 🔥 redirect حسب role + message
-    if ($user->role == 'farmer') {
-        return redirect('/ferme/dashboard')->with('success', $message);
+            case 'distributeur':
+                Distributeur::create([
+                    'user_id' => $user->id,
+                ]);
+                break;
+
+            case 'veterinaire':
+                Veterinaire::create([
+                    'user_id' => $user->id,
+                ]);
+                break;
+
+            case 'eleveur':
+                Eleveur::create([
+                    'user_id' => $user->id,
+                ]);
+                break;
+        }
+
+        event(new Registered($user));
+
+        Auth::login($user);
+
+        // 💬 message
+        $message = 'مرحبا ' . $user->name . ' 👋';
+
+        return redirect('/dashboard')->with('success', $message);
     }
-
-    if ($user->role == 'veterinaire') {
-        return redirect('/veterinaire/dashboard')->with('success', $message);
-    }
-
-    if ($user->role == 'distributeur') {
-        return redirect('/distributeur/dashboard')->with('success', $message);
-    }
-
-    return redirect('/dashboard')->with('success', $message);
-}
 }

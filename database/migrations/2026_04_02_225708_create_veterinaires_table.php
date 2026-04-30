@@ -13,6 +13,7 @@ return new class extends Migration
 {
     Schema::create('veterinaires', function (Blueprint $table) {
         $table->bigIncrements('id');
+        $table->foreignId('user_id')->constrained()->onDelete('cascade');
         $table->string('nom');
         $table->string('adresse');
         $table->string('telephone');

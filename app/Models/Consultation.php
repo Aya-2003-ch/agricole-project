@@ -23,7 +23,7 @@ class Consultation extends Model
 
     public function ferme()
     {
-        return $this->belongsTo(FermeAgricole::class, 'id_ferme');
+        return $this->belongsTo(Eleveur::class, 'id_eleveur');
     }
 
 }

@@ -13,9 +13,10 @@ return new class extends Migration
     {
         Schema::create('distributeurs', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('nom');
-            $table->string('tele');
-            $table->string('localisation');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->string('nom')->nullable();
+            $table->string('tele')->nullable();
+            $table->string('localisation')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
@@ -26,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('distributions');
+        Schema::dropIfExists('distributeurs');
     }
 };
