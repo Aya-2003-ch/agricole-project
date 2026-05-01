@@ -21,22 +21,24 @@ class StorePolicy
      */
     public function create(User $user): bool
     {
-       return true;
+       return $user->role === 'distributeur';
     }
 
     /**
      * Determine whether the user can update the model.
      */
     public function update(User $user, Store $store): bool
-    {
-        return $user ->id == $store->distributeur_id;
-    }
+   {
+    return $user->distributeur && 
+           $user->distributeur->id == $store->distributeur_id;
+   }
 
     /**
      * Determine whether the user can delete the model.
      */
     public function delete(User $user, Store $store): bool
-    {
-        return  $user ->id == $store->distributeur_id;
-    }
+  {
+    return $user->distributeur && 
+           $user->distributeur->id == $store->distributeur_id;
+   }
 }

@@ -12,12 +12,12 @@ class ProduitController extends Controller
 {
     use AuthorizesRequests;
 
-    // 📊 عرض + بحث
+    //  عرض + بحث
     public function index(Request $request)
     {
         $search = $request->search;
 
-        $distributeur = Auth::user()->distributeur; // 👈 مهم
+        $distributeur = Auth::user()->distributeur; 
 
         $produits = Store::where('distributeur_id', $distributeur->id)
             ->with('produit')
@@ -32,8 +32,15 @@ class ProduitController extends Controller
 
         return view('produits.index', compact('produits', 'allProduits'));
     }
+    public function show($id)
+  {
+    $store = Store::with(['produit', 'distributeur'])
+        ->findOrFail($id);
 
-    // ➕ ajouter
+    return view('produits.show', compact('store'));
+  }
+
+    //  ajouter
     public function store(Request $request)
     {
         $request->validate([
@@ -45,11 +52,11 @@ class ProduitController extends Controller
 
         $this->authorize('create', Store::class);
 
-        $distributeur = Auth::user()->distributeur; // 👈 مهم
+        $distributeur = Auth::user()->distributeur; 
 
         Store::create([
             'produit_id'      => $request->produit_id,
-            'distributeur_id' => $distributeur->id, // ✅ صحيح
+            'distributeur_id' => $distributeur->id, 
             'quantite'        => $request->quantite,
             'prix'            => $request->prix,
             'date_exp'        => $request->date_exp,
@@ -58,7 +65,7 @@ class ProduitController extends Controller
         return redirect()->back()->with('success', 'تمت الإضافة بنجاح');
     }
 
-    // ✏️ edit
+    //  edit
     public function edit($id)
     {
         $store = Store::findOrFail($id);

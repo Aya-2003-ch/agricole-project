@@ -7,7 +7,8 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
-    .welcome {
+
+.welcome {
     font-size: 24px;
     font-weight: bold;
     color: #14532d;
@@ -17,6 +18,7 @@
     border-radius: 10px;
     display: inline-block;
 }
+
 * {
     margin: 0;
     padding: 0;
@@ -59,7 +61,6 @@ body {
     background: rgba(255,255,255,0.2);
 }
 
-/* logout */
 .logout {
     position: absolute;
     bottom: 20px;
@@ -84,6 +85,7 @@ body {
 /* SEARCH */
 .search-box {
     margin: 20px 0;
+    position: relative;
 }
 
 .search-box input {
@@ -92,6 +94,26 @@ body {
     border: 1px solid #ddd;
     border-radius: 10px;
     outline: none;
+}
+
+/* RESULTS */
+#results {
+    background: white;
+    border: 1px solid #ddd;
+    margin-top: 5px;
+    border-radius: 10px;
+    max-height: 250px;
+    overflow-y: auto;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+}
+
+.result-item {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.result-item:hover {
+    background: #f0fdf4;
 }
 
 /* SERVICES */
@@ -120,16 +142,6 @@ body {
     margin-bottom: 15px;
 }
 
-/* BUTTON */
-.btn {
-    padding: 8px 15px;
-    border-radius: 20px;
-    background: #16a34a;
-    color: white;
-    text-decoration: none;
-    border: none;
-    cursor: pointer;
-}
 </style>
 </head>
 
@@ -144,9 +156,10 @@ body {
     <a href="{{ route('veterinaire.consultations') }}">
         <i class="fas fa-notes-medical"></i> الاستشارات
     </a>
+
     <a href="{{ route('veterinaire.profile') }}">
-    <i class="fas fa-user"></i> صفحتي
-</a>
+        <i class="fas fa-user"></i> صفحتي
+    </a>
 
     <!-- LOGOUT -->
     <a href="{{ route('logout') }}" class="logout"
@@ -165,15 +178,16 @@ body {
     <!-- HEADER -->
     <div class="header">
         <h2 class="welcome">
-     👋 مرحبا {{ Auth::user()->name }}
-     </h2>
+            👋 مرحبا {{ Auth::user()->name }}
+        </h2>
         <p>إدارة الاستشارات والطلبات بسهولة</p>
     </div>
 
-    <!-- SEARCH BOX -->
-    <div class="search-box">
-        <input type="text" id="search" placeholder="🔍 ابحث عن دواء...">
-    </div>
+    <!-- 🔍 LIVE SEARCH -->
+    <form action="{{ route('search') }}" method="GET">
+    <input type="text" name="search" placeholder="🔍 ابحث عن دواء">
+    <button>بحث</button>
+</form>
 
     <!-- SERVICES -->
     <div class="services">
@@ -195,21 +209,44 @@ body {
             <h3>الأدوية</h3>
             <p>التحقق من توفر الأدوية</p>
         </div>
-
-    </div>
+        </div>
 
 </div>
 
-<!-- SIMPLE SEARCH SCRIPT -->
+<!-- 🔥 LIVE SEARCH SCRIPT -->
 <script>
-document.getElementById("search").addEventListener("keyup", function () {
-    let value = this.value.toLowerCase();
-    let cards = document.querySelectorAll(".service-card");
+document.getElementById('search').addEventListener('keyup', function() {
 
-    cards.forEach(card => {
-        let text = card.innerText.toLowerCase();
-        card.style.display = text.includes(value) ? "block" : "none";
-    });
+    let query = this.value;
+
+    if(query.length < 2){
+        document.getElementById('results').innerHTML = "";
+        return;
+    }
+
+    fetch(`/live-search?search=${query}`)
+        .then(res => res.json())
+        .then(data => {
+
+            let html = "";
+
+            if(data.length === 0){
+                html = "<div class='result-item'>❌ لا يوجد نتائج</div>";
+            }
+
+            data.forEach(item => {
+                html += `
+                    <div class="result-item">
+                        <strong>${item.produit.nom}</strong><br>
+                        👨‍🌾 ${item.distributeur.nom}<br>
+                        📍 ${item.distributeur.address}<br>
+                        💰 ${item.prix} دج
+                    </div>
+                `;
+            });
+
+            document.getElementById('results').innerHTML = html;
+        });
 });
 </script>
 

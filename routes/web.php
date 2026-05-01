@@ -7,6 +7,7 @@ use App\Http\Controllers\EleveurController;
 use App\Http\Controllers\DistributeurController;
 use App\Http\Controllers\ConsultationController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\RechercheController;
 
 
 // 1. الصفحات العامة
@@ -14,6 +15,7 @@ Route::get('/', function () { return view('welcome'); });
 Route::get('/home', function () { return view('home'); })->name('home');
 Route::get('/contact', function () { return view('contact'); })->name('contact');
 Route::resource('produits', ProduitController::class);
+Route::get('/search', [RechercheController::class, 'Search'])->name('search');
 // 2. الروابط المحمية (لازم تسجيل دخول)
 Route::middleware(['auth'])->group(function () {
     Route::get('/distributeur/dashboard', [DistributeurController::class, 'dashboard']);
@@ -48,6 +50,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/veterinaire/profile', [VeterinaireController::class, 'profile'])->name('veterinaire.profile');
      Route::post('/veterinaire/store', [VeterinaireController::class, 'store'])
     ->name('veterinaire.store');
+    Route::get('/produit/{id}', [ProduitController::class, 'show'])->name('produits.show');
 
     // داشبورد الفلاح
     Route::get('/eleveur/dashboard', [EleveurController::class, 'dashboard'])->name('eleveur.dashboard');

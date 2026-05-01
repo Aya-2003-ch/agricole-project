@@ -57,18 +57,18 @@
 <div class="container">
     <h2>Modifier Produit</h2>
 
-    <form method="POST" action="{{ route('produit_agri.update', $produit->id) }}">
+    <form method="POST" action="{{ route('produits.update', $store->id) }}">
         @csrf
         @method('PUT')
-
-        <input type="number" name="quantite" value="{{ $produit->quantite }}">
-        <input type="number" name="prix" value="{{ $produit->prix }}">
-        <input type="date" name="date_exp" value="{{ $produit->date_exp }}">
+        <input type="text" value="{{ $store->produit->nom }}" disabled>
+        <input type="number" name="quantite" value="{{ $store->quantite }}">
+        <input type="number" name="prix" value="{{ $store->prix }}">
+        <input type="date" name="date_exp" value="{{ $store->date_exp }}">
 
         <button>Enregistrer</button>
     </form>
 
-    <a href="{{ route('produit_agri.index') }}" class="back">⬅ Retour</a>
+    <a href="{{ route('produits.index') }}" class="back">⬅ Retour</a>
 </div>
 
 </body>
