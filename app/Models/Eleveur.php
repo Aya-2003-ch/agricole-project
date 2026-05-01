@@ -5,14 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class FermeAgricole extends Model
+class Eleveur extends Model
 {
     use softDeletes;
     
     protected $fillable = [
         'user_id',
         'nom',
-        'localisation',
+        'address',
     ];
 
     public function consultations()

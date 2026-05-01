@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProduitController;
 use App\Http\Controllers\VeterinaireController;
-use App\Http\Controllers\FermeController;
+use App\Http\Controllers\EleveurController;
 use App\Http\Controllers\DistributeurController;
 use App\Http\Controllers\ConsultationController;
 use App\Http\Controllers\ProfileController;
@@ -50,7 +50,7 @@ Route::middleware(['auth'])->group(function () {
     ->name('veterinaire.store');
 
     // داشبورد الفلاح
-    Route::get('/eleveur/dashboard', [eleveurController::class, 'dashboard'])->name('eleveur.dashboard');
+    Route::get('/eleveur/dashboard', [EleveurController::class, 'dashboard'])->name('eleveur.dashboard');
 // الطريق لحفظ معلومات المزرعة مع الخريطة
 Route::post('/eleveur/store', [EleveurController::class, 'store'])->name('eleveur.store');
     // داشبورد الموزع

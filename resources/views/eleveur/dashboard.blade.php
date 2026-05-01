@@ -133,7 +133,7 @@
             <h3 style="margin-bottom: 15px;"><i class="fas fa-map-marked-alt"></i> تحديد موقع المزرعة</h3>
             <div id="map"></div>
             
-            <form action="{{ route('ferme.store') }}" method="POST">
+            <form action="{{ route('eleveur.store') }}" method="POST">
                 @csrf
                 <input type="hidden" name="latitude" id="latitude">
                 <input type="hidden" name="longitude" id="longitude">

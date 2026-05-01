@@ -66,14 +66,14 @@ class RegisteredUserController extends Controller
                 'user_id' => $user->id,
                 'nom' => $request->name,
                 'telephone' => $request->telephone,
-                'ferme' => $request->address,
+                'address' => $request->address,
             ]);
         }
 
         // 3️⃣ Login
         Auth::login($user);
 
-        // 4️⃣ Redirect
+        // Redirect
         return match ($user->role) {
             'veterinaire' => redirect()->route('veterinaire.dashboard'),
             'distributeur' => redirect()->route('distributeur.dashboard'),

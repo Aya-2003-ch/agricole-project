@@ -17,4 +17,8 @@ class Distributeur extends Model
             ->withPivot('quantite', 'date_exp')
             ->withTimestamps();
     }
+    public function stores()
+     {
+        return $this->hasMany(Store::class);
+       }  
 }
