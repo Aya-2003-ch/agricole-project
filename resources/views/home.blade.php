@@ -4,188 +4,207 @@
 <meta charset="UTF-8">
 <title>AgroDz</title>
 
-<!-- Icons -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Poppins', sans-serif;
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Poppins',sans-serif;
 }
 
-body {
-    background: #f1f5f3;
-    color: #1e293b;
+body{
+    background:#f5f7f6;
 }
 
-/* NAVBAR GLASS */
-nav {
-    position: sticky;
-    top: 0;
-    backdrop-filter: blur(10px);
-    background: rgba(255,255,255,0.7);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px 40px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.05);
-    z-index: 100;
+/* CONTAINER */
+.container{
+    width:90%;
+    margin:auto;
 }
 
-nav h2 {
-    color: #16a34a;
+/* NAVBAR */
+nav{
+    position:sticky;
+    top:0;
+    background:white;
+    padding:15px 0;
+    box-shadow:0 2px 10px rgba(0,0,0,0.05);
+    z-index:100;
 }
 
-.nav-icons a {
-    margin-left: 20px;
-    font-size: 18px;
-    color: #374151;
-    transition: 0.3s;
+.nav-content{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
 }
 
-.nav-icons a:hover {
-    color: #16a34a;
-    transform: scale(1.2);
+.logo{
+    color:#16a34a;
+    font-weight:bold;
+    font-size:22px;
+}
+
+.nav-icons a{
+    margin-left:15px;
+    color:#333;
+    font-size:18px;
 }
 
 /* HERO */
-.hero {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 90px 50px;
-    background: linear-gradient(135deg, #16a34a, #4ade80);
-    color: white;
-    border-radius: 0 0 50px 50px;
+.hero{
+    margin-top:20px;
+    background:white;
+    border-radius:20px;
+    padding:40px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    box-shadow:0 10px 30px rgba(0,0,0,0.05);
 }
 
-.hero-text {
-    max-width: 50%;
+.hero-text{
+    width:50%;
 }
 
-.hero h1 {
-    font-size: 45px;
-    margin-bottom: 15px;
+.hero-text h1{
+    font-size:38px;
+    color:#14532d;
 }
 
-.hero p {
-    margin-bottom: 25px;
-    font-size: 18px;
+.hero-text p{
+    margin:15px 0;
+    color:#555;
+    line-height:1.6;
 }
 
-.btn {
-    padding: 12px 25px;
-    border-radius: 30px;
-    border: none;
-    margin-right: 10px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: 0.3s;
-    text-decoration: none;
+.hero img{
+    width:420px;
+    border-radius:15px;
 }
 
-.btn-white {
-    background: white;
-    color: #16a34a;
+/* BUTTONS */
+.buttons{
+    margin-top:15px;
 }
 
-.btn-dark {
-    background: #064e3b;
-    color: white;
+.btn{
+    padding:10px 20px;
+    border-radius:25px;
+    text-decoration:none;
+    margin-right:10px;
+    display:inline-block;
 }
 
-.btn:hover {
-    transform: scale(1.05);
+.btn-main{
+    background:#16a34a;
+    color:white;
 }
 
-/* SERVICES */
-.section {
-    padding: 80px 50px;
-    text-align: center;
+.btn-outline{
+    border:1px solid #16a34a;
+    color:#16a34a;
 }
 
-.section h2 {
-    font-size: 32px;
-    margin-bottom: 40px;
-    color: #16a34a;
+/* SEARCH */
+.search-box{
+    margin:30px auto;
+    width:60%;
+    background:white;
+    border-radius:40px;
+    display:flex;
+    padding:8px;
+    box-shadow:0 5px 20px rgba(0,0,0,0.08);
+}
+
+.search-box input{
+    flex:1;
+    border:none;
+    outline:none;
+    padding:10px;
+}
+
+.search-box button{
+    background:#16a34a;
+    color:white;
+    border:none;
+    padding:10px 25px;
+    border-radius:30px;
+}
+
+/* SECTION */
+.section{
+    margin-top:40px;
+    text-align:center;
+}
+
+.section h2{
+    color:#16a34a;
+    margin-bottom:30px;
 }
 
 /* CARDS */
-.cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 25px;
+.cards{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+    gap:25px;
 }
 
-.card {
-    background: white;
-    padding: 25px;
-    border-radius: 18px;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.05);
-    transition: 0.3s;
-    position: relative;
-    overflow: hidden;
+.card{
+    background:white;
+    padding:25px;
+    border-radius:15px;
+    text-align:center;
+    box-shadow:0 5px 20px rgba(0,0,0,0.05);
+    transition:0.3s;
 }
 
-.card::before {
-    content: "";
-    position: absolute;
-    width: 100%;
-    height: 5px;
-    top: 0;
-    left: 0;
-    background: linear-gradient(90deg, #16a34a, #4ade80);
+.card:hover{
+    transform:translateY(-5px);
 }
 
-.card:hover {
-    transform: translateY(-10px);
+.card i{
+    font-size:30px;
+    color:#16a34a;
+    margin-bottom:10px;
 }
 
-.card i {
-    font-size: 28px;
-    margin-bottom: 10px;
-    color: #16a34a;
+.card h3{
+    margin-bottom:10px;
 }
 
-.card h3 {
-    margin-bottom: 10px;
-}
-
-.card p {
-    font-size: 14px;
-    color: #555;
-}
-
-/* CTA */
-.cta {
-    text-align: center;
-    padding: 70px;
-    background: linear-gradient(135deg, #dcfce7, #ffffff);
-}
-
-.cta h2 {
-    margin-bottom: 10px;
+.card p{
+    color:#666;
 }
 
 /* FOOTER */
-footer {
-    background: #0f172a;
-    color: white;
-    text-align: center;
-    padding: 20px;
+footer{
+    margin-top:50px;
+    background:#0f172a;
+    color:white;
+    text-align:center;
+    padding:15px;
 }
 
 /* RESPONSIVE */
-@media(max-width: 768px) {
-    .hero {
-        flex-direction: column;
-        text-align: center;
+@media(max-width:768px){
+    .hero{
+        flex-direction:column;
+        text-align:center;
     }
 
-    .hero-text {
-        max-width: 100%;
+    .hero-text{
+        width:100%;
+    }
+
+    .hero img{
+        width:300px;
+        margin-top:20px;
+    }
+
+    .search-box{
+        width:90%;
     }
 }
 </style>
@@ -193,87 +212,79 @@ footer {
 
 <body>
 
-<!-- NAVBAR ICONS -->
+<!-- NAVBAR -->
 <nav>
-    <h2>🌿 AgroDz</h2>
+    <div class="container nav-content">
+        <div class="logo">🌿 AgroDz</div>
 
-    <div class="nav-icons">
-        <a href="#"><i class="fas fa-home"></i></a>
-        <a href="#"><i class="fas fa-box"></i></a>
-        <a href="#"><i class="fas fa-envelope"></i></a>
-        <a href="{{ route('login') }}"><i class="fas fa-user"></i></a>
-        <a href="{{ route('register') }}"><i class="fas fa-user-plus"></i></a>
+        <div class="nav-icons">
+            <a href="{{ route('login') }}"><i class="fas fa-user"></i></a>
+            <a href="{{ route('register') }}"><i class="fas fa-user-plus"></i></a>
+        </div>
     </div>
 </nav>
 
 <!-- HERO -->
-<div class="hero">
-    <div class="hero-text">
-        <h1>AgroDz 🐄🌿</h1>
-        <p>منصة ذكية تجمع الفلاحين، الموزعين، والأطباء البيطريين</p>
+<div class="container">
+    <div class="hero">
 
-        <a href="{{ route('login') }}" class="btn btn-white">Se connecter</a>
-        <a href="{{ route('register') }}" class="btn btn-dark">Créer un compte</a>
-    </div>
+        <div class="hero-text">
+            <h1>كل ما تحتاجه لمزرعتك 🌿</h1>
+            <p>
+                منصة ذكية تساعدك في البحث عن الأدوية، 
+                التواصل مع الموزعين، ومتابعة صحة حيواناتك بسهولة.
+            </p>
 
-    <div>
-        <i class="fas fa-leaf" style="font-size:120px;"></i>
+            <div class="buttons">
+                <a href="{{ route('login') }}" class="btn btn-main">🔍 ابدأ الآن</a>
+                <a href="{{ route('register') }}" class="btn btn-outline">إنشاء حساب</a>
+            </div>
+        </div>
+
+        <img src="{{ asset('images/hero.png') }}">
+
     </div>
 </div>
 
+<!-- SEARCH -->
+<div class="search-box">
+    <input type="text" placeholder="🔍 ابحث عن دواء...">
+    <button>بحث</button>
+</div>
+
 <!-- SERVICES -->
-<div class="section">
+<div class="container section">
     <h2>خدماتنا</h2>
 
     <div class="cards">
 
         <div class="card">
-            <i class="fas fa-shopping-basket"></i>
-            <h3>بيع المنتجات</h3>
-            <p>بيع المنتجات الفلاحية الحيوانية و النباتية</p>
-        </div>
-        <div class="card">
-            <i class="fas fa-warehouse"></i>
-            <h3>إدارة المخزون</h3>
-            <p>تحكم كامل في الكميات والأسعار</p>
+            <i class="fas fa-pills"></i>
+            <h3>الأدوية</h3>
+            <p>ابحث عن الأدوية البيطرية بسهولة</p>
         </div>
 
         <div class="card">
             <i class="fas fa-truck"></i>
-            <h3>التوصيل</h3>
-            <p>تنظيم الطلبات مع الموزعين</p>
+            <h3>الموزعين</h3>
+            <p>أقرب موزع في منطقتك</p>
         </div>
 
         <div class="card">
-            <i class="fas fa-stethoscope"></i>
-            <h3>بيطري</h3>
-            <p>استشارات طبية للحيوانات</p>
+            <i class="fas fa-cow"></i>
+            <h3>الحيوانات</h3>
+            <p>متابعة صحة الحيوانات</p>
         </div>
 
         <div class="card">
             <i class="fas fa-chart-line"></i>
             <h3>إحصائيات</h3>
-            <p>تحليل الأداء والمبيعات</p>
-        </div>
-
-        <div class="card">
-            <i class="fas fa-users"></i>
-            <h3>شبكة</h3>
-            <p>ربط جميع الفاعلين في الفلاحة</p>
+            <p>تحليل الأداء</p>
         </div>
 
     </div>
 </div>
 
-<!-- CTA -->
-<div class="cta">
-    <h2>🚀 ابدأ الآن</h2>
-    <p>أنشئ حسابك وابدأ رحلتك</p>
-    <br>
-    <a href="{{ route('register') }}" class="btn btn-dark">إنشاء حساب</a>
-</div>
-
-<!-- FOOTER -->
 <footer>
     © 2026 AgroDz
 </footer>
