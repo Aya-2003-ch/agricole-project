@@ -7,42 +7,42 @@ use App\Models\Consultation;
 
 class ConsultationController extends Controller
 {
-    //  عرض جميع الاستشارات (للبيطري)
-    public function index()
+    // 👨‍⚕️ Dashboard vétérinaire
+    public function indexVet()
     {
-        $consultations = Consultation::with('user')->latest()->get();
+        $consultations = Consultation::where('veterinaire_id', Auth::id())
+            ->with('eleveur')
+            ->latest()
+            ->get();
 
         return view('veterinaire.consultations', compact('consultations'));
     }
 
-    //  إنشاء طلب جديد (الفلاح)
+    // 👨‍🌾 إنشاء طلب
     public function store(Request $request)
     {
-        $request->validate([
-            'description' => 'required|string',
-        ]);
-
         Consultation::create([
-            'description' => $request->description,
-            'status' => 'جديد',
-            'user_id' => auth()->id(),
+            'eleveur_id' => Auth::id(),
+            'veterinaire_id' => $request->veterinaire_id,
+            'date_demande' => now(),
+            'motif' => $request->motif
         ]);
 
         return back()->with('success', 'تم إرسال الطلب');
     }
 
-    //  تحديث الحالة (البيطري يعالج الطلب)
+    // 👨‍⚕️ تأكيد الاستشارة
     public function update(Request $request, $id)
     {
         $consultation = Consultation::findOrFail($id);
 
         $consultation->update([
-            'status' => 'تمت المعالجة'
+            'date_consultation' => $request->date_consultation,
+            'degree' => $request->degree
         ]);
 
-        return back()->with('success', 'تمت معالجة الطلب');
+        return back()->with('success', 'تم التحديث');
     }
-
     //  حذف (اختياري)
     public function destroy($id)
     {

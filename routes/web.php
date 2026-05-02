@@ -28,6 +28,14 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/check-role', function () {
         return "User Role is: " . auth()->user()->role;
     });
+    Route::middleware(['auth'])->group(function () {
+
+    Route::get('/veterinaire/consultations', [ConsultationController::class, 'indexVet']);
+
+    Route::post('/consultation', [ConsultationController::class, 'store']);
+
+    Route::post('/consultation/{id}', [ConsultationController::class, 'update']);
+});
 
     // التوجيه الذكي (العقل تاع السيستيم اللي يفرق بين المستخدمين)
     Route::get('/dashboard', function () {
