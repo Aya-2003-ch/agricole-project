@@ -4,14 +4,15 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Consultation;
+use Illuminate\Support\Facades\Auth; // ✅ مهم
 
 class ConsultationController extends Controller
 {
     // 👨‍⚕️ Dashboard vétérinaire
     public function indexVet()
     {
-        $consultations = Consultation::where('veterinaire_id', Auth::id())
-            ->with('eleveur')
+        $consultations = Consultation::with('eleveur')
+            ->where('veterinaire_id', Auth::id())
             ->latest()
             ->get();
 
@@ -21,6 +22,11 @@ class ConsultationController extends Controller
     // 👨‍🌾 إنشاء طلب
     public function store(Request $request)
     {
+        $request->validate([
+            'veterinaire_id' => 'required',
+            'motif' => 'required'
+        ]);
+
         Consultation::create([
             'eleveur_id' => Auth::id(),
             'veterinaire_id' => $request->veterinaire_id,
@@ -34,6 +40,11 @@ class ConsultationController extends Controller
     // 👨‍⚕️ تأكيد الاستشارة
     public function update(Request $request, $id)
     {
+        $request->validate([
+            'date_consultation' => 'required|date',
+            'degree' => 'required'
+        ]);
+
         $consultation = Consultation::findOrFail($id);
 
         $consultation->update([
@@ -43,11 +54,11 @@ class ConsultationController extends Controller
 
         return back()->with('success', 'تم التحديث');
     }
-    //  حذف (اختياري)
+
+    // 🗑️ حذف
     public function destroy($id)
     {
-        $consultation = Consultation::findOrFail($id);
-        $consultation->delete();
+        Consultation::findOrFail($id)->delete();
 
         return back()->with('success', 'تم الحذف');
     }

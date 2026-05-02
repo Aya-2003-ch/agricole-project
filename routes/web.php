@@ -32,9 +32,9 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/veterinaire/consultations', [ConsultationController::class, 'indexVet']);
 
-    Route::post('/consultation', [ConsultationController::class, 'store']);
+    Route::post('/consultations', [ConsultationController::class, 'store']);
 
-    Route::post('/consultation/{id}', [ConsultationController::class, 'update']);
+    Route::post('/consultations/{id}', [ConsultationController::class, 'update']);
 });
 
     // التوجيه الذكي (العقل تاع السيستيم اللي يفرق بين المستخدمين)
