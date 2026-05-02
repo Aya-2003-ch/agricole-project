@@ -8,6 +8,7 @@ use App\Http\Controllers\DistributeurController;
 use App\Http\Controllers\ConsultationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RechercheController;
+use App\Http\Controllers\DashboardController;
 
 
 // 1. الصفحات العامة
@@ -16,6 +17,9 @@ Route::get('/home', function () { return view('home'); })->name('home');
 Route::get('/contact', function () { return view('contact'); })->name('contact');
 Route::resource('produits', ProduitController::class);
 Route::get('/search', [RechercheController::class, 'Search'])->name('search');
+Route::get('/live-search', [DashboardController::class, 'search']);
+Route::get('/nearby-distributeurs', [DashboardController::class, 'nearby']);
+Route::get('/notifications', [DashboardController::class, 'notifications']);
 // 2. الروابط المحمية (لازم تسجيل دخول)
 Route::middleware(['auth'])->group(function () {
     Route::get('/distributeur/dashboard', [DistributeurController::class, 'dashboard']);

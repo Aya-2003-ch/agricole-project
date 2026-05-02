@@ -20,28 +20,37 @@ class RegisteredUserController extends Controller
 
     public function store(Request $request)
     {
+        // ✅ VALIDATION
         $request->validate([
-            'name' => 'required',
+            'name' => 'required|string',
             'email' => 'required|email|unique:users',
-            'password' => 'required|confirmed',
-            'role' => 'required',
+            'password' => 'required|confirmed|min:6',
+            'role' => 'required|in:eleveur,veterinaire,distributeur',
             'telephone' => 'required',
             'address' => 'required',
+
+            // 🔥 GPS (اختياري)
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
         ]);
 
-        // 1️⃣ Create User
-          $user = new User();
+        // ✅ CREATE USER
+        $user = new User();
 
-         $user->name = $request->name;
-         $user->email = $request->email;
-         $user->password = Hash::make($request->password);
-         $user->telephone = $request->telephone;
-         $user->address = $request->address;
-         $user->role = $request->role;
+        $user->name = $request->name;
+        $user->email = $request->email;
+        $user->password = Hash::make($request->password);
+        $user->telephone = $request->telephone;
+        $user->address = $request->address;
+        $user->role = $request->role;
 
-         $user->save(); // 👈 أهم سطر
+        // 🔥 حفظ الموقع
+        $user->latitude = $request->latitude;
+        $user->longitude = $request->longitude;
 
-        // 2️⃣ Role tables
+        $user->save();
+
+        // ✅ ROLE TABLES
         if ($request->role === 'distributeur') {
             Distributeur::create([
                 'user_id' => $user->id,
@@ -70,10 +79,10 @@ class RegisteredUserController extends Controller
             ]);
         }
 
-        // 3️⃣ Login
+        // ✅ LOGIN
         Auth::login($user);
 
-        // Redirect
+        // ✅ REDIRECT
         return match ($user->role) {
             'veterinaire' => redirect()->route('veterinaire.dashboard'),
             'distributeur' => redirect()->route('distributeur.dashboard'),

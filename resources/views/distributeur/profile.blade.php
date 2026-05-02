@@ -2,10 +2,10 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<title>صفحتي</title>
+<title>صفحتي الشخصية</title>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 <style>
 body {
     margin: 0;
@@ -28,7 +28,7 @@ body {
     padding: 15px;
 }
 
-/* TOP SECTION (INFO) */
+/* TOP */
 .top {
     background: white;
     padding: 25px;
@@ -37,6 +37,14 @@ body {
     margin-bottom: 20px;
 }
 
+.title {
+    color: #14532d;
+    font-weight: bold;
+    margin-bottom: 15px;
+    font-size: 18px;
+}
+
+/* GRID */
 .info-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -54,26 +62,19 @@ body {
     color: #14532d;
 }
 
-/* BOTTOM SECTION */
+/* BOTTOM */
 .bottom {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 20px;
 }
 
-/* CARDS */
+/* CARD */
 .card {
     background: white;
     padding: 25px;
     border-radius: 15px;
     box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-}
-
-/* TITLE */
-.title {
-    color: #14532d;
-    font-weight: bold;
-    margin-bottom: 15px;
 }
 
 /* INPUT */
@@ -102,7 +103,13 @@ input {
     background: #14532d;
 }
 
-/* BACK BUTTON */
+/* MAP */
+#map {
+    height: 300px;
+    border-radius: 10px;
+}
+
+/* BACK */
 .back {
     display: block;
     text-align: center;
@@ -112,7 +119,6 @@ input {
     color: white;
     text-decoration: none;
     border-radius: 10px;
-    transition: 0.3s;
 }
 
 .back:hover {
@@ -129,7 +135,12 @@ input {
         grid-template-columns: 1fr;
     }
 }
+#map {
+    height: 300px;
+    border-radius: 10px;
+}
 </style>
+
 </head>
 
 <body>
@@ -137,19 +148,19 @@ input {
 <!-- HEADER -->
 <div class="header">
     <h2>👤 صفحتي الشخصية</h2>
-    <p>إدارة معلومات الحساب</p>
+    <p>إدارة المعلومات والموقع</p>
 </div>
 
 <div class="container">
 
-    <!-- TOP: USER INFO -->
+    <!-- USER INFO -->
     <div class="top">
-        <div class="title">معلوماتي</div>
+        <div class="title">📌 معلوماتي</div>
 
         <div class="info-grid">
 
             <div class="info">
-                <strong>الاسم الكامل:</strong><br>
+                <strong>الاسم:</strong><br>
                 {{ $user->name }}
             </div>
 
@@ -160,60 +171,96 @@ input {
 
             <div class="info">
                 <strong>رقم الهاتف:</strong><br>
-                {{ $user->phone ?? 'غير متوفر' }}
+                {{ !empty($user->phone) ? $user->telephone : 'غير متوفر' }}
             </div>
 
             <div class="info">
                 <strong>العنوان:</strong><br>
-                {{ $user->address ?? 'غير متوفر' }}
+                {{ !empty($user->address) ? $user->address : 'غير متوفر' }}
+            </div>
+
+            <div class="info">
+                <strong>Latitude:</strong><br>
+                {{ !empty($user->latitude) ? $user->latitude : 'غير متوفر' }}
+            </div>
+
+            <div class="info">
+                <strong>Longitude:</strong><br>
+                {{ !empty($user->longitude) ? $user->longitude : 'غير متوفر' }}
             </div>
 
         </div>
     </div>
 
-    <!-- BOTTOM: EDIT + PASSWORD -->
+    <!-- MAP -->
+    <div class="card">
+        <div class="title">📍 موقعي على الخريطة</div>
+        <div id="map"></div>
+    </div>
+
+    <!-- EDIT -->
     <div class="bottom">
 
-        <!-- EDIT INFO -->
         <div class="card">
             <div class="title">✏️ تعديل المعلومات</div>
 
             <form method="POST" action="#">
                 @csrf
 
-                <input type="text" name="name" value="{{ $user->name }}" placeholder="الاسم الكامل">
+                <input type="text" name="name" value="{{ $user->name }}">
+                <input type="text" name="telephone" value="{{ $user->telephone }}">
+                <input type="text" name="address" value="{{ $user->address }}">
+                <input type="email" name="email" value="{{ $user->email}}">
 
-                <input type="text" name="phone" value="{{ $user->phone }}" placeholder="رقم الهاتف">
-
-                <input type="text" name="address" value="{{ $user->address }}" placeholder="العنوان">
-
-                <button class="btn" type="submit">حفظ التعديلات</button>
+                <button class="btn" type="submit">حفظ</button>
             </form>
         </div>
 
-        <!-- PASSWORD -->
         <div class="card">
             <div class="title">🔐 تغيير كلمة السر</div>
 
             <form method="POST" action="#">
                 @csrf
 
-                <input type="password" name="old_password" placeholder="كلمة السر القديمة">
+                <input type="password" name="old_password" placeholder="القديمة">
+                <input type="password" name="new_password" placeholder="الجديدة">
 
-                <input type="password" name="new_password" placeholder="كلمة السر الجديدة">
-
-                <button class="btn" type="submit">تغيير كلمة السر</button>
+                <button class="btn" type="submit">تغيير</button>
             </form>
-            </div>
+        </div>
 
     </div>
 
-    <!-- BACK BUTTON -->
     <a href="{{ route('distributeur.dashboard') }}" class="back">
-        ⬅ العودة للصفحة الرئيسية
+        ⬅ العودة
     </a>
 
 </div>
+
+<!-- GOOGLE MAP -->
+<div id="map"></div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const lat = {{ $user->latitude ?? 36.75 }};
+    const lng = {{ $user->longitude ?? 3.05 }};
+
+    const map = L.map('map').setView([lat, lng], 10);
+
+    // OpenStreetMap layer
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Marker
+    L.marker([lat, lng]).addTo(map)
+        .bindPopup("📍 موقعي الحالي")
+        .openPopup();
+});
+</script>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 </body>
 </html>

@@ -6,18 +6,10 @@
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-<style>
+<!-- LEAFLET -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 
-.welcome {
-    font-size: 24px;
-    font-weight: bold;
-    color: #14532d;
-    margin-bottom: 10px;
-    background: #dcfce7;
-    padding: 10px 15px;
-    border-radius: 10px;
-    display: inline-block;
-}
+<style>
 
 * {
     margin: 0;
@@ -54,7 +46,6 @@ body {
     color: white;
     text-decoration: none;
     border-radius: 8px;
-    transition: 0.3s;
 }
 
 .sidebar a:hover {
@@ -78,33 +69,44 @@ body {
     background: white;
     padding: 20px;
     border-radius: 12px;
-    margin-bottom: 25px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    margin-bottom: 20px;
+}
+
+/* WELCOME */
+.welcome-box {
+    font-size: 20px;
+    font-weight: bold;
+    color: #14532d;
+    background: #dcfce7;
+    padding: 10px;
+    border-radius: 10px;
+}
+
+/* NOTIF */
+.notif-box {
+    background: #fff3cd;
+    padding: 10px;
+    border-radius: 10px;
+    margin-top: 10px;
+    font-weight: bold;
 }
 
 /* SEARCH */
 .search-box {
     margin: 20px 0;
-    position: relative;
 }
 
 .search-box input {
     width: 100%;
     padding: 12px;
-    border: 1px solid #ddd;
     border-radius: 10px;
-    outline: none;
+    border: 1px solid #ddd;
 }
 
-/* RESULTS */
 #results {
     background: white;
-    border: 1px solid #ddd;
-    margin-top: 5px;
     border-radius: 10px;
-    max-height: 250px;
-    overflow-y: auto;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    margin-top: 5px;
 }
 
 .result-item {
@@ -112,37 +114,47 @@ body {
     border-bottom: 1px solid #eee;
 }
 
-.result-item:hover {
-    background: #f0fdf4;
+/* MAP */
+#map {
+    height: 300px;
+    width: 100%;
+    border-radius: 10px;
+    margin-top: 20px;
 }
 
 /* SERVICES */
 .services {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 20px;
+    margin-top: 20px;
 }
 
 .service-card {
     background: white;
-    padding: 25px;
+    padding: 20px;
     border-radius: 15px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
     text-align: center;
-    transition: 0.3s;
-}
-
-.service-card:hover {
-    transform: translateY(-8px);
 }
 
 .service-card i {
-    font-size: 35px;
+    font-size: 30px;
     color: #16a34a;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
+}
+
+.chat-btn {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 8px;
+    background: #16a34a;
+    color: white;
+    border-radius: 8px;
+    text-decoration: none;
 }
 
 </style>
+
 </head>
 
 <body>
@@ -161,13 +173,12 @@ body {
         <i class="fas fa-user"></i> صفحتي
     </a>
 
-    <!-- LOGOUT -->
     <a href="{{ route('logout') }}" class="logout"
        onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-        <i class="fas fa-right-from-bracket"></i> تسجيل الخروج
+        تسجيل الخروج
     </a>
 
-    <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display:none;">
+    <form id="logout-form" action="{{ route('logout') }}" method="POST">
         @csrf
     </form>
 </div>
@@ -177,44 +188,81 @@ body {
 
     <!-- HEADER -->
     <div class="header">
-        <h2 class="welcome">
-            👋 مرحبا {{ Auth::user()->name }}
-        </h2>
-        <p>إدارة الاستشارات والطلبات بسهولة</p>
+        <div class="welcome-box">
+            <span id="welcome-text"></span>
+        </div>
+
+        <div class="notif-box">
+            🔔 <span id="notif-count">0</span> طلب جديد
+        </div>
     </div>
 
-    <!-- 🔍 LIVE SEARCH -->
-    <form action="{{ route('search') }}" method="GET">
-    <input type="text" name="search" placeholder="🔍 ابحث عن دواء">
-    <button>بحث</button>
-</form>
+    <!-- SEARCH -->
+    <div class="search-box">
+        <input type="text" id="search" placeholder="🔍 ابحث عن دواء">
+        <div id="results"></div>
+    </div>
+
+    <!-- MAP -->
+    <div>
+        <h3>📍 الموزعين القريبين</h3>
+        <div id="map"></div>
+    </div>
 
     <!-- SERVICES -->
     <div class="services">
 
         <div class="service-card">
             <i class="fas fa-notes-medical"></i>
-            <h3>إدارة الطلبات</h3>
-            <p>عرض ومعالجة طلبات الفلاحين</p>
-        </div>
-
-        <div class="service-card">
-            <i class="fas fa-bug"></i>
-            <h3>تقارير الأمراض</h3>
-            <p>متابعة الحالات المرضية للحيوانات</p>
+            <h3>الطلبات</h3>
         </div>
 
         <div class="service-card">
             <i class="fas fa-pills"></i>
             <h3>الأدوية</h3>
-            <p>التحقق من توفر الأدوية</p>
         </div>
+
+        <div class="service-card">
+            <i class="fas fa-comments"></i>
+            <h3>المحادثات</h3>
+            <a href="#" class="chat-btn">فتح</a>
         </div>
+
+    </div>
 
 </div>
 
-<!-- 🔥 LIVE SEARCH SCRIPT -->
+<!-- JS -->
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
 <script>
+// 🔥 WELCOME
+const name = "{{ Auth::user()->name }}";
+const messages = [
+    👋 مرحباً ${name},
+    🩺 جاهز لمساعدة الفلاحين؟,
+    🌾 إدارة الاستشارات بسهولة,
+];
+
+let i = 0;
+setInterval(() => {
+    document.getElementById("welcome-text").innerText = messages[i];
+    i = (i + 1) % messages.length;
+}, 3000);
+
+// 🔔 NOTIFICATIONS
+function loadNotifications(){
+    fetch('/notifications')
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById('notif-count').innerText = data.count;
+        });
+}
+setInterval(loadNotifications, 5000);
+loadNotifications();
+
+// 🔍 SEARCH
+document.addEventListener("DOMContentLoaded", function () {
 document.getElementById('search').addEventListener('keyup', function() {
 
     let query = this.value;
@@ -224,30 +272,65 @@ document.getElementById('search').addEventListener('keyup', function() {
         return;
     }
 
-    fetch(`/live-search?search=${query}`)
-        .then(res => res.json())
-        .then(data => {
+    fetch('/live-search?search=' + query)
+    .then(response => response.json())
+    .then(data => {
 
-            let html = "";
+        console.log("DATA:", data); // 👈 مهم
 
-            if(data.length === 0){
-                html = "<div class='result-item'>❌ لا يوجد نتائج</div>";
-            }
+        let resultsDiv = document.getElementById('results');
+        resultsDiv.innerHTML = "";
 
-            data.forEach(item => {
-                html += `
-                    <div class="result-item">
-                        <strong>${item.produit.nom}</strong><br>
-                        👨‍🌾 ${item.distributeur.nom}<br>
-                        📍 ${item.distributeur.address}<br>
-                        💰 ${item.prix} دج
-                    </div>
-                `;
-            });
+        if(data.length === 0){
+            resultsDiv.innerHTML = "<p>❌ لا توجد نتائج</p>";
+            return;
+        }
 
-            document.getElementById('results').innerHTML = html;
+        data.forEach(item => {
+
+            let div = document.createElement('div');
+            div.classList.add('result-item');
+
+            div.innerHTML = `
+                <strong>${item.nom}</strong><br>
+                📍 ${item.address ?? 'غير متوفر'}<br>
+                💰 ${item.prix} دج
+            `;
+
+            resultsDiv.appendChild(div);
         });
+
+    })
+    .catch(error => {
+        console.error("ERROR:", error);
+    });
+
 });
+});
+
+// 🌍 MAP
+const userLat = {{ Auth::user()->latitude ?? 36.75 }};
+const userLng = {{ Auth::user()->longitude ?? 3.05 }};
+
+const map = L.map('map').setView([userLat, userLng], 10);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+L.marker([userLat, userLng]).addTo(map)
+    .bindPopup("📍 موقعك");
+
+fetch('/nearby-distributeurs')
+    .then(res => res.json())
+    .then(data => {
+
+        data.forEach(d => {
+            L.marker([d.latitude, d.longitude])
+                .addTo(map)
+                .bindPopup(`${d.name}<br>${d.address}`);
+        });
+
+    });
+
 </script>
 
 </body>
