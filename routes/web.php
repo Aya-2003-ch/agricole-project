@@ -22,8 +22,10 @@ Route::get('/search', [RechercheController::class, 'Search'])->name('search');
 
 // 2. الروابط المحمية
 Route::middleware(['auth'])->group(function () {
+    Route::get('/eleveur/search', [EleveurController::class, 'search'])->name('eleveur.search');
+    Route::post('/eleveur/update-location', [EleveurController::class, 'updateLocation'])->name('eleveur.updateLocation');
 
-    // التوجيه الذكي (Redirector)
+    //  Redirector
     Route::get('/dashboard', function () {
         $user = auth()->user();
         if (in_array($user->role, ['eleveur', 'فلاح'])) {
@@ -38,33 +40,33 @@ Route::middleware(['auth'])->group(function () {
         return view('dashboard'); 
     })->name('dashboard');
 
-    // --- قسم الطبيب البيطري (Veterinaire) ---
+    //Veterinaire 
     Route::prefix('veterinaire')->name('veterinaire.')->group(function () {
         Route::get('/dashboard', [VeterinaireController::class, 'dashboard'])->name('dashboard');
         Route::get('/consultations', [VeterinaireController::class, 'consultations'])->name('consultations');
         Route::get('/profile', [VeterinaireController::class, 'profile'])->name('profile');
         Route::get('/chats', [VeterinaireController::class, 'chats'])->name('chats');
 
-        // البحث عن الأدوية عند الموزعين وطلبها (فقط عرض وطلب)
+        // البحث عن الأدوية عند الموزعين  
         Route::get('/medicines', [VeterinaireController::class, 'medicines'])->name('medicines');
         Route::post('/order/place', [VeterinaireController::class, 'placeOrder'])->name('order.place');
         Route::get('/my-orders', [VeterinaireController::class, 'myOrders'])->name('commandes'); // عرض طلبات البيطري المرسلة للموزع
 
-        // ميزة التبليغ عن الأوبئة (المضافة حديثاً)
+        //  التبليغ عن الأوبئة 
         Route::get('/report', [VeterinaireController::class, 'report'])->name('report');
         Route::post('/report/send', [VeterinaireController::class, 'sendReport'])->name('report.send');
 
         // تحديث حالة الاستشارة (عندما ينتهي الطبيب من فحص حالة الفلاح)
         Route::post('/consultations/{id}/status', [VeterinaireController::class, 'updateStatus'])->name('updateStatus');
         
-        // ملاحظة: تم حذف مسارات CRUD (create, store, edit, update, destroy) للأدوية 
-        // لأن البيطري يطلبها فقط ولا يضيفها للنظام حسب المخطط.
+        
     });
 
-    // --- قسم الفلاح (Eleveur) ---
+    //  Eleveur 
     Route::prefix('eleveur')->name('eleveur.')->group(function () {
         Route::get('/dashboard', [EleveurController::class, 'dashboard'])->name('dashboard');
         Route::post('/store', [EleveurController::class, 'store'])->name('store');
+        
     });
 
     // --- قسم الموزع (Distributeur) ---

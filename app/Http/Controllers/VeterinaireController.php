@@ -64,12 +64,12 @@ class VeterinaireController extends Controller
     // 4. عرض تاريخ طلبات الأدوية التي قام بها البيطري
     public function myOrders()
     {
-        $commandes = Commande::where('user_id', auth()->id())
+        $commandes = Commande::where('id_user', auth()->id())
             ->with('produit')
             ->latest()
             ->get();
             
-        return view('veterinaire.my_orders', compact('commandes'));
+        return view('veterinaire.orders', compact('commandes'));
     }
 
     // 5. التبليغ عن الأوبئة (صلاحية خاصة بالبيطري)
