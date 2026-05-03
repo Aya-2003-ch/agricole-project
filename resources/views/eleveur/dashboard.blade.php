@@ -154,6 +154,14 @@
         <a href="#"><i class="fas fa-user-md"></i> <span>استشارة بيطرية</span></a>
         <a href="#"><i class="fas fa-comments"></i> <span>المحادثات</span></a>
         <a href="#"><i class="fas fa-shopping-basket"></i> <span>طلباتي</span></a>
+        <div style="margin-top: auto; border-top: 1px solid #2d6a4f; padding-top: 10px;">
+        <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" style="color: #ff8a8a;">
+            <i class="fas fa-sign-out-alt"></i> <span>تسجيل الخروج</span>
+        </a>
+        <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+            @csrf
+        </form>
+    </div>
     </div>
 
     <!-- Main Content -->
@@ -192,7 +200,7 @@
                 <p style="font-size: 14px; color: var(--text-muted);"><i class="fas fa-map-pin"></i> {{ $item->address }}</p>
                 
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding-top: 15px; border-top: 1px solid #f1f5f9;">
-                    <span class="price-tag">{{ $item->price }} د.ج</span>
+                    <span class="price-tag">{{ $item->prix }} د.ج</span>
                     <a href="https://www.google.com/maps?q={{ $item->lat }},{{ $item->lng }}" target="_blank" style="color: #007bff; text-decoration: none; font-size: 13px; font-weight: bold;">
                         <i class="fas fa-directions"></i> الاتجاهات
                     </a>
