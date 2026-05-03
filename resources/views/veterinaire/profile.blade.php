@@ -231,7 +231,7 @@ input {
 
     </div>
 
-    <a href="{{ route('distributeur.dashboard') }}" class="back">
+    <a href="{{ route('veterinaire.dashboard') }}" class="back"> 
         ⬅ العودة
     </a>
 
