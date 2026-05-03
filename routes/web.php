@@ -24,6 +24,7 @@ Route::get('/search', [RechercheController::class, 'Search'])->name('search');
 Route::middleware(['auth'])->group(function () {
     Route::get('/eleveur/search', [EleveurController::class, 'search'])->name('eleveur.search');
     Route::post('/eleveur/update-location', [EleveurController::class, 'updateLocation'])->name('eleveur.updateLocation');
+    Route::get('/veterinaire/search-medicines', [App\Http\Controllers\VeterinaireController::class, 'searchMedicines'])->name('veterinaire.searchMedicines');
 
     //  Redirector
     Route::get('/dashboard', function () {
@@ -46,9 +47,10 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/consultations', [VeterinaireController::class, 'consultations'])->name('consultations');
         Route::get('/profile', [VeterinaireController::class, 'profile'])->name('profile');
         Route::get('/chats', [VeterinaireController::class, 'chats'])->name('chats');
+        
 
         // البحث عن الأدوية عند الموزعين  
-        Route::get('/medicines', [VeterinaireController::class, 'medicines'])->name('medicines');
+       
         Route::post('/order/place', [VeterinaireController::class, 'placeOrder'])->name('order.place');
         Route::get('/my-orders', [VeterinaireController::class, 'myOrders'])->name('commandes'); // عرض طلبات البيطري المرسلة للموزع
 

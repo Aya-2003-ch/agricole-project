@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
-
+namespace App\Http\Controllers; 
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use App\Models\Consultation;
 use App\Models\Commande; 
 use App\Models\Produit; // يمثل الأدوية المعروضة من الموزعين
@@ -27,19 +28,34 @@ class VeterinaireController extends Controller
     }
 
     // 2. صفحة البحث عن الأدوية (عرض فقط بدون تعديل)
-    public function medicines(Request $request)
-    {
-        // البيطري يتصفح الأدوية المتوفرة عند الموزعين
-        $query = Produit::query();
+    public function searchMedicines(Request $request)
+{
+    $searchQuery = $request->input('medicine');
+    $veto = Auth::user(); // نستخدم موقع البيطري من جدول users
 
-        if ($request->has('search')) {
-            $query->where('name', 'like', '%' . $request->search . '%');
-        }
+    // إحداثيات البيطري
+    $lat = $veto->latitude ?? 36.4621;
+    $lng = $veto->longitude ?? 7.4311;
 
-        $medicines = $query->latest()->get(); 
-        
-        return view('veterinaire.medicines', compact('medicines'));
-    }
+    $results = DB::table('stores')
+        ->join('users', 'stores.distributeur_id', '=', 'users.id')
+        ->join('produits', 'stores.produit_id', '=', 'produits.id') 
+        ->select(
+            'users.name as distributeur_name',
+            'users.address',
+            'users.latitude as lat',
+            'users.longitude as lng',
+            'produits.nom as medicine_name', 
+            'stores.prix',
+            DB::raw("ROUND(6371 * acos(cos(radians($lat)) * cos(radians(users.latitude)) * cos(radians(users.longitude) - radians($lng)) + sin(radians($lat)) * sin(radians(users.latitude))), 1) AS distance")
+        )
+        ->where('produits.nom', 'LIKE', '%' . $searchQuery . '%') 
+        ->orderBy('distance', 'asc') // ترتيب حسب الأقرب
+        ->get();
+
+    // نرجع لصفحة الداشبورد الخاصة بالبيطري مع النتائج
+    return view('veterinaire.dashboard', compact('results', 'searchQuery'));
+}
 
     // 3. دالة إرسال طلب شراء دواء من موزع
     public function placeOrder(Request $request)

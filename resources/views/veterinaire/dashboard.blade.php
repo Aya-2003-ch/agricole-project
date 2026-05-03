@@ -174,11 +174,11 @@
     
     <a href="#" class="active"><i class="fas fa-th-large"></i> الرئيسية</a>
     <a href="{{ route('veterinaire.consultations') }}"><i class="fas fa-stethoscope"></i> الاستشارات الميدانية</a>
-    <a href="{{ route('veterinaire.commandes') }}"><i class="fas fa-shopping-cart"></i> طلبات الأدوية</a>
+    <!-- رابط الطلبات لرؤية تاريخ الطلبات التي قام بها -->
+    <a href="{{ route('veterinaire.commandes') }}"><i class="fas fa-shopping-basket"></i> سجل الطلبات</a>
     <a href="{{ route('veterinaire.chats') }}"><i class="fas fa-comments"></i> دردشة الفلاحين <span class="badge">3</span></a>
     <a href="{{ route('veterinaire.profile') }}"><i class="fas fa-user-md"></i> الملف الشخصي</a>
     
-    <!-- ميزة التبليغ عن مرض منتشر -->
     <a href="{{ route('veterinaire.report') }}" class="report-link">
         <i class="fas fa-biohazard"></i> التبليغ عن وباء
     </a>
@@ -197,83 +197,118 @@
             <h2>مرحباً، دكتور {{ Auth::user()->name }} 👋</h2>
             <p style="color: #64748b;">لديك اليوم 4 استشارات مجدولة وتنبيه بخصوص صحة المواشي في منطقتك.</p>
         </div>
-        <div class="welcome-card" style="border-right-color: var(--warning-red);">
-            <h3 style="color: var(--warning-red);"><i class="fas fa-exclamation-triangle"></i> حالة الطوارئ</h3>
+        <div class="welcome-card" style="border-right-color: #ef4444;">
+            <h3 style="color: #ef4444;"><i class="fas fa-exclamation-triangle"></i> حالة الطوارئ</h3>
             <p>تم تسجيل حالة اشتباه "حمى قلاعية" على بعد 10 كم.</p>
         </div>
     </div>
 
-    <!-- البحث عن الأدوية عند الموزعين (حسب الـ Diagram) -->
-    <div class="search-section">
-        <h3><i class="fas fa-search"></i> البحث عن أدوية ومواد فلاحية</h3>
-        <p style="font-size: 14px; color: #64748b; margin-bottom: 15px;">ابحث في مخازن الموزعين المعتمدين (Distributeurs) لطلب الكميات اللازمة.</p>
-        <div class="search-input-wrapper">
-            <input type="text" id="med-search" placeholder="مثال: لقاح طاعون المجترات، مضادات حيوية...">
-            <button class="action-card" style="padding: 10px 30px; margin: 0; background: var(--accent-green); color: white;">بحث</button>
+    <!-- نظام البحث والطلب المباشر -->
+    <div class="search-section" id="med-search-section">
+        <h3><i class="fas fa-search"></i> نظام البحث وطلب الأدوية</h3>
+        <p style="font-size: 14px; color: #64748b; margin-bottom: 15px;">ابحث عن الأدوية والمواد البيطرية في مخازن الموزعين واطلبها لعيادتك مباشرة.</p>
+        
+        <form action="{{ route('veterinaire.searchMedicines') }}" method="GET" class="search-input-wrapper">
+            <input type="text" name="medicine" placeholder="ابحث عن دواء (مثال: أومنيسين، لقاحات...)" value="{{ $searchQuery ?? '' }}" required>
+            <button type="submit" class="action-card" style="padding: 10px 30px; margin: 0; background: #2d6a4f; color: white; cursor: pointer; border: none;">
+                بحث في المخازن
+            </button>
+        </form>
+
+        <div id="search-results" style="margin-top: 20px;">
+            @if(isset($results))
+                @if($results->isEmpty())
+                    <p style="text-align: center; color: #ef4444; padding: 20px;">عذراً، هذا المنتج غير متوفر حالياً عند الموزعين المسجلين.</p>
+                @else
+                    <div class="results-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;">
+                        @foreach($results as $item)
+                        <div class="action-card" style="text-align: right; border: 1px solid #e2e8f0; background: white; cursor: default; transition: 0.3s;">
+                            <div style="display: flex; justify-content: space-between; align-items: start;">
+                                <h4 style="margin: 0; color: #1b4332;">{{ $item->distributeur_name }}</h4>
+                                <span style="background: #f0fdf4; color: #16a34a; padding: 3px 10px; border-radius: 15px; font-size: 11px; font-weight: bold;">
+                                    <i class="fas fa-truck"></i> {{ $item->distance }} كم
+                                </span>
+                            </div>
+                            
+                            <p style="font-size: 13px; color: #64748b; margin: 10px 0;"><i class="fas fa-pills"></i> المنتج: {{ $item->medicine_name }}</p>
+                            
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding-top: 10px; border-top: 1px solid #f1f5f9;">
+                                <strong style="color: #2d6a4f; font-size: 1.1rem;">{{ $item->prix }} د.ج</strong>
+                                <a href="https://www.google.com/maps?q={{ $item->lat }},{{ $item->lng }}" target="_blank" style="color: #007bff; text-decoration: none; font-size: 12px;">
+                                    <i class="fas fa-map-marked-alt"></i> الموقع
+                                </a>
+                            </div>
+                            
+                            <!-- فورم إرسال الطلب -->
+                            <form action="{{ route('veterinaire.commandes') }}" method="POST" style="margin-top: 12px;">
+                                @csrf
+                                <input type="hidden" name="medicine_name" value="{{ $item->medicine_name }}">
+                                <input type="hidden" name="distributeur_id" value="{{ $item->distributeur_name }}">
+                                <button type="submit" style="width: 100%; padding: 10px; background: #2d6a4f; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;">
+                                    <i class="fas fa-cart-plus"></i> تأكيد طلب الشراء
+                                </button>
+                            </form>
+                        </div>
+                        @endforeach
+                    </div>
+                @endif
+            @endif
         </div>
-        <div id="search-results"></div>
     </div>
 
     <!-- الخريطة التفاعلية -->
     <div class="map-card">
         <h3>📍 خريطة الموزعين والنشاط الرعوي</h3>
-        <div id="map"></div>
+        <div id="map" style="height: 400px; border-radius: 15px; border: 1px solid #e2e8f0;"></div>
     </div>
 
     <!-- شبكة العمليات (Actions) -->
     <div class="actions-grid">
         <a href="{{ route('veterinaire.consultations') }}" class="action-card">
-            <i class="fas fa-clipboard-list"></i>
+            <i class="fas fa-clipboard-list" style="color: #2d6a4f;"></i>
             <h3>الاستشارات</h3>
-            <p>تشخيص وعلاج حالات الفلاحين</p>
-        </a>
-
-        <a href="{{ route('veterinaire.medicines') }}" class="action-card">
-            <i class="fas fa-pills"></i>
-            <h3>المخزن الخاص</h3>
-            <p>إدارة أدويتك المتوفرة</p>
+            <p>إدارة مواعيد الكشوفات الميدانية</p>
         </a>
 
         <a href="{{ route('veterinaire.chats') }}" class="action-card">
-            <i class="fas fa-headset"></i>
-            <h3>الدعم المباشر</h3>
-            <p>الإجابة على استفسارات المربين</p>
+            <i class="fas fa-headset" style="color: #007bff;"></i>
+            <h3>الدعم الفني</h3>
+            <p>تواصل مباشر مع المربين</p>
         </a>
 
-        <a href="{{ route('veterinaire.report') }}" class="action-card alert">
-            <i class="fas fa-bullhorn"></i>
-            <h3>تبليغ فوري</h3>
-            <p>رصد وباء أو مرض معدي</p>
+        <a href="{{ route('veterinaire.report') }}" class="action-card alert" style="background: #fff5f5;">
+            <i class="fas fa-bullhorn" style="color: #ef4444;"></i>
+            <h3 style="color: #ef4444;">تبليغ عن وباء</h3>
+            <p>إخطار المصالح الفلاحية فوراً</p>
         </a>
     </div>
 
 </div>
 
+<!-- السكريبتات -->
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
-    // إعدادات الخريطة (الجزائر افتراضياً)
-    const lat = {{ Auth::user()->latitude ?? 36.75 }};
-    const lng = {{ Auth::user()->longitude ?? 3.05 }};
+    // موقع البيطري الحالي
+    const lat = {{ Auth::user()->latitude ?? 36.4621 }};
+    const lng = {{ Auth::user()->longitude ?? 7.4311 }};
     
-    const map = L.map('map').setView([lat, lng], 10);
+    const map = L.map('map').setView([lat, lng], 11);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: 'AgroDz Map'
+        attribution: '&copy; AgroDz'
     }).addTo(map);
 
-    // موقع البيطري
-    L.marker([lat, lng]).addTo(map).bindPopup("<b>عيادتك / موقعك</b>").openPopup();
+    // أيقونة البيطري
+    L.marker([lat, lng]).addTo(map).bindPopup("<b>دكتور {{ Auth::user()->name }}</b>").openPopup();
 
-    // محاكاة مواقع الموزعين (الذين يبيعون الأدوية للبيطري كما في الـ Diagram)
-    const distributors = [
-        { name: "موزع قالمة للأدوية", lat: 36.46, lng: 7.43 },
-        { name: "شركة الأدوية الفلاحية", lat: 36.50, lng: 7.50 }
-    ];
-
-    distributors.forEach(d => {
-        L.circleMarker([d.lat, d.lng], { color: 'green', radius: 8 }).addTo(map)
-            .bindPopup(`<b>${d.name}</b><br>متوفر أدوية بيطرية`);
-    });
+    // إضافة نتائج البحث على الخريطة إذا وجدت
+    @if(isset($results))
+        const searchResults = @json($results);
+        searchResults.forEach(res => {
+            L.marker([res.lat, res.lng])
+              .addTo(map)
+              .bindPopup(`<b>${res.distributeur_name}</b><br>متوفر: ${res.medicine_name}<br>السعر: ${res.price} د.ج`);
+        });
+    @endif
 </script>
 
 </body>
-</html>
