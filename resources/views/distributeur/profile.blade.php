@@ -211,7 +211,7 @@
     <div class="bottom-grid">
         <div class="card">
             <div class="title"><i class="fas fa-user-edit"></i> تعديل البيانات</div>
-            <form method="POST" action="#">
+            <form method="POST" action="{{ route('distributeur.profile.update') }}">
                 @csrf
                 <label style="font-size: 12px; color: var(--text-gray);">الاسم</label>
                 <input type="text" name="name" value="{{ $user->name }}">

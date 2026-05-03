@@ -71,15 +71,16 @@ Route::middleware(['auth'])->group(function () {
         
     });
 
-    // --- قسم الموزع (Distributeur) ---
+    //(Distributeur) 
     Route::prefix('distributeur')->name('distributeur.')->group(function () {
         Route::get('/dashboard', [DistributeurController::class, 'dashboard'])->name('dashboard');
         Route::get('/profile', [DistributeurController::class, 'profile'])->name('profile');
+        Route::post('/distributeur/profile/update', [DistributeurController::class, 'updateProfile'])->name('distributeur.profile.update');
         // الموزع هو من يملك صلاحية إضافة المنتجات (store)
         Route::post('/products/store', [DistributeurController::class, 'store'])->name('store');
     });
 
-    // --- الإدارة العامة للحساب ---
+    //  الإدارة العامة للحساب 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');

@@ -313,7 +313,7 @@ display: flex;
     <script>
         // عرض التاريخ اليومي ي
         const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-        document.getElementById('dateText').innerHTML = new Date().toLocaleDateString('ar-SA', dateOptions);
+        document.getElementById('dateText').innerHTML = new Date().toLocaleDateString('fr-SA', dateOptions);
     </script>
 
 </body>
