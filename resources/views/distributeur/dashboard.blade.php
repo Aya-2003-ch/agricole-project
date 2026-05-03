@@ -5,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة الموزع | AgroDz</title>
     
-    <!-- الروابط الأساسية: أيقونات وخطوط -->
+    <!-- الروابط الأساسية:   -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            /* الألوان مستوحاة من صورة المنصة image_19e1bd.jpg */
+             
             --primary-dark: #344e41; 
             --primary-green: #588157;
             --accent-green: #a3b18a;
@@ -93,14 +93,14 @@
             color: white !important;
         }
 
-        /* --- CONTENT AREA --- */
+        
         .content {
             margin-right: var(--sidebar-width);
             width: calc(100% - var(--sidebar-width));
             padding: 40px;
         }
 
-        /* --- HEADER & WELCOME MESSAGE --- */
+        /*  HEADER ET  WELCOME MESSAGE  */
         .header {
             display: flex;
             justify-content: space-between;

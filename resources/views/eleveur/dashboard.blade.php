@@ -102,7 +102,7 @@
 
         .btn-primary:hover { background: var(--secondary); transform: translateY(-2px); }
 
-        /* Results Grid - شبكة النتائج */
+        /*  -  النتائج */
         .results-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -134,7 +134,7 @@
             font-weight: 800;
         }
 
-        /* Map - الخريطة */
+        /* Map  */
         #map { height: 350px; width: 100%; border-radius: 18px; border: 1.5px solid #e2e8f0; }
 
         @media (max-width: 992px) {
@@ -180,7 +180,7 @@
             </div>
         </div>
 
-        <!-- Search Section - قسم البحث -->
+        <! قسم البحث ->
         <div class="section-card">
             <h3 style="margin-bottom: 20px; color: var(--secondary);"><i class="fas fa-search-location"></i> ابحث عن دواء (نتائج حسب الأقرب والسعر)</h3>
             <form action="{{ route('eleveur.search') }}" method="GET" class="search-box">
@@ -189,7 +189,7 @@
             </form>
         </div>
 
-        <!-- Results Section - نتائج البحث (تظهر عند الضغط على بحث) -->
+        <! - نتائج البحث >
         @if(isset($results))
         <div class="results-grid">
             @foreach($results as $item)
@@ -215,7 +215,7 @@
         </div>
         @endif
 
-        <!-- Map Section - موقع المزرعة -->
+        <!  - موقع المزرعة>
         <div class="section-card" style="margin-top: 25px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                 <h3 style="margin: 0; color: var(--secondary);"><i class="fas fa-map-marked-alt"></i> موقع مزرعتك المسجل</h3>

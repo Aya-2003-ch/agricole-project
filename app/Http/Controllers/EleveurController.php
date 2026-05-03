@@ -9,14 +9,14 @@ use Illuminate\Support\Facades\DB;
 
 class EleveurController extends Controller
 {
-    // 1. Dashboard
+    //  Dashboard
     public function dashboard()
     {
         $eleveur = Eleveur::where('user_id', Auth::id())->first();
         return view('eleveur.dashboard', compact('eleveur'));
     }
 
-    // 2. البحث عن دواء
+    //  البحث عن دواء
     public function search(Request $request)
     {
         $searchQuery = $request->input('medicine');
@@ -24,12 +24,12 @@ class EleveurController extends Controller
         // جلب الفلاح
         $eleveur = Eleveur::where('user_id', Auth::id())->first();
 
-        // ✅ حماية من الخطأ (إذا ماكانش فلاح)
+        //  حماية من الخطأ 
         if (!$eleveur) {
             return back()->with('error', 'لازم تحددي الموقع تاعك أولاً');
         }
 
-        // ✅ حماية إذا الموقع غير موجود
+        //  حماية إذا الموقع غير موجود
         if (!$eleveur->latitude || !$eleveur->longitude) {
             return back()->with('error', 'يرجى تحديد الموقع قبل البحث');
         }
@@ -60,7 +60,7 @@ class EleveurController extends Controller
             //  البحث
             ->where(DB::raw('LOWER(produits.nom)'), 'LIKE', '%' . strtolower($searchQuery) . '%')
 
-            //  فلترة: فقط القريبين (مثلا 50km)
+            //   فقط القريبين
             ->having('distance', '<=', 50)
 
             //  ترتيب: الأقرب ثم الأرخص
@@ -72,12 +72,12 @@ class EleveurController extends Controller
         return view('eleveur.dashboard', compact('results', 'searchQuery', 'eleveur'));
     }
 
-    // 3. تحديث الموقع
+    //  تحديث الموقع
     public function updateLocation(Request $request)
     {
         $request->validate([
-            'lat' => 'required|numeric',
-            'lng' => 'required|numeric',
+            'latitude' => 'required|numeric',
+            'longitude' => 'required|numeric',
         ]);
 
         $eleveur = Eleveur::where('user_id', Auth::id())->first();

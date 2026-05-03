@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <title>AgroDz - Gestion Store</title>
     <style>
-        /* المتغيرات المستوحاة من AgroDz */
+        
         :root {
-            --primary-dark: #2d4a36;    /* الأخضر الداكن للقائمة */
-            --accent-green: #5a8d5a;    /* الأخضر المتوسط للعناصر النشطة */
-            --light-green: #f0fdf4;     /* خلفية خفيفة جداً */
-            --bg-body: #f8fafc;         /* خلفية الصفحة */
+            --primary-dark: #2d4a36;    
+            --accent-green: #5a8d5a;    
+            --light-green: #f0fdf4;     
+            --bg-body: #f8fafc;         
             --white: #ffffff;
             --text-dark: #1f2937;
             --text-gray: #6b7280;
@@ -61,7 +61,7 @@
             justify-content: center;
             width: 45px;
             height: 45px;
-            background: #f1f5f9; /* رمادي خفيف جداً ليناسب الداشبورد */
+            background: #f1f5f9; 
             color: var(--primary-dark);
             border-radius: 12px;
             text-decoration: none;
@@ -72,7 +72,7 @@
         .btn-back:hover {
             background: var(--primary-dark);
             color: white;
-            transform: translateX(5px); /* حركة لليمين لأن الاتجاه RTL */
+            transform: translateX(5px); 
         }
 
         .welcome-card h2 {
@@ -184,7 +184,7 @@
             background: var(--light-green);
         }
 
-        /* البحث المباشر */
+        /* البحث  */
         #results {
             position: absolute;
             background: white;

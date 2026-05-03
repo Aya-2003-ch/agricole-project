@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
-    // 🔍 البحث
+    //  البحث
     public function search(Request $request)
 {
     return \App\Models\Store::with(['produit', 'distributeur'])
@@ -26,13 +26,13 @@ class DashboardController extends Controller
             ];
         });
 }
-    // 🌍 الموزعين القريبين
+    //  الموزعين القريبين
     public function nearby()
     {
         return Distributeur::select('name', 'address', 'latitude', 'longitude')->get();
     }
 
-    // 🔔 الإشعارات
+    //  الإشعارات
     public function notifications()
     {
         $count = Consultation::where('status', 'pending')->count();

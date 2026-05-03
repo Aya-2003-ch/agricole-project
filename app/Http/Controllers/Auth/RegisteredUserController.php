@@ -20,7 +20,7 @@ class RegisteredUserController extends Controller
 
     public function store(Request $request)
     {
-        // ✅ VALIDATION
+        //  validation
         $request->validate([
             'name' => 'required|string',
             'email' => 'required|email|unique:users',
@@ -29,12 +29,13 @@ class RegisteredUserController extends Controller
             'telephone' => 'required',
             'address' => 'required',
 
-            // 🔥 GPS (اختياري)
+            
+            // GPS 
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
         ]);
 
-        // ✅ CREATE USER
+        //  create user
         $user = new User();
 
         $user->name = $request->name;
@@ -44,13 +45,13 @@ class RegisteredUserController extends Controller
         $user->address = $request->address;
         $user->role = $request->role;
 
-        // 🔥 حفظ الموقع
+        //  حفظ الموقع
         $user->latitude = $request->latitude;
         $user->longitude = $request->longitude;
 
         $user->save();
 
-        // ✅ ROLE TABLES
+        //  role
         if ($request->role === 'distributeur') {
             Distributeur::create([
                 'user_id' => $user->id,
@@ -79,10 +80,10 @@ class RegisteredUserController extends Controller
             ]);
         }
 
-        // ✅ LOGIN
+        //  login
         Auth::login($user);
 
-        // ✅ REDIRECT
+        //  توجيه حسب role
         return match ($user->role) {
             'veterinaire' => redirect()->route('veterinaire.dashboard'),
             'distributeur' => redirect()->route('distributeur.dashboard'),

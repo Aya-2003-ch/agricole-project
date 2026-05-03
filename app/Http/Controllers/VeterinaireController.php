@@ -57,7 +57,7 @@ class VeterinaireController extends Controller
     return view('veterinaire.dashboard', compact('results', 'searchQuery'));
 }
 
-    // 3. دالة إرسال طلب شراء دواء من موزع
+    //  دالة إرسال طلب شراء دواء من موزع
     public function placeOrder(Request $request)
     {
         $request->validate([
@@ -77,7 +77,7 @@ class VeterinaireController extends Controller
         return back()->with('success', 'تم إرسال طلب الدواء للموزع بنجاح');
     }
 
-    // 4. عرض تاريخ طلبات الأدوية التي قام بها البيطري
+    //  عرض تاريخ طلبات الأدوية التي قام بها البيطري
     public function myOrders()
     {
         $commandes = Commande::where('id_user', auth()->id())
@@ -88,7 +88,7 @@ class VeterinaireController extends Controller
         return view('veterinaire.orders', compact('commandes'));
     }
 
-    // 5. التبليغ عن الأوبئة (صلاحية خاصة بالبيطري)
+    // . التبليغ عن الأوبئة 
     public function report()
     {
         return view('veterinaire.report');
@@ -102,11 +102,11 @@ class VeterinaireController extends Controller
             'location' => 'required'
         ]);
 
-        // منطق إرسال التبليغ...
+        //  إرسال التبليغ
         return redirect()->route('veterinaire.dashboard')->with('success', 'تم التبليغ بنجاح');
     }
 
-    // 6. الاستشارات والبروفايل والشات (تظل كما هي)
+    //  الاستشارات والبروفايل والشات 
     public function consultations() 
     { 
         $consultations = Consultation::where('veterinaire_id', auth()->id())->with('user')->latest()->get();

@@ -142,7 +142,7 @@ input {
 
 <div class="container">
 
-    <!-- TOP: USER INFO -->
+    <! USER INFO>
     <div class="top">
         <div class="title">معلوماتي</div>
 

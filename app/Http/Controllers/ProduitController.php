@@ -75,7 +75,7 @@ class ProduitController extends Controller
         return view('produits.edit', compact('store'));
     }
 
-    // 🔄 update
+    //  update
     public function update(Request $request, $id)
     {
         $store = Store::findOrFail($id);
@@ -98,7 +98,7 @@ class ProduitController extends Controller
                          ->with('success', 'تم التعديل بنجاح');
     }
 
-    // ❌ delete
+    //  delete
     public function destroy($id)
     {
         $store = Store::findOrFail($id);

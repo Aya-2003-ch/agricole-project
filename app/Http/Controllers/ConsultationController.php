@@ -4,11 +4,11 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Consultation;
-use Illuminate\Support\Facades\Auth; // ✅ مهم
+use Illuminate\Support\Facades\Auth;   
 
 class ConsultationController extends Controller
 {
-    // 👨‍⚕️ Dashboard vétérinaire
+    //  Dashboard vétérinaire
     public function indexVet()
     {
         $consultations = Consultation::with('eleveur')
@@ -19,7 +19,7 @@ class ConsultationController extends Controller
         return view('veterinaire.consultations', compact('consultations'));
     }
 
-    // 👨‍🌾 إنشاء طلب
+    //  إنشاء طلب
     public function store(Request $request)
     {
         $request->validate([
@@ -37,7 +37,7 @@ class ConsultationController extends Controller
         return back()->with('success', 'تم إرسال الطلب');
     }
 
-    // 👨‍⚕️ تأكيد الاستشارة
+    //  تأكيد الاستشارة
     public function update(Request $request, $id)
     {
         $request->validate([
@@ -55,7 +55,7 @@ class ConsultationController extends Controller
         return back()->with('success', 'تم التحديث');
     }
 
-    // 🗑️ حذف
+    //  حذف
     public function destroy($id)
     {
         Consultation::findOrFail($id)->delete();

@@ -173,7 +173,7 @@
 
 <div class="container">
 
-    <!-- USER INFO -->
+    /* USER INFO */
     <div class="card">
         <div class="title"><i class="fas fa-info-circle"></i> معلوماتي الأساسية</div>
         <div class="info-grid">
@@ -207,7 +207,7 @@
         <div id="map"></div>
     </div>
 
-    <!-- EDIT SECTION -->
+    <!-- EDIT  -->
     <div class="bottom-grid">
         <div class="card">
             <div class="title"><i class="fas fa-user-edit"></i> تعديل البيانات</div>
