@@ -1,301 +1,358 @@
 <!DOCTYPE html>
-<html>
+<html lang="ar" dir="rtl">
 <head>
-    <title>Gestion Store</title>
+    <meta charset="UTF-8">
+    <title>AgroDz - Gestion Store</title>
+    <style>
+        /* المتغيرات المستوحاة من AgroDz */
+        :root {
+            --primary-dark: #2d4a36;    /* الأخضر الداكن للقائمة */
+            --accent-green: #5a8d5a;    /* الأخضر المتوسط للعناصر النشطة */
+            --light-green: #f0fdf4;     /* خلفية خفيفة جداً */
+            --bg-body: #f8fafc;         /* خلفية الصفحة */
+            --white: #ffffff;
+            --text-dark: #1f2937;
+            --text-gray: #6b7280;
+            --shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            --radius: 16px;
+        }
 
-<style>
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Segoe UI', sans-serif;
-}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
 
-body {
-    background: linear-gradient(135deg, #e0f2fe, #f0fdf4);
-    min-height: 100vh;
-}
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-dark);
+            padding: 40px 20px;
+        }
 
-/* TITLE */
-h2 {
-    text-align: center;
-    margin: 25px 0;
-    color: #064e3b;
-    font-size: 28px;
-}
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
 
-/* FORM */
-form {
-    text-align: center;
-    margin: 15px auto;
-}
+        /* رأس الصفحة (ستايل الكارت العلوي في الصورة) */
+        .welcome-card {
+            background: var(--white);
+            padding: 30px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border-right: 8px solid var(--accent-green);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-input {
-    padding: 12px;
-    margin: 6px;
-    border-radius: 10px;
-    border: 1px solid #ddd;
-    width: 220px;
-    transition: 0.3s;
-}
+        .welcome-card h2 {
+            color: var(--primary-dark);
+            font-size: 26px;
+        }
 
-input:focus {
-    outline: none;
-    border-color: #22c55e;
-    box-shadow: 0 0 8px rgba(34,197,94,0.3);
-}
+        /* تنسيق النماذج */
+        .section-card {
+            background: var(--white);
+            padding: 25px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+        }
 
-/* BUTTONS */
-button {
-    padding: 10px 18px;
-    border-radius: 10px;
-    border: none;
-    font-weight: bold;
-    cursor: pointer;
-    transition: 0.3s;
-}
+        .section-title {
+            color: var(--accent-green);
+            margin-bottom: 20px;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
 
-.add {
-    background: linear-gradient(90deg, #22c55e, #16a34a);
-    color: white;
-}
-.add:hover {
-    transform: scale(1.05);
-}
+        form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+        }
 
-.delete {
-    background: #ef4444;
-    color: white;
-}
-.delete:hover {
-    background: #dc2626;
-}
+        input {
+            padding: 12px 16px;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            outline: none;
+            transition: 0.3s;
+            flex: 1;
+            min-width: 180px;
+        }
 
-.edit {
-    background: #f59e0b;
-    color: white;
-}
-.edit:hover {
-    background: #d97706;
-}
+        input:focus {
+            border-color: var(--accent-green);
+            box-shadow: 0 0 0 3px rgba(90, 141, 90, 0.1);
+        }
 
-.view {
-    background: #3b82f6;
-    color: white;
-}
-.view:hover {
-    background: #2563eb;
-}
+        /* الأزرار */
+        button {
+            padding: 12px 24px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
 
-/* TABLE */
-table {
-    width: 90%;
-    margin: 30px auto;
-    border-collapse: collapse;
-    background: rgba(255,255,255,0.9);
-    backdrop-filter: blur(10px);
-    border-radius: 15px;
-    overflow: hidden;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
-}
+        .btn-add {
+            background: var(--primary-dark);
+            color: white;
+        }
 
-th {
-    background: linear-gradient(90deg, #16a34a, #22c55e);
-    color: white;
-    padding: 15px;
-}
+        .btn-add:hover {
+            background: var(--accent-green);
+            transform: translateY(-2px);
+        }
 
-td {
-    padding: 12px;
-    border-bottom: 1px solid #eee;
-}
+        .btn-view { background: #eff6ff; color: #2563eb; }
+        .btn-edit { background: #fffbeb; color: #d97706; }
+        .btn-delete { background: #fef2f2; color: #dc2626; }
 
-tr:hover {
-    background: #f0fdf4;
-    transition: 0.3s;
-}
+        /* الجدول (ستايل الكروت الموزعة) */
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 12px;
+        }
 
-/* SEARCH RESULTS */
-#results {
-    width: 220px;
-    margin: auto;
-    border-radius: 10px;
-    overflow: hidden;
-    background: white;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-}
+        th {
+            padding: 10px 20px;
+            color: var(--text-gray);
+            text-align: right;
+            font-weight: 500;
+        }
 
-#results div {
-    padding: 10px;
-    border-bottom: 1px solid #eee;
-}
+        td {
+            background: var(--white);
+            padding: 20px;
+            border-top: 1px solid #f3f4f6;
+            border-bottom: 1px solid #f3f4f6;
+        }
 
-#results div:hover {
-    background: #dcfce7;
-}
+        td:first-child {
+            border-right: 1px solid #f3f4f6;
+            border-top-right-radius: var(--radius);
+            border-bottom-right-radius: var(--radius);
+        }
 
-/* MODAL */
-.modal {
-    display: none;
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0,0,0,0.5);
-}
+        td:last-child {
+            border-left: 1px solid #f3f4f6;
+            border-top-left-radius: var(--radius);
+            border-bottom-left-radius: var(--radius);
+        }
 
-.modal-content {
-    background: white;
-    width: 320px;
-    margin: 15% auto;
-    padding: 25px;
-    border-radius: 15px;
-    text-align: center;
-    animation: fadeIn 0.3s ease;
-}
+        tr:hover td {
+            background: var(--light-green);
+        }
 
-@keyframes fadeIn {
-    from { transform: scale(0.8); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
-}
-</style>
+        /* البحث المباشر */
+        #results {
+            position: absolute;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            width: 250px;
+            margin-top: 50px;
+            z-index: 10;
+            overflow: hidden;
+        }
+
+        #results div {
+            padding: 12px;
+            border-bottom: 1px solid #f3f4f6;
+            cursor: pointer;
+        }
+
+        #results div:hover {
+            background: var(--light-green);
+            color: var(--primary-dark);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(4px);
+            z-index: 100;
+        }
+
+        .modal-content {
+            background: white;
+            width: 350px;
+            margin: 15% auto;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+
+        .modal-btns {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .hidden-details {
+            background: #f9fafb;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+    </style>
 </head>
-
 <body>
 
-<h2 style="text-align:center;">Gestion Store</h2>
-
-<!-- 🔍 RECHERCHE -->
-<form method="GET" action="{{ route('produits.index') }}">
-    <input type="text" name="search" placeholder="Rechercher produit...">
-    <button type="submit" class="add">بحث</button>
-</form>
-
-<!-- ➕ AJOUT -->
-@can('create', App\Models\Store::class)
-<form method="POST" action="{{ route('produits.store') }}">
-    @csrf
-
-    <h3 style="color:#14532d;">إضافة منتج</h3>
-
-    <!-- 🔥 Live Search -->
-    <input type="text" id="produitInput" placeholder="اكتب اسم المنتج">
-
-    <div id="results"></div>
-
-    <!-- important -->
-    <input type="hidden" name="produit_id" id="produit_id" required>
-
-    <input type="number" name="quantite" placeholder="Quantité" required>
-    <input type="number" name="prix" placeholder="Prix" required>
-    <input type="date" name="date_exp">
-
-    <button class="add">اضافة</button>
-</form>
-@endcan
-
-<!-- 📊 TABLE -->
-<table>
-<tr>
-    <th>Nom</th>
-    <th>Détails</th>
-    <th>Actions</th>
-</tr>
-
-@foreach($produits as $p)
-<tr>
-    <td>{{ $p->produit->nom }}</td>
-
-    <td>
-        <button class="view" onclick="toggleDetails({{ $p->id }})">View</button>
-
-        <div id="details-{{ $p->id }}" style="display:none;">
-            <p>Quantité: {{ $p->quantite }}</p>
-            <p>Prix: {{ $p->prix }}</p>
+<div class="container">
+    
+    <!-- HEADER -->
+    <div class="welcome-card">
+        <div>
+            <h2>إدارة المتجر - AgroDz</h2>
+            <p style="color: var(--text-gray); margin-top: 5px;">مرحباً بك مجدداً، نظام التتبع جاهز لمساعدتك.</p>
         </div>
-    </td>
-
-    <td>
-        <a href="{{ route('produits.edit', $p->id) }}">
-            <button class="edit">Modifier</button>
-        </a>
-
-        <form method="POST"
-              action="{{ route('produits.destroy', $p->id) }}"
-              style="display:inline;">
-            @csrf
-            @method('DELETE')
-
-            <button type="button" class="delete"
-                onclick="openModal(this.closest('form'))">
-                Supprimer
-            </button>
+        <form method="GET" action="{{ route('produits.index') }}" style="margin: 0;">
+            <input type="text" name="search" placeholder="بحث سريع عن منتج...">
+            <button type="submit" class="btn-add">بحث</button>
         </form>
-    </td>
-</tr>
-@endforeach
-</table>
+    </div>
+
+    <!-- ADD FORM -->
+    @can('create', App\Models\Store::class)
+    <div class="section-card">
+        <h3 class="section-title">📦 إضافة منتج جديد للمخزن</h3>
+        <form method="POST" action="{{ route('produits.store') }}">
+            @csrf
+            <div style="position: relative; flex: 1;">
+                <input type="text" id="produitInput" placeholder="اسم المنتج (ابحث هنا...)" autocomplete="off">
+                <div id="results"></div>
+            </div>
+            
+            <input type="hidden" name="produit_id" id="produit_id" required>
+            <input type="number" name="quantite" placeholder="الكمية" required>
+            <input type="number" name="prix" placeholder="السعر" required>
+            <input type="date" name="date_exp">
+
+            <button type="submit" class="btn-add">إضافة للمخزن</button>
+        </form>
+    </div>
+    @endcan
+
+    <!-- TABLE -->
+    <table>
+        <thead>
+            <tr>
+                <th>المنتج</th>
+                <th>التفاصيل</th>
+                <th>إجراءات</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($produits as $p)
+            <tr>
+                <td style="font-weight: 600; color: var(--primary-dark);">{{ $p->produit->nom }}</td>
+                <td>
+                    <button class="btn-view" onclick="toggleDetails({{ $p->id }})">عرض التفاصيل</button>
+                    <div id="details-{{ $p->id }}" class="hidden-details" style="display:none;">
+                        <p>الكمية المتوفرة: <strong>{{ $p->quantite }}</strong></p>
+                        <p>سعر الوحدة: <strong>{{ $p->prix }} دج</strong></p>
+                    </div>
+                </td>
+                <td>
+                    <div style="display: flex; gap: 8px;">
+                        <a href="{{ route('produits.edit', $p->id) }}" style="text-decoration: none;">
+                            <button class="btn-edit">تعديل</button>
+                        </a>
+                        <form method="POST" action="{{ route('produits.destroy', $p->id) }}" style="display:inline;">
+                            @csrf @method('DELETE')
+                            <button type="button" class="btn-delete" onclick="openModal(this.closest('form'))">حذف</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
+</div>
 
 <!-- MODAL -->
 <div id="confirmModal" class="modal">
     <div class="modal-content">
-        <p>هل أنت متأكد؟</p>
-        <button onclick="confirmDelete()" class="delete">نعم</button>
-        <button onclick="closeModal()" class="edit">لا</button>
+        <h3 style="color: var(--primary-dark);">تأكيد الحذف</h3>
+        <p style="margin: 15px 0; color: var(--text-gray);">هل أنت متأكد من حذف هذا المنتج نهائياً؟</p>
+        <div class="modal-btns">
+            <button onclick="confirmDelete()" class="btn-add" style="background: #dc2626;">نعم، احذف</button>
+            <button onclick="closeModal()" class="btn-edit" style="background: #e5e7eb; color: #374151;">إلغاء</button>
+        </div>
     </div>
 </div>
 
 <script>
-// modal
-let deleteForm;
+    let deleteForm;
 
-function openModal(form) {
-    deleteForm = form;
-    document.getElementById('confirmModal').style.display = 'block';
-}
+    function openModal(form) {
+        deleteForm = form;
+        document.getElementById('confirmModal').style.display = 'block';
+    }
 
-function closeModal() {
-    document.getElementById('confirmModal').style.display = 'none';
-}
+    function closeModal() {
+        document.getElementById('confirmModal').style.display = 'none';
+    }
 
-function confirmDelete() {
-    deleteForm.submit();
-}
+    function confirmDelete() {
+        deleteForm.submit();
+    }
 
-// details
-function toggleDetails(id) {
-    let div = document.getElementById('details-' + id);
-    div.style.display = (div.style.display === 'none') ? 'block' : 'none';
-}
+    function toggleDetails(id) {
+        let div = document.getElementById('details-' + id);
+        div.style.display = (div.style.display === 'none') ? 'block' : 'none';
+    }
 
-// 🔥 LIVE SEARCH
-document.getElementById('produitInput').addEventListener('keyup', function () {
-    let value = this.value.toLowerCase();
-    let resultsDiv = document.getElementById('results');
-    resultsDiv.innerHTML = '';
+    // LIVE SEARCH
+    document.getElementById('produitInput').addEventListener('keyup', function () {
+        let value = this.value.toLowerCase();
+        let resultsDiv = document.getElementById('results');
+        resultsDiv.innerHTML = '';
 
-    if (value.length < 2) return;
+        if (value.length < 2) return;
 
-    let produits = @json($allProduits);
+        let produits = @json($allProduits);
 
-    let filtered = produits.filter(p =>
-        p.nom.toLowerCase().includes(value)
-    );
+        let filtered = produits.filter(p => p.nom.toLowerCase().includes(value));
 
-    filtered.forEach(p => {
-        let div = document.createElement('div');
-        div.innerHTML = p.nom;
-        div.style.padding = '5px';
-        div.style.cursor = 'pointer';
-
-        div.onclick = function () {
-            document.getElementById('produitInput').value = p.nom;
-            document.getElementById('produit_id').value = p.id;
-            resultsDiv.innerHTML = '';
-        };
-
-        resultsDiv.appendChild(div);
+        filtered.forEach(p => {
+            let div = document.createElement('div');
+            div.innerHTML = p.nom;
+            div.onclick = function () {
+                document.getElementById('produitInput').value = p.nom;
+                document.getElementById('produit_id').value = p.id;
+                resultsDiv.innerHTML = '';
+            };
+            resultsDiv.appendChild(div);
+        });
     });
-});
+
+    // إغلاق المودال عند الضغط خارجه
+    window.onclick = function(event) {
+        if (event.target == document.getElementById('confirmModal')) {
+            closeModal();
+        }
+    }
 </script>
 
 </body>
