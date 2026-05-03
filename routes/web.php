@@ -23,7 +23,7 @@ Route::get('/search', [RechercheController::class, 'Search'])->name('search');
 // 2. الروابط المحمية
 Route::middleware(['auth'])->group(function () {
 
-    // التوجيه الذكي
+    // التوجيه الذكي (Redirector)
     Route::get('/dashboard', function () {
         $user = auth()->user();
         if (in_array($user->role, ['eleveur', 'فلاح'])) {
@@ -43,21 +43,22 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/dashboard', [VeterinaireController::class, 'dashboard'])->name('dashboard');
         Route::get('/consultations', [VeterinaireController::class, 'consultations'])->name('consultations');
         Route::get('/profile', [VeterinaireController::class, 'profile'])->name('profile');
-        
-        // إدارة الأدوية والطلبات
-        Route::get('/commandes', [VeterinaireController::class, 'orders'])->name('commandes');
-        Route::get('/medicines', [VeterinaireController::class, 'medicines'])->name('medicines');
         Route::get('/chats', [VeterinaireController::class, 'chats'])->name('chats');
 
-        // أفعال الأدوية (CRUD)
-        Route::get('/produits/create', [VeterinaireController::class, 'createProduit'])->name('produit.create');
-        Route::post('/produits/store', [VeterinaireController::class, 'storeProduit'])->name('produit.store');
-        Route::get('/produits/edit/{id}', [VeterinaireController::class, 'editProduit'])->name('produit.edit');
-        Route::put('/produits/update/{id}', [VeterinaireController::class, 'updateProduit'])->name('produit.update');
-        Route::delete('/produits/destroy/{id}', [VeterinaireController::class, 'destroyProduit'])->name('produit.destroy');
+        // البحث عن الأدوية عند الموزعين وطلبها (فقط عرض وطلب)
+        Route::get('/medicines', [VeterinaireController::class, 'medicines'])->name('medicines');
+        Route::post('/order/place', [VeterinaireController::class, 'placeOrder'])->name('order.place');
+        Route::get('/my-orders', [VeterinaireController::class, 'myOrders'])->name('commandes'); // عرض طلبات البيطري المرسلة للموزع
 
-        // تحديث حالة الطلب
-        Route::post('/orders/{id}/status', [VeterinaireController::class, 'updateStatus'])->name('updateStatus');
+        // ميزة التبليغ عن الأوبئة (المضافة حديثاً)
+        Route::get('/report', [VeterinaireController::class, 'report'])->name('report');
+        Route::post('/report/send', [VeterinaireController::class, 'sendReport'])->name('report.send');
+
+        // تحديث حالة الاستشارة (عندما ينتهي الطبيب من فحص حالة الفلاح)
+        Route::post('/consultations/{id}/status', [VeterinaireController::class, 'updateStatus'])->name('updateStatus');
+        
+        // ملاحظة: تم حذف مسارات CRUD (create, store, edit, update, destroy) للأدوية 
+        // لأن البيطري يطلبها فقط ولا يضيفها للنظام حسب المخطط.
     });
 
     // --- قسم الفلاح (Eleveur) ---
@@ -70,10 +71,11 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('distributeur')->name('distributeur.')->group(function () {
         Route::get('/dashboard', [DistributeurController::class, 'dashboard'])->name('dashboard');
         Route::get('/profile', [DistributeurController::class, 'profile'])->name('profile');
-        Route::post('/store', [DistributeurController::class, 'store'])->name('store');
+        // الموزع هو من يملك صلاحية إضافة المنتجات (store)
+        Route::post('/products/store', [DistributeurController::class, 'store'])->name('store');
     });
 
-    // --- الإدارة العامة ---
+    // --- الإدارة العامة للحساب ---
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');

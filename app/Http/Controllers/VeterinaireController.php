@@ -4,80 +4,99 @@ namespace App\Http\Controllers;
 
 use App\Models\Consultation;
 use App\Models\Commande; 
+use App\Models\Produit; // يمثل الأدوية المعروضة من الموزعين
 use Illuminate\Http\Request;
-use App\Models\Produit; 
 
 class VeterinaireController extends Controller
 {
-    // 1. الداشبورد مع نظام التنبيهات (الشريط الأصفر)
+    // 1. الداشبورد: عرض الاستشارات والطلبات التي قام بها البيطري
     public function dashboard()
     {
-        // جلب الاستشارات مع بيانات المستخدم (الفلاح)
-        $consultations = Consultation::with('user')->latest()->get();
+        // استشارات الفلاحين الموجهة لهذا البيطري
+        $consultations = Consultation::where('veterinaire_id', auth()->id())
+            ->with('user') 
+            ->latest()
+            ->get();
         
-        // حساب عدد الطلبات الجديدة للتنبيهات باستعمال العمود الصحيح 'statut'
-        $newOrdersCount = Commande::where('statut', 'pending')->count(); 
+        // عدد طلبات الأدوية التي أرسلها البيطري للموزعين وما زالت قيد الانتظار
+        $newOrdersCount = Commande::where('id_user', auth()->id()) // البيطري هنا هو صاحب الطلب
+            ->where('statut', 'pending')
+            ->count(); 
 
         return view('veterinaire.dashboard', compact('consultations', 'newOrdersCount'));
     }
 
-    // 2. عرض قائمة الطلبات بالتفصيل للبيطري
-    public function commande()
+    // 2. صفحة البحث عن الأدوية (عرض فقط بدون تعديل)
+    public function medicines(Request $request)
     {
-        // جلب كل الطلبات القادمة مع بيانات الفلاح صاحب الطلب
-        $commandes = Commande::with('user')->latest()->get();
-        return view('veterinaire.commande', compact('commandes'));
+        // البيطري يتصفح الأدوية المتوفرة عند الموزعين
+        $query = Produit::query();
+
+        if ($request->has('search')) {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
+
+        $medicines = $query->latest()->get(); 
+        
+        return view('veterinaire.medicines', compact('medicines'));
     }
 
-    // 3. صفحة الأدوية (البحث والترتيب حسب الموقع الجغرافي)
-   public function medicines()
-{
-    // جلب كل الأدوية من قاعدة البيانات
-    $medicines = Produit::all(); 
-    
-    return view('veterinaire.medicines', compact('medicines'));
-}
+    // 3. دالة إرسال طلب شراء دواء من موزع
+    public function placeOrder(Request $request)
+    {
+        $request->validate([
+            'produit_id' => 'required|exists:produits,id',
+            'quantite' => 'required|integer|min:1',
+        ]);
 
-    // 4. صفحة الاستشارات (تم إصلاح الخطأ بتمرير المتغير $consultations)
+        // إنشاء طلب جديد في جدول Commandes
+        Commande::create([
+            'user_id' => auth()->id(), // معرف البيطري
+            'produit_id' => $request->produit_id,
+            'quantite' => $request->quantite,
+            'statut' => 'pending',
+            'date_commande' => now(),
+        ]);
+
+        return back()->with('success', 'تم إرسال طلب الدواء للموزع بنجاح');
+    }
+
+    // 4. عرض تاريخ طلبات الأدوية التي قام بها البيطري
+    public function myOrders()
+    {
+        $commandes = Commande::where('user_id', auth()->id())
+            ->with('produit')
+            ->latest()
+            ->get();
+            
+        return view('veterinaire.my_orders', compact('commandes'));
+    }
+
+    // 5. التبليغ عن الأوبئة (صلاحية خاصة بالبيطري)
+    public function report()
+    {
+        return view('veterinaire.report');
+    }
+
+    public function sendReport(Request $request)
+    {
+        $request->validate([
+            'disease_name' => 'required|string',
+            'description' => 'required',
+            'location' => 'required'
+        ]);
+
+        // منطق إرسال التبليغ...
+        return redirect()->route('veterinaire.dashboard')->with('success', 'تم التبليغ بنجاح');
+    }
+
+    // 6. الاستشارات والبروفايل والشات (تظل كما هي)
     public function consultations() 
     { 
-        // جلب البيانات لكي لا يظهر خطأ Undefined variable
-        $consultations = Consultation::with('user')->latest()->get();
+        $consultations = Consultation::where('veterinaire_id', auth()->id())->with('user')->latest()->get();
         return view('veterinaire.consultations', compact('consultations')); 
     }
-    
-    // 5. صفحة البروفايل الشخصي
-    public function profile() 
-    { 
-        return view('veterinaire.profile', ['user' => auth()->user()]); 
-    }
 
-    // 6. صفحة المحادثات بين البيطري والفلاح
-    public function chats() 
-    { 
-        return view('veterinaire.chats'); 
-    }
-
-    // 7. دالة تحديث حالة الطلب (استعمال 'statut' ليتوافق مع قاعدة البيانات)
-    public function updateStatus(Request $request, $id)
-    {
-        $commande = Commande::findOrFail($id);
-        
-        // التأكد من تحديث الحقل الصحيح 'statut'
-        $commande->update(['statut' => $request->statut]);
-
-        return back()->with('success', 'تم تحديث حالة الطلب بنجاح');
-    }
-    // لعرض صفحة إضافة دواء جديد
-public function createProduit()
-{
-    return view('veterinaire.create_produit');
-}
-
-// لعرض صفحة تعديل دواء موجود
-public function editProduit($id)
-{
-    $produit = Produit::findOrFail($id);
-    return view('veterinaire.edit_produit', compact('produit'));
-}
+    public function profile() { return view('veterinaire.profile', ['user' => auth()->user()]); }
+    public function chats() { return view('veterinaire.chats'); }
 }

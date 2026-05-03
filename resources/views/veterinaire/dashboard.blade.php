@@ -1,331 +1,278 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>لوحة البيطري - إدارة المشروع</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgroDz - لوحة البيطري</title>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Poppins', 'Cairo', sans-serif;
+        :root {
+            --primary-dark: #14532d;
+            --accent-green: #16a34a;
+            --warning-red: #dc2626;
+            --bg-light: #f8fafc;
+            --white: #ffffff;
+            --text-main: #1e293b;
+            --shadow: 0 4px 12px rgba(0,0,0,0.08);
         }
 
         body {
-            background: #f4f7f6;
-            direction: rtl; /* لضمان التنسيق العربي */
+            background: var(--bg-light);
+            color: var(--text-main);
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         /* SIDEBAR */
         .sidebar {
-            width: 240px;
+            width: 260px;
             height: 100vh;
-            background: linear-gradient(180deg, #14532d, #16a34a);
+            background: linear-gradient(180deg, var(--primary-dark), #064e3b);
             position: fixed;
             color: white;
-            padding: 20px;
-            right: 0; /* التثبيت على اليمين */
+            padding: 30px 15px;
+            right: 0;
+            box-shadow: -2px 0 10px rgba(0,0,0,0.1);
         }
 
-        .sidebar h2 {
+        .sidebar-brand {
             text-align: center;
+            font-size: 24px;
+            font-weight: bold;
             margin-bottom: 40px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 15px;
         }
 
         .sidebar a {
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 12px;
-            margin-bottom: 10px;
-            color: white;
+            gap: 12px;
+            padding: 14px;
+            margin-bottom: 8px;
+            color: #ecfdf5;
             text-decoration: none;
-            border-radius: 8px;
+            border-radius: 12px;
             transition: 0.3s;
         }
 
-        .sidebar a:hover {
-            background: rgba(255,255,255,0.2);
+        .sidebar a:hover, .sidebar a.active {
+            background: var(--accent-green);
+            transform: translateX(-5px);
         }
 
-        .logout {
-            position: absolute;
-            bottom: 20px;
-            width: 80%;
-        }
+        .report-link { color: #fca5a5 !important; margin-top: 20px !important; }
+        .report-link:hover { background: var(--warning-red) !important; color: white !important; }
 
         /* CONTENT */
-        .content {
-            margin-right: 240px; /* الهامش من اليمين بسبب السايدبار */
+        .main-content {
+            margin-right: 260px;
             padding: 30px;
         }
 
-        /* HEADER */
-        .header {
-            background: white;
+        /* HEADER CARDS */
+        .top-bar {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .welcome-card {
+            background: var(--white);
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            border-right: 8px solid var(--accent-green);
+        }
+
+        /* SEARCH AREA */
+        .search-section {
+            background: var(--white);
             padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
         }
 
-        .welcome-box {
-            font-size: 20px;
-            font-weight: bold;
-            color: #14532d;
-            background: #dcfce7;
-            padding: 10px 20px;
-            border-radius: 10px;
-            min-width: 300px;
-        }
-
-        .notif-box {
-            background: #fff3cd;
-            padding: 10px 20px;
-            border-radius: 10px;
-            font-weight: bold;
-            color: #856404;
-        }
-
-        /* SEARCH */
-        .search-box {
-            margin: 20px 0;
+        .search-input-wrapper {
             position: relative;
+            display: flex;
+            gap: 10px;
         }
 
-        .search-box input {
-            width: 100%;
-            padding: 15px;
-            border-radius: 10px;
-            border: 1px solid #ddd;
+        .search-input-wrapper input {
+            flex: 1;
+            padding: 15px 20px;
+            border-radius: 12px;
+            border: 2px solid #e2e8f0;
+            outline: none;
             font-size: 16px;
         }
 
-        #results {
-            background: white;
-            border-radius: 10px;
-            margin-top: 5px;
-            position: absolute;
-            width: 100%;
-            z-index: 1000;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        /* MAP BOX */
+        .map-card {
+            background: var(--white);
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
         }
 
-        .result-item {
-            padding: 12px;
-            border-bottom: 1px solid #eee;
-            cursor: pointer;
-        }
+        #map { height: 400px; border-radius: 15px; }
 
-        .result-item:hover { background: #f9f9f9; }
-
-        /* MAP */
-        #map {
-            height: 350px;
-            width: 100%;
-            border-radius: 15px;
-            margin-top: 15px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-
-        /* SERVICES */
-        .services {
+        /* GRID SERVICES */
+        .actions-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 20px;
-            margin-top: 30px;
         }
 
-        .service-card {
-            background: white;
-            padding: 30px;
+        .action-card {
+            background: var(--white);
+            padding: 25px;
             border-radius: 20px;
             text-align: center;
-            transition: transform 0.3s, box-shadow 0.3s;
-            cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-        }
-
-        .service-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
-        }
-
-        .service-card i {
-            font-size: 40px;
-            color: #16a34a;
-            margin-bottom: 15px;
-        }
-
-        .chat-btn {
-            display: inline-block;
-            margin-top: 15px;
-            padding: 10px 25px;
-            background: #16a34a;
-            color: white;
-            border-radius: 8px;
             text-decoration: none;
-            font-weight: bold;
+            color: var(--text-main);
+            box-shadow: var(--shadow);
+            transition: 0.3s;
+            border: 1px solid transparent;
+        }
+
+        .action-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--accent-green);
+        }
+
+        .action-card i {
+            font-size: 45px;
+            color: var(--accent-green);
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .action-card.alert i { color: var(--warning-red); }
+
+        .badge {
+            background: var(--warning-red);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+            margin-right: 5px;
         }
     </style>
 </head>
-
 <body>
 
-<div class="sidebar">
-    <h2>👨‍⚕️ لوحة البيطري</h2>
-
-    <a href="{{ route('veterinaire.dashboard') }}"><i class="fas fa-home"></i> الرئيسية</a>
-
-    <a href="{{ route('veterinaire.consultations') }}">
-        <i class="fas fa-notes-medical"></i> الاستشارات
-    </a>
-
-    <a href="{{ route('veterinaire.profile') }}">
-        <i class="fas fa-user"></i> ملفي الشخصي
-    </a>
-
-    <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-        @csrf
-    </form>
+<nav class="sidebar">
+    <div class="sidebar-brand">🌿 AgroDz البيطري</div>
     
-    <a href="#" class="logout" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+    <a href="#" class="active"><i class="fas fa-th-large"></i> الرئيسية</a>
+    <a href="{{ route('veterinaire.consultations') }}"><i class="fas fa-stethoscope"></i> الاستشارات الميدانية</a>
+    <a href="{{ route('veterinaire.commandes') }}"><i class="fas fa-shopping-cart"></i> طلبات الأدوية</a>
+    <a href="{{ route('veterinaire.chats') }}"><i class="fas fa-comments"></i> دردشة الفلاحين <span class="badge">3</span></a>
+    <a href="{{ route('veterinaire.profile') }}"><i class="fas fa-user-md"></i> الملف الشخصي</a>
+    
+    <!-- ميزة التبليغ عن مرض منتشر -->
+    <a href="{{ route('veterinaire.report') }}" class="report-link">
+        <i class="fas fa-biohazard"></i> التبليغ عن وباء
+    </a>
+
+    <a href="{{ route('logout') }}" style="margin-top: auto;" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
         <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
     </a>
-</div>
+    <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">@csrf</form>
+</nav>
 
-<div class="content">
-
-    <div class="header">
-        <div class="welcome-box">
-            <span id="welcome-text">جارِ التحميل...</span>
+<div class="main-content">
+    
+    <!-- الترحيب والإشعارات -->
+    <div class="top-bar">
+        <div class="welcome-card">
+            <h2>مرحباً، دكتور {{ Auth::user()->name }} 👋</h2>
+            <p style="color: #64748b;">لديك اليوم 4 استشارات مجدولة وتنبيه بخصوص صحة المواشي في منطقتك.</p>
         </div>
-
-        <div class="notif-box">
-            🔔 <span id="notif-count">0</span> استشارات جديدة
+        <div class="welcome-card" style="border-right-color: var(--warning-red);">
+            <h3 style="color: var(--warning-red);"><i class="fas fa-exclamation-triangle"></i> حالة الطوارئ</h3>
+            <p>تم تسجيل حالة اشتباه "حمى قلاعية" على بعد 10 كم.</p>
         </div>
     </div>
 
-    <div class="search-box">
-        <input type="text" id="search" placeholder="🔍 ابحث عن أدوية بيطرية أو فلاحية...">
-        <div id="results"></div>
+    <!-- البحث عن الأدوية عند الموزعين (حسب الـ Diagram) -->
+    <div class="search-section">
+        <h3><i class="fas fa-search"></i> البحث عن أدوية ومواد فلاحية</h3>
+        <p style="font-size: 14px; color: #64748b; margin-bottom: 15px;">ابحث في مخازن الموزعين المعتمدين (Distributeurs) لطلب الكميات اللازمة.</p>
+        <div class="search-input-wrapper">
+            <input type="text" id="med-search" placeholder="مثال: لقاح طاعون المجترات، مضادات حيوية...">
+            <button class="action-card" style="padding: 10px 30px; margin: 0; background: var(--accent-green); color: white;">بحث</button>
+        </div>
+        <div id="search-results"></div>
     </div>
 
-    <div style="background: white; padding: 20px; border-radius: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-        <h3>📍 الموزعون والصيدليات القريبة</h3>
+    <!-- الخريطة التفاعلية -->
+    <div class="map-card">
+        <h3>📍 خريطة الموزعين والنشاط الرعوي</h3>
         <div id="map"></div>
     </div>
 
-    <div class="services">
-
-        <a href="{{ route('veterinaire.commandes') }}" style="text-decoration: none; color: inherit;">
-            <div class="service-card">
-                <i class="fas fa-file-invoice-dollar"></i>
-                <h3>إدارة الطلبات</h3>
-                <p style="color: #666; font-size: 14px; margin-top: 5px;">متابعة طلبات الأدوية</p>
-            </div>
+    <!-- شبكة العمليات (Actions) -->
+    <div class="actions-grid">
+        <a href="{{ route('veterinaire.consultations') }}" class="action-card">
+            <i class="fas fa-clipboard-list"></i>
+            <h3>الاستشارات</h3>
+            <p>تشخيص وعلاج حالات الفلاحين</p>
         </a>
 
-        <a href="{{ route('veterinaire.medicines') }}" style="text-decoration: none; color: inherit;">
-            <div class="service-card">
-                <i class="fas fa-pills"></i>
-                <h3>مخزن الأدوية</h3>
-                <p style="color: #666; font-size: 14px; margin-top: 5px;">عرض وإضافة الأدوية</p>
-            </div>
+        <a href="{{ route('veterinaire.medicines') }}" class="action-card">
+            <i class="fas fa-pills"></i>
+            <h3>المخزن الخاص</h3>
+            <p>إدارة أدويتك المتوفرة</p>
         </a>
 
-        <div class="service-card">
-            <i class="fas fa-comments"></i>
-            <h3>المحادثات المباشرة</h3>
-            <p style="color: #666; font-size: 14px; margin-top: 5px;">تواصل مع الفلاحين</p>
-            <a href="{{ route('veterinaire.chats') }}" class="chat-btn">فتح الشات</a>
-        </div>
+        <a href="{{ route('veterinaire.chats') }}" class="action-card">
+            <i class="fas fa-headset"></i>
+            <h3>الدعم المباشر</h3>
+            <p>الإجابة على استفسارات المربين</p>
+        </a>
 
+        <a href="{{ route('veterinaire.report') }}" class="action-card alert">
+            <i class="fas fa-bullhorn"></i>
+            <h3>تبليغ فوري</h3>
+            <p>رصد وباء أو مرض معدي</p>
+        </a>
     </div>
 
 </div>
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-
 <script>
-    // 1. نظام الترحيب الديناميكي
-    const userName = "{{ Auth::user()->name }}";
-    const messages = [
-        `👋 مرحباً دكتور ${userName}`,
-        `🩺 هل هناك استشارات جديدة اليوم؟`,
-        `🌾 لنساعد فلاحينا في حماية محاصيلهم`,
+    // إعدادات الخريطة (الجزائر افتراضياً)
+    const lat = {{ Auth::user()->latitude ?? 36.75 }};
+    const lng = {{ Auth::user()->longitude ?? 3.05 }};
+    
+    const map = L.map('map').setView([lat, lng], 10);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: 'AgroDz Map'
+    }).addTo(map);
+
+    // موقع البيطري
+    L.marker([lat, lng]).addTo(map).bindPopup("<b>عيادتك / موقعك</b>").openPopup();
+
+    // محاكاة مواقع الموزعين (الذين يبيعون الأدوية للبيطري كما في الـ Diagram)
+    const distributors = [
+        { name: "موزع قالمة للأدوية", lat: 36.46, lng: 7.43 },
+        { name: "شركة الأدوية الفلاحية", lat: 36.50, lng: 7.50 }
     ];
 
-    let msgIdx = 0;
-    const welcomeEl = document.getElementById("welcome-text");
-    
-    function rotateMessages() {
-        welcomeEl.innerText = messages[msgIdx];
-        msgIdx = (msgIdx + 1) % messages.length;
-    }
-    rotateMessages();
-    setInterval(rotateMessages, 4000);
-
-    // 2. جلب التنبيهات (Real-time Simulation)
-    function checkNotifications(){
-        fetch('/notifications') // تأكدي من وجود هذا المسار في web.php
-            .then(res => res.json())
-            .then(data => {
-                document.getElementById('notif-count').innerText = data.count || 0;
-            }).catch(e => console.log("Notification endpoint not ready"));
-    }
-    setInterval(checkNotifications, 10000);
-
-    // 3. البحث المباشر عن الأدوية
-    document.getElementById('search').addEventListener('input', function() {
-        let query = this.value;
-        let resultsDiv = document.getElementById('results');
-
-        if(query.length < 2) {
-            resultsDiv.innerHTML = "";
-            return;
-        }
-
-        fetch('/live-search?search=' + query)
-        .then(response => response.json())
-        .then(data => {
-            resultsDiv.innerHTML = "";
-            data.forEach(item => {
-                let div = document.createElement('div');
-                div.classList.add('result-item');
-                div.innerHTML = `<strong>${item.nom}</strong> - 💰 ${item.prix} دج`;
-                resultsDiv.appendChild(div);
-            });
-        });
+    distributors.forEach(d => {
+        L.circleMarker([d.lat, d.lng], { color: 'green', radius: 8 }).addTo(map)
+            .bindPopup(`<b>${d.name}</b><br>متوفر أدوية بيطرية`);
     });
-
-    // 4. إعداد الخريطة
-    const lat = {{ Auth::user()->latitude ?? 36.46 }}; // الافتراضي قالمة
-    const lng = {{ Auth::user()->longitude ?? 7.43 }};
-
-    const map = L.map('map').setView([lat, lng], 12);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-
-    // ماركر موقع البيطري
-    L.marker([lat, lng]).addTo(map).bindPopup("<b>أنت هنا</b>").openPopup();
-
-    // جلب الموزعين (اختياري إذا كان الـ API جاهز)
-    fetch('/nearby-distributeurs')
-        .then(res => res.json())
-        .then(data => {
-            data.forEach(d => {
-                L.marker([d.latitude, d.longitude]).addTo(map)
-                    .bindPopup(`<b>${d.name}</b><br>${d.address}`);
-            });
-        }).catch(e => console.log("Map markers endpoint not ready"));
-
 </script>
 
 </body>

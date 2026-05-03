@@ -1,266 +1,270 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<title>صفحتي الشخصية</title>
+    <meta charset="UTF-8">
+    <title>AgroDz - الملف الشخصي</title>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-<style>
-body {
-    margin: 0;
-    font-family: 'Poppins', sans-serif;
-    background: #f4f7f6;
-}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    
+    <style>
+        :root {
+            --primary-dark: #2d4a36;
+            --accent-green: #5a8d5a;
+            --light-green: #f0fdf4;
+            --bg-body: #f8fafc;
+            --white: #ffffff;
+            --text-dark: #1f2937;
+            --text-gray: #6b7280;
+            --shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            --radius: 16px;
+        }
 
-/* HEADER */
-.header {
-    background: linear-gradient(180deg, #14532d, #16a34a);
-    color: white;
-    text-align: center;
-    padding: 25px;
-}
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg-body);
+            color: var(--text-dark);
+        }
 
-/* CONTAINER */
-.container {
-    max-width: 1000px;
-    margin: 30px auto;
-    padding: 15px;
-}
+        /* HEADER (Style AgroDz) */
+        .header {
+            background: linear-gradient(135deg, var(--primary-dark), var(--accent-green));
+            color: white;
+            text-align: center;
+            padding: 40px 20px;
+            border-bottom-left-radius: 30px;
+            border-bottom-right-radius: 30px;
+            box-shadow: var(--shadow);
+        }
 
-/* TOP */
-.top {
-    background: white;
-    padding: 25px;
-    border-radius: 15px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-    margin-bottom: 20px;
-}
+        .container {
+            max-width: 1000px;
+            margin: -30px auto 30px; /* تداخل بسيط مع الهيدر */
+            padding: 0 20px;
+        }
 
-.title {
-    color: #14532d;
-    font-weight: bold;
-    margin-bottom: 15px;
-    font-size: 18px;
-}
+        /* CARDS */
+        .card {
+            background: var(--white);
+            padding: 25px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+            border: 1px solid rgba(0,0,0,0.02);
+        }
 
-/* GRID */
-.info-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 15px;
-}
+        .title {
+            color: var(--primary-dark);
+            font-weight: 700;
+            margin-bottom: 20px;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 2px solid var(--light-green);
+            padding-bottom: 10px;
+        }
 
-.info {
-    padding: 15px;
-    background: #f9fafb;
-    border-radius: 10px;
-    border: 1px solid #eee;
-}
+        /* INFO GRID */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+        }
 
-.info strong {
-    color: #14532d;
-}
+        .info-box {
+            padding: 15px;
+            background: var(--light-green);
+            border-radius: 12px;
+            border-right: 4px solid var(--accent-green);
+        }
 
-/* BOTTOM */
-.bottom {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-}
+        .info-box strong {
+            color: var(--accent-green);
+            font-size: 0.9rem;
+            display: block;
+            margin-bottom: 5px;
+        }
 
-/* CARD */
-.card {
-    background: white;
-    padding: 25px;
-    border-radius: 15px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-}
+        .info-box span {
+            color: var(--primary-dark);
+            font-weight: 600;
+        }
 
-/* INPUT */
-input {
-    width: 100%;
-    padding: 10px;
-    margin: 8px 0;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    outline: none;
-}
+        /* FORMS */
+        .bottom-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
 
-/* BUTTON */
-.btn {
-    width: 100%;
-    padding: 10px;
-    background: #16a34a;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    margin-top: 10px;
-}
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            outline: none;
+            transition: 0.3s;
+        }
 
-.btn:hover {
-    background: #14532d;
-}
+        input:focus {
+            border-color: var(--accent-green);
+            box-shadow: 0 0 0 3px rgba(90, 141, 90, 0.1);
+        }
 
-/* MAP */
-#map {
-    height: 300px;
-    border-radius: 10px;
-}
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--primary-dark);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.3s;
+        }
 
-/* BACK */
-.back {
-    display: block;
-    text-align: center;
-    margin-top: 20px;
-    padding: 12px;
-    background: #2c3e50;
-    color: white;
-    text-decoration: none;
-    border-radius: 10px;
-}
+        .btn:hover {
+            background: var(--accent-green);
+            transform: translateY(-2px);
+        }
 
-.back:hover {
-    background: #1f2d3a;
-}
+        /* MAP */
+        #map {
+            height: 350px;
+            border-radius: 12px;
+            z-index: 1;
+            border: 2px solid var(--light-green);
+        }
 
-/* RESPONSIVE */
-@media (max-width: 768px) {
-    .info-grid {
-        grid-template-columns: 1fr;
-    }
+        /* BACK BUTTON */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 20px;
+            padding: 12px 25px;
+            background: #e2e8f0;
+            color: #475569;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: 0.3s;
+        }
 
-    .bottom {
-        grid-template-columns: 1fr;
-    }
-}
-#map {
-    height: 300px;
-    border-radius: 10px;
-}
-</style>
+        .back-link:hover {
+            background: #cbd5e1;
+            color: #1e293b;
+        }
 
+        @media (max-width: 768px) {
+            .bottom-grid { grid-template-columns: 1fr; }
+        }
+    </style>
 </head>
-
 <body>
 
-<!-- HEADER -->
 <div class="header">
-    <h2>👤 صفحتي الشخصية</h2>
-    <p>إدارة المعلومات والموقع</p>
+    <h2>👤 الملف الشخصي</h2>
+    <p>مرحباً بك، {{ $user->name }} - إدارة بياناتك الشخصية</p>
 </div>
 
 <div class="container">
 
     <!-- USER INFO -->
-    <div class="top">
-        <div class="title">📌 معلوماتي</div>
-
+    <div class="card">
+        <div class="title"><i class="fas fa-info-circle"></i> معلوماتي الأساسية</div>
         <div class="info-grid">
-
-            <div class="info">
-                <strong>الاسم:</strong><br>
-                {{ $user->name }}
+            <div class="info-box">
+                <strong>الاسم الكامل</strong>
+                <span>{{ $user->name }}</span>
             </div>
-
-            <div class="info">
-                <strong>الإيميل:</strong><br>
-                {{ $user->email }}
+            <div class="info-box">
+                <strong>البريد الإلكتروني</strong>
+                <span>{{ $user->email }}</span>
             </div>
-
-            <div class="info">
-                <strong>رقم الهاتف:</strong><br>
-                {{ !empty($user->phone) ? $user->telephone : 'غير متوفر' }}
+            <div class="info-box">
+                <strong>رقم الهاتف</strong>
+                <!-- تم التعديل هنا ليعمل التحقق بشكل صحيح -->
+                <span>{{ !empty($user->telephone) ? $user->telephone : 'غير متوفر' }}</span>
             </div>
-
-            <div class="info">
-                <strong>العنوان:</strong><br>
-                {{ !empty($user->address) ? $user->address : 'غير متوفر' }}
+            <div class="info-box">
+                <strong>العنوان الحالي</strong>
+                <span>{{ !empty($user->address) ? $user->address : 'غير متوفر' }}</span>
             </div>
-
-            <div class="info">
-                <strong>Latitude:</strong><br>
-                {{ !empty($user->latitude) ? $user->latitude : 'غير متوفر' }}
+            <div class="info-box">
+                <strong>الإحداثيات (Lat/Lng)</strong>
+                <span>{{ $user->latitude ?? '0' }} / {{ $user->longitude ?? '0' }}</span>
             </div>
-
-            <div class="info">
-                <strong>Longitude:</strong><br>
-                {{ !empty($user->longitude) ? $user->longitude : 'غير متوفر' }}
-            </div>
-
         </div>
     </div>
 
     <!-- MAP -->
     <div class="card">
-        <div class="title">📍 موقعي على الخريطة</div>
+        <div class="title"><i class="fas fa-map-marker-alt"></i> موقعي الجغرافي</div>
         <div id="map"></div>
     </div>
 
-    <!-- EDIT -->
-    <div class="bottom">
-
+    <!-- EDIT SECTION -->
+    <div class="bottom-grid">
         <div class="card">
-            <div class="title">✏️ تعديل المعلومات</div>
-
+            <div class="title"><i class="fas fa-user-edit"></i> تعديل البيانات</div>
             <form method="POST" action="#">
                 @csrf
-
+                <label style="font-size: 12px; color: var(--text-gray);">الاسم</label>
                 <input type="text" name="name" value="{{ $user->name }}">
+                
+                <label style="font-size: 12px; color: var(--text-gray);">الهاتف</label>
                 <input type="text" name="telephone" value="{{ $user->telephone }}">
+                
+                <label style="font-size: 12px; color: var(--text-gray);">العنوان</label>
                 <input type="text" name="address" value="{{ $user->address }}">
-                <input type="email" name="email" value="{{ $user->email}}">
+                
+                <label style="font-size: 12px; color: var(--text-gray);">الإيميل</label>
+                <input type="email" name="email" value="{{ $user->email }}">
 
-                <button class="btn" type="submit">حفظ</button>
+                <button class="btn" type="submit">تحديث الملف</button>
             </form>
         </div>
 
         <div class="card">
-            <div class="title">🔐 تغيير كلمة السر</div>
-
+            <div class="title"><i class="fas fa-key"></i> الأمان</div>
             <form method="POST" action="#">
                 @csrf
-
-                <input type="password" name="old_password" placeholder="القديمة">
-                <input type="password" name="new_password" placeholder="الجديدة">
-
-                <button class="btn" type="submit">تغيير</button>
+                <input type="password" name="old_password" placeholder="كلمة السر الحالية">
+                <input type="password" name="new_password" placeholder="كلمة السر الجديدة">
+                <button class="btn" type="submit" style="background: var(--accent-green);">تغيير كلمة السر</button>
             </form>
         </div>
-
     </div>
 
-    <a href="{{ route('distributeur.dashboard') }}" class="back">
-        ⬅ العودة
+    <a href="{{ route('distributeur.dashboard') }}" class="back-link">
+        <i class="fas fa-arrow-right"></i> العودة للوحة التحكم
     </a>
 
 </div>
 
-<!-- GOOGLE MAP -->
-<div id="map"></div>
-
+<!-- Scripts -->
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-
+    // جلب الإحداثيات من السيرفر أو وضع إحداثيات افتراضية للجزائر
     const lat = {{ $user->latitude ?? 36.75 }};
     const lng = {{ $user->longitude ?? 3.05 }};
 
-    const map = L.map('map').setView([lat, lng], 10);
+    const map = L.map('map').setView([lat, lng], 13);
 
-    // OpenStreetMap layer
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors'
+        attribution: '&copy; AgroDz Contributors'
     }).addTo(map);
 
-    // Marker
-    L.marker([lat, lng]).addTo(map)
-        .bindPopup("📍 موقعي الحالي")
+    const marker = L.marker([lat, lng]).addTo(map)
+        .bindPopup("<b>📍 موقعك المسجل</b>")
         .openPopup();
 });
 </script>
-
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 </body>
 </html>

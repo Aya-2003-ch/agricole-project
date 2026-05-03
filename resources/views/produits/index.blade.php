@@ -35,7 +35,7 @@
             margin: 0 auto;
         }
 
-        /* رأس الصفحة (ستايل الكارت العلوي في الصورة) */
+        /* رأس الصفحة */
         .welcome-card {
             background: var(--white);
             padding: 30px;
@@ -46,6 +46,33 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        /* زر العودة للـ Dashboard */
+        .btn-back {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 45px;
+            height: 45px;
+            background: #f1f5f9; /* رمادي خفيف جداً ليناسب الداشبورد */
+            color: var(--primary-dark);
+            border-radius: 12px;
+            text-decoration: none;
+            transition: 0.3s;
+            border: 1px solid #e2e8f0;
+        }
+
+        .btn-back:hover {
+            background: var(--primary-dark);
+            color: white;
+            transform: translateX(5px); /* حركة لليمين لأن الاتجاه RTL */
         }
 
         .welcome-card h2 {
@@ -120,7 +147,7 @@
         .btn-edit { background: #fffbeb; color: #d97706; }
         .btn-delete { background: #fef2f2; color: #dc2626; }
 
-        /* الجدول (ستايل الكروت الموزعة) */
+        /* الجدول */
         table {
             width: 100%;
             border-collapse: separate;
@@ -222,10 +249,20 @@
     
     <!-- HEADER -->
     <div class="welcome-card">
-        <div>
-            <h2>إدارة المتجر - AgroDz</h2>
-            <p style="color: var(--text-gray); margin-top: 5px;">مرحباً بك مجدداً، نظام التتبع جاهز لمساعدتك.</p>
+        <div class="header-content">
+            <!-- زر العودة لداشبورد الموزع -->
+            <a href="{{ route('distributeur.dashboard') }}" class="btn-back" title="العودة للوحة تحكم الموزع">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+            </a>
+            <div>
+                <h2>إدارة المتجر - AgroDz</h2>
+                <p style="color: var(--text-gray); margin-top: 5px;">تعديل مخزون الموزع وتتبع المنتجات.</p>
+            </div>
         </div>
+        
         <form method="GET" action="{{ route('produits.index') }}" style="margin: 0;">
             <input type="text" name="search" placeholder="بحث سريع عن منتج...">
             <button type="submit" class="btn-add">بحث</button>
@@ -294,7 +331,7 @@
 <div id="confirmModal" class="modal">
     <div class="modal-content">
         <h3 style="color: var(--primary-dark);">تأكيد الحذف</h3>
-        <p style="margin: 15px 0; color: var(--text-gray);">هل أنت متأكد من حذف هذا المنتج نهائياً؟</p>
+        <p style="margin: 15px 0; color: var(--text-gray);">هل أنت متأكد من حذف هذا المنتج؟</p>
         <div class="modal-btns">
             <button onclick="confirmDelete()" class="btn-add" style="background: #dc2626;">نعم، احذف</button>
             <button onclick="closeModal()" class="btn-edit" style="background: #e5e7eb; color: #374151;">إلغاء</button>
@@ -347,7 +384,6 @@
         });
     });
 
-    // إغلاق المودال عند الضغط خارجه
     window.onclick = function(event) {
         if (event.target == document.getElementById('confirmModal')) {
             closeModal();

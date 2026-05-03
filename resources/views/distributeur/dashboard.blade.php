@@ -280,8 +280,9 @@ display: flex;
                     <i class="fas fa-boxes-stacked"></i>
                 </div>
                 <div class="stat-info">
-                    <h3>إجمالي المنتجات</h3>
-                    <div class="number">{{ $totalProduits ?? '0' }}</div>
+        <h3>إجمالي منتجاتي</h3> 
+        <div class="number">{{ $totalProduits }}</div>
+    </div>
                 </div>
             </div>
 
@@ -310,7 +311,7 @@ display: flex;
     </main>
 
     <script>
-        // عرض التاريخ اليومي بشكل احترافي
+        // عرض التاريخ اليومي ي
         const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
         document.getElementById('dateText').innerHTML = new Date().toLocaleDateString('ar-SA', dateOptions);
     </script>
