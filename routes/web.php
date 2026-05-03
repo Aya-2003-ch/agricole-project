@@ -79,7 +79,7 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::resource('consultation', ConsultationController::class);
-    Route::resource('produit', ProduitController::class);
+    Route::resource('produits', ProduitController::class);
     Route::get('/produit/{id}', [ProduitController::class, 'show'])->name('produits.show');
 });
 

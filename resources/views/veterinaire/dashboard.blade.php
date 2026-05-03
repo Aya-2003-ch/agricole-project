@@ -225,7 +225,7 @@
 
     <div class="services">
 
-        <a href="{{ route('veterinaire.orders') }}" style="text-decoration: none; color: inherit;">
+        <a href="{{ route('veterinaire.commandes') }}" style="text-decoration: none; color: inherit;">
             <div class="service-card">
                 <i class="fas fa-file-invoice-dollar"></i>
                 <h3>إدارة الطلبات</h3>

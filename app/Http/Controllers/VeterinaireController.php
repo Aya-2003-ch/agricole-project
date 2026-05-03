@@ -22,11 +22,11 @@ class VeterinaireController extends Controller
     }
 
     // 2. عرض قائمة الطلبات بالتفصيل للبيطري
-    public function orders()
+    public function commande()
     {
         // جلب كل الطلبات القادمة مع بيانات الفلاح صاحب الطلب
         $commandes = Commande::with('user')->latest()->get();
-        return view('veterinaire.orders', compact('commandes'));
+        return view('veterinaire.commande', compact('commandes'));
     }
 
     // 3. صفحة الأدوية (البحث والترتيب حسب الموقع الجغرافي)
