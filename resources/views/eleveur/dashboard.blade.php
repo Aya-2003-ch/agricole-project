@@ -16,6 +16,7 @@
             --accent: #d4a373;
             --bg: #f8f9fa;
             --white: #ffffff;
+            --danger: #ef4444;
             --text-muted: #64748b;
         }
 
@@ -71,12 +72,7 @@
             margin-bottom: 25px;
         }
 
-        /* Search - نظام البحث */
-        .search-box {
-            display: flex;
-            gap: 10px;
-        }
-
+        .search-box { display: flex; gap: 10px; }
         .search-box input {
             flex: 1;
             padding: 15px;
@@ -87,8 +83,6 @@
             transition: 0.3s;
         }
 
-        .search-box input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(45, 106, 79, 0.1); }
-
         .btn-primary {
             padding: 0 35px;
             background: var(--primary);
@@ -98,44 +92,16 @@
             cursor: pointer;
             font-weight: bold;
             transition: 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .btn-primary:hover { background: var(--secondary); transform: translateY(-2px); }
 
-        /*  -  النتائج */
-        .results-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-
-        .result-card {
-            background: var(--white);
-            border: 1px solid #e2e8f0;
-            padding: 20px;
-            border-radius: 18px;
-            position: relative;
-            transition: 0.3s;
-        }
-
-        .result-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
-
-        .distance-badge {
-            position: absolute; left: 15px; top: 15px;
-            background: #f0fdf4; color: #16a34a;
-            padding: 5px 12px; border-radius: 20px;
-            font-size: 12px; font-weight: bold;
-        }
-
-        .price-tag {
-            color: var(--primary);
-            font-size: 20px;
-            font-weight: 800;
-        }
-
-        /* Map  */
-        #map { height: 350px; width: 100%; border-radius: 18px; border: 1.5px solid #e2e8f0; }
+        /* Map */
+        #map { height: 500px; width: 100%; border-radius: 18px; border: 1.5px solid #e2e8f0; z-index: 1; }
 
         @media (max-width: 992px) {
             .sidebar { width: 70px; }
@@ -149,19 +115,22 @@
     <!-- Sidebar -->
     <div class="sidebar">
         <h2><i class="fas fa-tractor"></i> AgroDz</h2>
-        <a href="#" class="active"><i class="fas fa-home"></i> <span>الرئيسية</span></a>
-        <a href="#"><i class="fas fa-pills"></i> <span>الأدوية والموزعين</span></a>
-        <a href="#"><i class="fas fa-user-md"></i> <span>استشارة بيطرية</span></a>
-        <a href="#"><i class="fas fa-comments"></i> <span>المحادثات</span></a>
-        <a href="#"><i class="fas fa-shopping-basket"></i> <span>طلباتي</span></a>
-        <div style="margin-top: auto; border-top: 1px solid #2d6a4f; padding-top: 10px;">
-        <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" style="color: #ff8a8a;">
-            <i class="fas fa-sign-out-alt"></i> <span>تسجيل الخروج</span>
+        <a href="{{ route('eleveur.dashboard') }}" class="active">
+            <i class="fas fa-home"></i> <span>الرئيسية</span>
         </a>
-        <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-            @csrf
-        </form>
-    </div>
+        <a href="{{ route('eleveur.consultations') }}">
+            <i class="fas fa-user-md"></i> <span>استشارة بيطرية</span>
+        </a>
+        <a href="{{ route('eleveur.chats') }}">
+            <i class="fas fa-comments"></i> <span>المحادثات</span>
+        </a>
+        
+        <div style="margin-top: auto; border-top: 1px solid #2d6a4f; padding-top: 10px;">
+            <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" style="color: #ff8a8a;">
+                <i class="fas fa-sign-out-alt"></i> <span>تسجيل الخروج</span>
+            </a>
+            <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">@csrf</form>
+        </div>
     </div>
 
     <!-- Main Content -->
@@ -171,102 +140,123 @@
         <div class="header">
             <div class="welcome-msg">
                 <h2>أهلاً بك، {{ Auth::user()->name }} 👨‍🌾</h2>
-                <p>إليك قائمة الموزعين الأقرب لمزرعتك في ولاية قالمة.</p>
+                <p>استكشف البياطرة الأقرب إليك وتابع حالة مزرعتك.</p>
             </div>
             
             <div style="font-size: 1.5rem; color: var(--primary); position: relative; cursor: pointer;">
                 <i class="fas fa-bell"></i>
-                <span style="position: absolute; top: -5px; right: -8px; background: #ef4444; color: white; font-size: 10px; padding: 2px 6px; border-radius: 50%; border: 2px solid white;">2</span>
+                <span style="position: absolute; top: -5px; right: -8px; background: var(--danger); color: white; font-size: 10px; padding: 2px 6px; border-radius: 50%; border: 2px solid white;">2</span>
             </div>
         </div>
 
-        <! قسم البحث ->
+        <!-- قسم الخريطة التفاعلية -->
         <div class="section-card">
-            <h3 style="margin-bottom: 20px; color: var(--secondary);"><i class="fas fa-search-location"></i> ابحث عن دواء (نتائج حسب الأقرب والسعر)</h3>
-            <form action="{{ route('eleveur.search') }}" method="GET" class="search-box">
-                <input type="text" name="medicine" placeholder="مثلاً: أدويـة أبقـار، لقاحات، Vitamine..." required>
-                <button type="submit" class="btn-primary">بحث سريع</button>
-            </form>
-        </div>
-
-        <! - نتائج البحث >
-        @if(isset($results))
-        <div class="results-grid">
-            @foreach($results as $item)
-            <div class="result-card">
-                <div class="distance-badge"><i class="fas fa-map-marker-alt"></i> يبعد {{ $item->distance }} كم</div>
-                <h4 style="margin: 30px 0 10px 0; color: var(--secondary);">{{ $item->distributeur_name }}</h4>
-                <p style="font-size: 14px; color: var(--text-muted);"><i class="fas fa-store"></i> المتوفر: {{ $item->medicine_name }}</p>
-                <p style="font-size: 14px; color: var(--text-muted);"><i class="fas fa-map-pin"></i> {{ $item->address }}</p>
-                
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding-top: 15px; border-top: 1px solid #f1f5f9;">
-                    <span class="price-tag">{{ $item->prix }} د.ج</span>
-                    <a href="https://www.google.com/maps?q={{ $item->lat }},{{ $item->lng }}" target="_blank" style="color: #007bff; text-decoration: none; font-size: 13px; font-weight: bold;">
-                        <i class="fas fa-directions"></i> الاتجاهات
-                    </a>
-                </div>
-                
-                <div style="display: flex; gap: 10px; margin-top: 15px;">
-                    <button class="btn-primary" style="flex: 2; font-size: 13px;"><i class="fas fa-shopping-cart"></i> طلب المنتج</button>
-                    <button class="btn-primary" style="flex: 1; background: #e9f5ff; color: #007bff;"><i class="fas fa-comment"></i></button>
-                </div>
-            </div>
-            @endforeach
-        </div>
-        @endif
-
-        <!  - موقع المزرعة>
-        <div class="section-card" style="margin-top: 25px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <h3 style="margin: 0; color: var(--secondary);"><i class="fas fa-map-marked-alt"></i> موقع مزرعتك المسجل</h3>
-                <span style="font-size: 12px; background: #eee; padding: 4px 10px; border-radius: 10px;">إحداثياتك: {{ Auth::user()->latitude ?? '36.46' }}, {{ Auth::user()->longitude ?? '7.43' }}</span>
+                <h3 style="margin: 0; color: var(--secondary);"><i class="fas fa-map-marked-alt"></i> رادار البياطرة الأقرب إليك</h3>
+                <span style="font-size: 12px; background: #eee; padding: 4px 10px; border-radius: 10px;">
+                    إحداثيات المزرعة: <span id="coords-display">{{ Auth::user()->latitude ?? 'لم يحدد' }}, {{ Auth::user()->longitude ?? '' }}</span>
+                </span>
             </div>
             
             <div id="map"></div>
             
-            <form action="{{ route('eleveur.updateLocation') }}" method="POST" style="margin-top: 15px;">
-                @csrf
-                <input type="hidden" name="lat" id="lat" value="{{ Auth::user()->latitude }}">
-                <input type="hidden" name="lng" id="lng" value="{{ Auth::user()->longitude }}">
-                <button type="submit" class="btn-primary" style="background: var(--accent);">
-                    <i class="fas fa-save"></i> حفظ الموقع الجديد للمزرعة
-                </button>
-            </form>
+            <div style="margin-top: 15px; display: flex; gap: 10px; align-items: center;">
+                <form action="{{ route('eleveur.updateLocation') }}" method="POST" style="flex: 1;">
+                    @csrf
+                    <input type="hidden" name="lat" id="lat" value="{{ Auth::user()->latitude }}">
+                    <input type="hidden" name="lng" id="lng" value="{{ Auth::user()->longitude }}">
+                    <button type="submit" class="btn-primary" style="background: var(--accent); width: 100%; height: 50px;">
+                        <i class="fas fa-save"></i> حفظ موقع المزرعة الجديد رسمياً
+                    </button>
+                </form>
+                <p style="font-size: 13px; color: var(--text-muted); flex: 1;">
+                    💡 <b>نصيحة:</b> اسحب العلامة الزرقاء لوضعها فوق موقع مزرعتك بالضبط، وستظهر النقاط الحمراء (البياطرة) حولك تلقائياً.
+                </p>
+            </div>
         </div>
-
     </div>
 
     <!-- Scripts -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // جلب إحداثيات المستخدم من قاعدة البيانات
+        // 1. الإحداثيات الأولية (من قاعدة البيانات أو افتراضية)
         var userLat = {{ Auth::user()->latitude ?? 36.4621 }};
         var userLng = {{ Auth::user()->longitude ?? 7.4311 }};
 
-        // إعداد الخريطة
-        var map = L.map('map').setView([userLat, userLng], 13);
+        var map = L.map('map').setView([userLat, userLng], 12);
+        
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: 'AgroDz Map'
         }).addTo(map);
 
-        // إضافة ماركر قابل للسحب لتحديد الموقع
-        var marker = L.marker([userLat, userLng], {draggable: true}).addTo(map)
-            .bindPopup("موقع مزرعتك")
-            .openPopup();
+        // طبقة خاصة لماركرات البياطرة لتسهيل مسحها
+        var vetsLayer = L.layerGroup().addTo(map);
 
-        // تحديث الإحداثيات عند سحب الماركر
-        marker.on('dragend', function (e) {
-            var lat = marker.getLatLng().lat;
-            var lng = marker.getLatLng().lng;
-            document.getElementById('lat').value = lat;
-            document.getElementById('lng').value = lng;
+        // 2. ماركر المزرعة (أزرق وقابل للسحب)
+        var farmIcon = L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
         });
 
-        // تحديث الإحداثيات عند النقر على الخريطة
-        map.on('click', function(e) {
-            marker.setLatLng(e.latlng);
-            document.getElementById('lat').value = e.latlng.lat;
-            document.getElementById('lng').value = e.latlng.lng;
+        var farmMarker = L.marker([userLat, userLng], {draggable: true, icon: farmIcon}).addTo(map)
+            .bindPopup("<b>موقع مزرعتك</b><br>اسحبني لتحديث رادار البياطرة")
+            .openPopup();
+
+        // 3. دالة جلب البياطرة "الرادار"
+        function updateVetRadar(lat, lng) {
+            // تحديث الواجهة
+            document.getElementById('lat').value = lat;
+            document.getElementById('lng').value = lng;
+            document.getElementById('coords-display').innerText = lat.toFixed(4) + ", " + lng.toFixed(4);
+
+            // AJAX لجلب البياطرة القريبين من الموقع الجديد
+            fetch(`{{ route('eleveur.nearby.vets') }}?lat=${lat}&lng=${lng}`)
+                .then(response => response.json())
+                .then(vets => {
+                    vetsLayer.clearLayers(); // مسح النقاط القديمة
+
+                    vets.forEach(vet => {
+                        // أيقونة حمراء للبياطرة
+                        var vetIcon = L.icon({
+                            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+                            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                            iconSize: [25, 41],
+                            iconAnchor: [12, 41],
+                            popupAnchor: [1, -34],
+                            shadowSize: [41, 41]
+                        });
+
+                        var vMarker = L.marker([vet.latitude, vet.longitude], {icon: vetIcon});
+                        
+                        var content = `
+                            <div style="text-align: right; direction: rtl;">
+                                <strong style="color: #b91c1c;">د. ${vet.name}</strong><br>
+                                <small>المسافة: ${parseFloat(vet.distance).toFixed(2)} كم</small><br>
+                                <a href="{{ route('eleveur.consultations') }}?vet_id=${vet.id}" 
+                                   style="display:block; background:#2d6a4f; color:white; text-align:center; padding:5px; border-radius:5px; margin-top:8px; text-decoration:none; font-size:11px;">
+                                   طلب استشارة
+                                </a>
+                            </div>
+                        `;
+                        vMarker.bindPopup(content);
+                        vetsLayer.addLayer(vMarker);
+                    });
+                });
+        }
+
+        // حدث عند سحب ماركر المزرعة
+        farmMarker.on('dragend', function (e) {
+            var position = farmMarker.getLatLng();
+            updateVetRadar(position.lat, position.lng);
+        });
+
+        // تشغيل الرادار عند تحميل الصفحة لأول مرة
+        document.addEventListener('DOMContentLoaded', function() {
+            updateVetRadar(userLat, userLng);
         });
     </script>
 </body>

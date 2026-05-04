@@ -74,21 +74,19 @@ class EleveurController extends Controller
 
     //  تحديث الموقع
     public function updateLocation(Request $request)
-    {
-        $request->validate([
-            'latitude' => 'required|numeric',
-            'longitude' => 'required|numeric',
-        ]);
+{
+    $request->validate([
+        'lat' => 'required|numeric',
+        'lng' => 'required|numeric',
+    ]);
 
-        $eleveur = Eleveur::where('user_id', Auth::id())->first();
+    // التحديث مباشرة في جدول المستخدمين
+    $user = Auth::user();
+    $user->update([
+        'latitude' => $request->lat,
+        'longitude' => $request->lng,
+    ]);
 
-        if ($eleveur) {
-            $eleveur->update([
-                'latitude' => $request->lat,
-                'longitude' => $request->lng,
-            ]);
-        }
-
-        return redirect()->back()->with('success', 'تم تحديث موقع المزرعة بنجاح!');
-    }
+    return redirect()->back()->with('success', 'تم تحديث موقعك بنجاح!');
+}
 }

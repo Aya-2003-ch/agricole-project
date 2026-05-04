@@ -54,4 +54,19 @@ class User extends Authenticatable
     {
         return $this->hasOne(Eleveur::class);
     }
+    /**
+ * الرسائل التي أرسلها المستخدم
+ */
+public function sentMessages()
+{
+    return $this->hasMany(Message::class, 'sender_id');
+}
+
+/**
+ * الرسائل التي استلمها المستخدم
+ */
+public function receivedMessages()
+{
+    return $this->hasMany(Message::class, 'receiver_id');
+}
 }
