@@ -69,4 +69,9 @@ public function receivedMessages()
 {
     return $this->hasMany(Message::class, 'receiver_id');
 }
+  public function consultations()
+{
+    // الربط باستخدام الحقل eleveur_id الموجود في جدول الاستشارات
+    return $this->hasMany(Consultation::class, 'eleveur_id');
+}
 }

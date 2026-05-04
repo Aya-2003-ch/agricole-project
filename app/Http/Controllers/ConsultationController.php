@@ -9,16 +9,21 @@ use Illuminate\Support\Facades\Auth;
 
 class ConsultationController extends Controller
 {
-    // للفلاح: يعرض فقط استشاراته التي طلبها هو
-    public function index()
-    {
-        $consultations = Consultation::with('veterinaire')
-            ->where('eleveur_id', Auth::id()) 
-            ->latest()
-            ->get();
+    // للفلاح: يعرض استشاراته + قائمة البياطرة (لحل مشكلة المتغير غير المعرف)
+   public function index()
+{
+    // جلب البياطرة
+    $veterinaires = User::where('role', 'veterinaire')->get();
 
-        return view('eleveur.consultations', compact('consultations'));
-    }
+    // جلب الاستشارات الخاصة بالفلاح الحالي يدوياً
+    $consultations = Consultation::where('eleveur_id', Auth::id())
+                        ->with('veterinaire') // جلب بيانات الطبيب لتقليل الضغط على قاعدة البيانات
+                        ->latest()
+                        ->get(); 
+
+    // تمرير البيانات (تأكد أن الأسماء مطابقة تماماً لما تستخدمه في Blade)
+    return view('eleveur.consultations', compact('veterinaires', 'consultations'));
+}
 
     // للبيطري: يعرض فقط الطلبات التي أرسلت إليه
     public function indexVet()
@@ -31,23 +36,16 @@ class ConsultationController extends Controller
         return view('veterinaire.consultations', compact('consultations'));
     }
 
-    /**
-     * جلب البياطرة القريبين (الرادار التفاعلي)
-     * تم التعديل ليستقبل الإحداثيات من الخريطة مباشرة عبر AJAX
-     */
+    // جلب البياطرة القريبين (الرادار التفاعلي للخريطة)
     public function getNearbyVets(Request $request) 
     {
-        // 1. الأولوية للإحداثيات القادمة من الخريطة (عند السحب)، وإذا لم توجد نستخدم إحداثيات الفلاح المسجلة
         $lat = $request->lat ?? Auth::user()->latitude;
         $lng = $request->lng ?? Auth::user()->longitude;
 
-        // إذا لم يتوفر موقع (لا في الطلب ولا في الملف الشخصي)
         if (!$lat || !$lng) {
             return response()->json([]); 
         }
 
-        // 2. حساب المسافة باستخدام صيغة Haversine
-        // جلب المستخدمين الذين دورهم بيطري فقط
         $vets = User::where('role', 'veterinaire')
             ->whereNotNull('latitude')
             ->whereNotNull('longitude')
@@ -60,40 +58,43 @@ class ConsultationController extends Controller
     }
 
     // حفظ طلب استشارة جديد
-    public function store(Request $request)
-    {
-        $request->validate([
-            'veterinaire_id' => 'required|exists:users,id',
-            'motif' => 'required|string|max:500'
-        ]);
+   public function store(Request $request)
+{
+    $request->validate([
+        'veterinaire_id' => 'required',
+        'motif' => 'required',
+    ]);
 
-        Consultation::create([
-            'eleveur_id' => Auth::id(),
-            'veterinaire_id' => $request->veterinaire_id,
-            'date_demande' => now(),
-            'motif' => $request->motif,
-            'status' => 'pending'
-        ]);
+    Consultation::create([
+        'eleveur_id' => auth()->id(),
+        'veterinaire_id' => $request->veterinaire_id,
+        'date_demande' => now(),
+        'motif' => $request->motif,
+        'status' => 'pending'
+    ]);
 
-        return back()->with('success', 'تم إرسال طلب الاستشارة بنجاح ✅');
-    }
+    return back()->with('success', 'تم إرسال الطلب');
+}
+public function updateStatus(Request $request, $id)
+{
+    $consultation = Consultation::findOrFail($id);
 
-    /**
-     * تحديث موقع الفلاح رسمياً في قاعدة البيانات
-     */
-    public function updateLocation(Request $request)
-    {
-        $request->validate([
-            'lat' => 'required|numeric',
-            'lng' => 'required|numeric',
-        ]);
+    $consultation->status = $request->status; // accepted / rejected
+    $consultation->save();
 
-        $user = User::find(Auth::id());
-        $user->update([
-            'latitude' => $request->lat,
-            'longitude' => $request->lng,
-        ]);
+    return response()->json(['success' => true]);
+}
+public function update(Request $request, $id)
+{
+    $consultation = Consultation::findOrFail($id);
 
-        return back()->with('success', 'تم تحديث موقع مزرعتك بنجاح 📍');
-    }
+    $consultation->update([
+        'date_consultation' => $request->date_consultation,
+        'degree' => $request->degree,
+        'diagnostique' => $request->diagnostique,
+        'status' => 'accepted' // كي يكملها تتأكد
+    ]);
+
+    return response()->json(['success' => true]);
+}
 }

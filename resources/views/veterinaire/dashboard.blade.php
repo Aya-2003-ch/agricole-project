@@ -174,7 +174,13 @@
     
     <a href="#" class="active"><i class="fas fa-th-large"></i> الرئيسية</a>
     <a href="{{ route('veterinaire.consultations') }}"><i class="fas fa-stethoscope"></i> الاستشارات الميدانية</a>
-    <!-- رابط الطلبات لرؤية تاريخ الطلبات التي قام بها -->
+    <a href="{{ route('veterinaire.consultations') }}" class="nav-link">
+    <i class="fas fa-user-md"></i> استشارات بيطرية
+    @php $count = \App\Models\Consultation::where('veterinaire_id', auth()->id())->where('status', 'pending')->count(); @endphp
+    @if($count > 0)
+        <span class="badge" style="background: red; color: white; border-radius: 50%; padding: 2px 6px;">{{ $count }}</span>
+    @endif
+</a>
     <a href="{{ route('veterinaire.commandes') }}"><i class="fas fa-shopping-basket"></i> سجل الطلبات</a>
     <a href="{{ route('veterinaire.chats') }}"><i class="fas fa-comments"></i> دردشة الفلاحين <span class="badge">3</span></a>
     <a href="{{ route('veterinaire.profile') }}"><i class="fas fa-user-md"></i> الملف الشخصي</a>
@@ -191,7 +197,6 @@
 
 <div class="main-content">
     
-    <!-- الترحيب والإشعارات -->
     <div class="top-bar">
         <div class="welcome-card">
             <h2>مرحباً، دكتور {{ Auth::user()->name }} 👋</h2>
@@ -203,7 +208,6 @@
         </div>
     </div>
 
-    <!-- نظام البحث والطلب المباشر -->
     <div class="search-section" id="med-search-section">
         <h3><i class="fas fa-search"></i> نظام البحث وطلب الأدوية</h3>
         <p style="font-size: 14px; color: #64748b; margin-bottom: 15px;">ابحث عن الأدوية والمواد البيطرية في مخازن الموزعين واطلبها لعيادتك مباشرة.</p>
@@ -239,7 +243,6 @@
                                 </a>
                             </div>
                             
-                            <!-- فورم إرسال الطلب -->
                             <form action="{{ route('veterinaire.commandes') }}" method="POST" style="margin-top: 12px;">
                                 @csrf
                                 <input type="hidden" name="medicine_name" value="{{ $item->medicine_name }}">
@@ -256,13 +259,11 @@
         </div>
     </div>
 
-    <!-- الخريطة التفاعلية -->
     <div class="map-card">
         <h3>📍 خريطة الموزعين والنشاط الرعوي</h3>
         <div id="map" style="height: 400px; border-radius: 15px; border: 1px solid #e2e8f0;"></div>
     </div>
 
-    <!-- شبكة العمليات (Actions) -->
     <div class="actions-grid">
         <a href="{{ route('veterinaire.consultations') }}" class="action-card">
             <i class="fas fa-clipboard-list" style="color: #2d6a4f;"></i>
@@ -285,10 +286,8 @@
 
 </div>
 
-<!-- السكريبتات -->
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
-    // موقع البيطري الحالي
     const lat = {{ Auth::user()->latitude ?? 36.4621 }};
     const lng = {{ Auth::user()->longitude ?? 7.4311 }};
     
@@ -297,10 +296,8 @@
         attribution: '&copy; AgroDz'
     }).addTo(map);
 
-    // أيقونة البيطري
     L.marker([lat, lng]).addTo(map).bindPopup("<b>دكتور {{ Auth::user()->name }}</b>").openPopup();
 
-    // إضافة نتائج البحث على الخريطة إذا وجدت
     @if(isset($results))
         const searchResults = @json($results);
         searchResults.forEach(res => {
@@ -312,3 +309,4 @@
 </script>
 
 </body>
+</html>

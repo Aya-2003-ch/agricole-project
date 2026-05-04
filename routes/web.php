@@ -63,8 +63,9 @@ Route::middleware(['auth'])->group(function () {
         
         // إدارة الاستشارات الواصلة للبيطري
         Route::get('/consultations', [ConsultationController::class, 'indexVet'])->name('consultations');
-        Route::post('/consultations/{id}/status', [VeterinaireController::class, 'updateStatus'])->name('updateStatus');
+        Route::post('/consultations/{id}/status', [ConsultationController::class, 'updateStatus'])->name('consultations.status');
 
+Route::put('/consultation/{id}', [ConsultationController::class, 'update']);
         // طلب الأدوية من الموزعين
         Route::get('/search-medicines', [VeterinaireController::class, 'searchMedicines'])->name('searchMedicines');
         Route::post('/order/place', [VeterinaireController::class, 'placeOrder'])->name('order.place');

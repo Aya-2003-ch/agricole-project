@@ -9,21 +9,26 @@ class Consultation extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = [
-        'date_dammande',
-        'date_consultation',
-        'motif',
-        'degree'
-    ];
+   protected $fillable = [
+    'eleveur_id',
+    'veterinaire_id',
+    'date_demande',
+    'date_consultation',
+    'motif',
+    'degree',
+    'status',
+    'diagnostique'
+];
 
-    public function veterinaire()
-    {
-        return $this->belongsTo(Veterinaire::class, 'id_veterinaire');
-    }
+// العلاقات
+public function veterinaire()
+{
+    return $this->belongsTo(User::class, 'veterinaire_id');
+}
 
-    public function ferme()
-    {
-        return $this->belongsTo(Eleveur::class, 'id_eleveur');
-    }
+public function eleveur()
+{
+    return $this->belongsTo(User::class, 'eleveur_id');
+}
 
 }
