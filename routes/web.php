@@ -88,10 +88,14 @@ Route::prefix('distributeur')->name('distributeur.')->group(function () {
     
     Route::post('/products/store', [DistributeurController::class, 'store'])->name('store');
     Route::get('/marche', [DistributeurController::class, 'market'])->name('market');
-    Route::post('/marche/commander', [DistributeurController::class, 'storeOrder'])->name('market.store');
-
+    // التعديل الصحيح داخل المجموعة (Group)
+    Route::post('/order', [DistributeurController::class, 'storeOrder'])->name('market.store');
     Route::get('/commandes-recues', [DistributeurController::class, 'incomingOrders'])->name('incoming.orders');
     Route::get('/mes-commandes', [DistributeurController::class, 'myOrders'])->name('my.orders');
+    // روابط تحديث حالة الطلب
+    Route::patch('/order/{order}/accept', [DistributeurController::class, 'acceptOrder'])->name('order.accept');
+    Route::patch('/order/{order}/reject', [DistributeurController::class, 'rejectOrder'])->name('order.reject');
+    Route::get('/mes-commandes', [DistributeurController::class, 'myOrders'])->name('my_orders');
 
     // تصحيح مسار الاقتراحات - احذف السطر القديم وضع هذا:
     Route::get('/suggestions', [DistributeurController::class, 'getProductSuggestions'])->name('suggestions');

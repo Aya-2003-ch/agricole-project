@@ -18,8 +18,12 @@ class DistributeurController extends Controller
         
         // 2. حساب إجمالي المنتجات في المخزن
         $totalProduits = 0;
+        $incomingOrdersCount = 0;
         if ($distributeur) {
             $totalProduits = Store::where('distributeur_id', $distributeur->id)->count();
+            $incomingOrdersCount = Commande::where('receiver_id', auth()->id())
+                                        ->where('status', 'pending')
+                                        ->count();
         }
 
         // 3. جلب جميع الموزعين للخريطة
@@ -32,7 +36,7 @@ class DistributeurController extends Controller
             ];
         });
 
-        return view('distributeur.dashboard', compact('totalProduits', 'allDistributors'));
+        return view('distributeur.dashboard', compact('totalProduits', 'allDistributors','incomingOrdersCount'));
     }
 
     // --- الميزات الجديدة (Marche et Commandes) ---
@@ -54,17 +58,17 @@ public function market(Request $request) {
 }
 
     // عرض الطلبات الواردة
-    public function incomingOrders()
-    {
-        // تم تغيير 'product' إلى 'produit' ليتوافق مع علاقات Store
-        $orders = Commande::where('receiver_id', auth()->id())
-                          ->where('order_type', 'to_distributeur')
-                          ->with(['sender', 'produit']) 
-                          ->latest()
-                          ->get();
+  public function incomingOrders()
+{
+    $orders = \App\Models\Commande::where('receiver_id', auth()->id())
+                // جلب الطلبات التي لها منتج فقط لتجنب الخطأ
+                ->whereHas('produit') 
+                ->with(['produit', 'sender'])
+                ->latest()
+                ->get();
 
-        return view('distributeur.incoming_orders', compact('orders'));
-    }
+    return view('distributeur.incoming_orders', compact('orders'));
+}
 
     // حفظ طلب شراء جديد
     public function storeOrder(Request $request)
@@ -84,7 +88,7 @@ public function market(Request $request) {
         'receiver_id' => $request->receiver_id,
         'product_id'  => $request->product_id,
         'quantity'    => $request->quantity,
-        'telephone'   => $request->telephone,
+        'phone'       => $request->phone,
         'address'     => $request->address,
         'status'      => 'pending', // الطلب يبدأ بحالة انتظار
     ]);
@@ -146,5 +150,46 @@ public function getProductSuggestions(Request $request)
         ->take(10);    // نكتفي بـ 10 اقتراحات لتسريع الاستجابة
 
     return response()->json($suggestions);
+}
+  public function acceptOrder(Commande $order)
+{
+    // التأكد أن الموزع الحالي هو الذي استلم الطلب (البائع)
+    if ($order->receiver_id !== auth()->id()) {
+        abort(403);
+    }
+
+    $order->update([
+        'status' => 'accepted',
+        'is_seen' => false // نجعلها false لكي يظهر الإشعار للمشتري
+    ]);
+
+    return back()->with('success', 'تم قبول الطلب بنجاح.');
+}
+
+public function rejectOrder(Commande $order)
+{
+    // التأكد أن الموزع الحالي هو الذي استلم الطلب (البائع)
+    if ($order->receiver_id !== auth()->id()) {
+        abort(403);
+    }
+
+    $order->update([
+        'status' => 'rejected',
+        'is_seen' => false // نجعلها false لكي يظهر الإشعار للمشتري
+    ]);
+
+    return back()->with('error', 'تم رفض الطلب.');
+}
+  public function myOrders()
+{
+     Commande::where('sender_id', auth()->id())
+            ->where('is_seen', false)
+            ->update(['is_seen' => true]);
+    $orders = Commande::where('sender_id', auth()->id())
+                ->with(['produit', 'receiver']) // جلب المنتج والموزع الذي استلم الطلب
+                ->latest()
+                ->paginate(10); // تقسيم الصفحة إذا كانت الطلبات كثيرة
+
+    return view('distributeur.my_orders', compact('orders'));
 }
 }

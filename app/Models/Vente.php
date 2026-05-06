@@ -19,11 +19,6 @@ class vente extends Model
         return $this->belongsTo(Commande::class, 'id_commande');
     }
 
-    public function livreur()
-    {
-        return $this->belongsTo(Livreur::class, 'id_livreur');
-    }
-
     public function store()
     {
         return $this->belongsTo(Store::class, 'id_store');

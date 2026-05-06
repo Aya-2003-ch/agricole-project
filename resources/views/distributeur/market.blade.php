@@ -74,7 +74,7 @@
             <div class="modal fade" id="orderModal{{ $item->id }}" tabindex="-1" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content" style="border-radius: 20px;">
-                        <form action="/distributeur/order" method="POST">
+                        <form action="{{ route('distributeur.market.store') }}" method="POST">
                             @csrf
                             <div class="modal-header border-0">
                                 <h5 class="modal-title fw-bold">تأكيد طلب الشراء</h5>
