@@ -9,12 +9,9 @@ class Commande extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = [
-        'id_user',
-        'livreur_id',
-        'date_commande',
-        'statut',
-    ];
+   protected $fillable = [
+    'sender_id', 'receiver_id', 'product_id', 'quantity', 'telephone', 'address', 'status', 'order_type'
+];
 
     // المستخدم (acheteur)
     public function user()

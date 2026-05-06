@@ -10,7 +10,8 @@ use App\Http\Controllers\{
     ProfileController,
     RechercheController,
     DashboardController,
-    MessageController
+    MessageController,
+    CommandeController
 };
 
 // --- 1. الصفحات العامة (الجميع يمكنه الوصول إليها) ---
@@ -65,7 +66,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/consultations', [ConsultationController::class, 'indexVet'])->name('consultations');
         Route::post('/consultations/{id}/status', [ConsultationController::class, 'updateStatus'])->name('consultations.status');
 
-Route::put('/consultation/{id}', [ConsultationController::class, 'update']);
+        Route::put('/consultation/{id}', [ConsultationController::class, 'update']);
         // طلب الأدوية من الموزعين
         Route::get('/search-medicines', [VeterinaireController::class, 'searchMedicines'])->name('searchMedicines');
         Route::post('/order/place', [VeterinaireController::class, 'placeOrder'])->name('order.place');
@@ -79,16 +80,22 @@ Route::put('/consultation/{id}', [ConsultationController::class, 'update']);
         Route::get('/chats', [MessageController::class, 'index'])->name('chats');
     });
 
-    // --- قسم الموزع (Distributeur) ---
-    Route::prefix('distributeur')->name('distributeur.')->group(function () {
-        Route::get('/dashboard', [DistributeurController::class, 'dashboard'])->name('dashboard');
-        Route::get('/profile', [DistributeurController::class, 'profile'])->name('profile');
-        Route::post('/profile/update', [DistributeurController::class, 'updateProfile'])->name('profile.update');
-        
-        // إدارة المخزن والمنتجات
-        Route::post('/products/store', [DistributeurController::class, 'store'])->name('store');
-    });
+   // --- قسم الموزع (Distributeur) ---
+Route::prefix('distributeur')->name('distributeur.')->group(function () {
+    Route::get('/dashboard', [DistributeurController::class, 'dashboard'])->name('dashboard');
+    Route::get('/profile', [DistributeurController::class, 'profile'])->name('profile');
+    Route::post('/profile/update', [DistributeurController::class, 'updateProfile'])->name('profile.update');
+    
+    Route::post('/products/store', [DistributeurController::class, 'store'])->name('store');
+    Route::get('/marche', [DistributeurController::class, 'market'])->name('market');
+    Route::post('/marche/commander', [DistributeurController::class, 'storeOrder'])->name('market.store');
 
+    Route::get('/commandes-recues', [DistributeurController::class, 'incomingOrders'])->name('incoming.orders');
+    Route::get('/mes-commandes', [DistributeurController::class, 'myOrders'])->name('my.orders');
+
+    // تصحيح مسار الاقتراحات - احذف السطر القديم وضع هذا:
+    Route::get('/suggestions', [DistributeurController::class, 'getProductSuggestions'])->name('suggestions');
+});
     // --- إدارة الملف الشخصي العامة ---
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

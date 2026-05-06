@@ -9,7 +9,8 @@ class Distributeur extends Model
 {
     use SoftDeletes;
     
-    protected $fillable = ['user_id','nom', 'telephone', 'localisation'];
+    protected $fillable = ['user_id','nom', 'telephone', 'address','latitude',  
+    'longitude'];
 
     public function produits()
     {
@@ -21,4 +22,8 @@ class Distributeur extends Model
      {
         return $this->hasMany(Store::class);
        }  
+       public function user()
+{
+    return $this->belongsTo(\App\Models\User::class, 'user_id');
+}
 }

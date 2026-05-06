@@ -11,20 +11,33 @@ return new class extends Migration
      */
     public function up(): void
     {
-      Schema::create('commandes', function (Blueprint $table) {
-    $table->bigIncrements('id');
-    $table->unsignedBigInteger('id_user');
+        Schema::create('commandes', function (Blueprint $table) {
+            $table->id(); // الرقم التعريفي للطلب
+            
+            // الربط مع المستخدمين (المشتري والبائع)
+            $table->unsignedBigInteger('sender_id');   // الموزع الذي أرسل الطلب
+            $table->unsignedBigInteger('receiver_id'); // الموزع المستلم للطلب (صاحب المنتج)
+            
+            // الربط مع جدول المنتجات
+            $table->unsignedBigInteger('product_id');  // المنتج المطلوب
+            
+            // تفاصيل الطلب
+            $table->integer('quantity');               // الكمية المطلوبة
+            $table->string('phone');                   // رقم هاتف التواصل
+            $table->text('address');                 // عنوان التوصيل
+            
+            // الحالة والنوع
+            $table->string('status')->default('pending'); // حالة الطلب (pending, accepted, rejected)
+            $table->string('order_type')->default('to_distributeur'); // نوع الطلب لتفريقه عن طلبات المربين
 
-    $table->foreign('id_user')
-     ->references('id')->on('users')->onDelete('cascade');
-
-    
-    $table->date('date_commande');
-    $table->string('statut');
-    
-    $table->timestamps();
-    $table->softDeletes();
-});
+            // تعريف المفاتيح الأجنبية (Foreign Keys)
+            $table->foreign('sender_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('receiver_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('product_id')->references('id')->on('produits')->onDelete('cascade');
+            
+            $table->timestamps();   // تاريخ الإنشاء والتحديث
+            $table->softDeletes(); // خاصية الحذف الناعم (لحفظ السجلات المؤرشفة)
+        });
     }
 
     /**
