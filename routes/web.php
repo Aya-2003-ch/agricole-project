@@ -11,7 +11,8 @@ use App\Http\Controllers\{
     RechercheController,
     DashboardController,
     MessageController,
-    CommandeController
+    CommandeController,
+    AdminController
 };
 
 // --- 1. الصفحات العامة (الجميع يمكنه الوصول إليها) ---
@@ -26,23 +27,41 @@ Route::get('/nearby-distributeurs', [DashboardController::class, 'nearby']);
 // --- 2. الروابط المحمية (تحتاج تسجيل دخول) ---
 Route::middleware(['auth'])->group(function () {
 
-    // الـ Redirector: يوجه المستخدم للوحة التحكم الخاصة به حسب دوره (Role)
+    // الـ Redirector المطور: يوجه المستخدم للوحة التحكم الخاصة به حسب دوره
     Route::get('/dashboard', function () {
         $user = auth()->user();
+        
+        // توجيه الأدمن
+        if ($user->role == 'admin') {
+            return redirect()->route('admin.panel');
+        }
+        
+        // توجيه الفلاح
         if (in_array($user->role, ['eleveur', 'فلاح'])) {
             return redirect()->route('eleveur.dashboard');
         } 
+        
+        // توجيه البيطري
         if (in_array($user->role, ['veterinaire', 'بيطرى', 'بيطري'])) {
             return redirect()->route('veterinaire.dashboard');
         }
+        
+        // توجيه الموزع
         if (in_array($user->role, ['distributeur', 'موزع'])) {
             return redirect()->route('distributeur.dashboard');
         }
+        
         return view('dashboard'); 
     })->name('dashboard');
 
+    // --- قسم المدير (Admin Panel) ---
+    Route::prefix('admin')->name('admin.')->group(function () {
+        Route::get('/panel', [AdminController::class, 'index'])->name('panel');
+        Route::get('/delete/{id}', [AdminController::class, 'delete'])->name('user.delete');
+    });
+
     // --- قسم الفلاح (Eleveur) ---
-        Route::prefix('eleveur')->name('eleveur.')->group(function () {
+    Route::prefix('eleveur')->name('eleveur.')->group(function () {
         Route::get('/dashboard', [EleveurController::class, 'dashboard'])->name('dashboard');
         Route::post('/update-location', [EleveurController::class, 'updateLocation'])->name('updateLocation');
         Route::get('/search-medicine', [EleveurController::class, 'search'])->name('search');
@@ -58,58 +77,42 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // --- قسم البيطري (Veterinaire) ---
-// تم إضافة 'auth' لضمان أن المسجلين فقط يدخلون، ويمكنك إضافة 'checkRole:veterinaire' إذا كان لديك Middleware للأدوار
-Route::middleware(['auth'])->prefix('veterinaire')->name('veterinaire.')->group(function () {
-    
-    // 1. لوحة التحكم والبروفايل
-    Route::get('/dashboard', [VeterinaireController::class, 'dashboard'])->name('dashboard');
-    Route::get('/profile', [VeterinaireController::class, 'profile'])->name('profile');
-    
-    // 2. إدارة الاستشارات (الطبيب مع الفلاح)
-    Route::get('/consultations', [ConsultationController::class, 'indexVet'])->name('consultations');
-    Route::post('/consultations/{id}/status', [ConsultationController::class, 'updateStatus'])->name('consultations.status');
-    Route::put('/consultations/{id}', [ConsultationController::class, 'update'])->name('consultations.update');
+    Route::prefix('veterinaire')->name('veterinaire.')->group(function () {
+        Route::get('/dashboard', [VeterinaireController::class, 'dashboard'])->name('dashboard');
+        Route::get('/profile', [VeterinaireController::class, 'profile'])->name('profile');
+        
+        Route::get('/consultations', [ConsultationController::class, 'indexVet'])->name('consultations');
+        Route::post('/consultations/{id}/status', [ConsultationController::class, 'updateStatus'])->name('consultations.status');
+        Route::put('/consultations/{id}', [ConsultationController::class, 'update'])->name('consultations.update');
 
-    // 3. نظام البحث وطلب الأدوية (Market & Autocomplete)
-    // ✅ ملاحظة: هذا المسار سيصبح: /veterinaire/api/medicines/suggestions
-    Route::get('/api/medicines/suggestions', [VeterinaireController::class, 'getSuggestions'])->name('api.suggestions');
-    
-    // صفحة نتائج البحث
-    Route::get('/market', [VeterinaireController::class, 'market'])->name('market');
-    
-    // إرسال الطلب للموزع
-    Route::post('/order/store', [VeterinaireController::class, 'storeOrder'])->name('order.store');
+        Route::get('/api/medicines/suggestions', [VeterinaireController::class, 'getSuggestions'])->name('api.suggestions');
+        Route::get('/market', [VeterinaireController::class, 'market'])->name('market');
+        Route::post('/order/store', [VeterinaireController::class, 'storeOrder'])->name('order.store');
+        Route::get('/mes-commandes', [VeterinaireController::class, 'myOrders'])->name('my_orders');
 
-    // 4. سجل الطلبات (لتتبع حالة الطلب وتصفير الإشعارات)
-    Route::get('/mes-commandes', [VeterinaireController::class, 'myOrders'])->name('my_orders');
+        Route::get('/report', [VeterinaireController::class, 'report'])->name('report');
+        Route::post('/report/send', [VeterinaireController::class, 'sendReport'])->name('report.send');
+        Route::get('/chats', [MessageController::class, 'index'])->name('chats');
+    });
 
-    // 5. التبليغ عن الأوبئة
-    Route::get('/report', [VeterinaireController::class, 'report'])->name('report');
-    Route::post('/report/send', [VeterinaireController::class, 'sendReport'])->name('report.send');
+    // --- قسم الموزع (Distributeur) ---
+    Route::prefix('distributeur')->name('distributeur.')->group(function () {
+        Route::get('/dashboard', [DistributeurController::class, 'dashboard'])->name('dashboard');
+        Route::get('/profile', [DistributeurController::class, 'profile'])->name('profile');
+        Route::post('/profile/update', [DistributeurController::class, 'updateProfile'])->name('profile.update');
+        
+        Route::post('/products/store', [DistributeurController::class, 'store'])->name('store');
+        Route::get('/marche', [DistributeurController::class, 'market'])->name('market');
+        Route::post('/order', [DistributeurController::class, 'storeOrder'])->name('market.store');
+        Route::get('/commandes-recues', [DistributeurController::class, 'incomingOrders'])->name('incoming.orders');
+        Route::get('/mes-commandes', [DistributeurController::class, 'myOrders'])->name('my.orders');
+        
+        Route::patch('/order/{order}/accept', [DistributeurController::class, 'acceptOrder'])->name('order.accept');
+        Route::patch('/order/{order}/reject', [DistributeurController::class, 'rejectOrder'])->name('order.reject');
+        
+        Route::get('/suggestions', [DistributeurController::class, 'getProductSuggestions'])->name('suggestions');
+    });
 
-    // 6. الدردشة (رسائل الفلاحين)
-    Route::get('/chats', [MessageController::class, 'index'])->name('chats');
-});
-   // --- قسم الموزع (Distributeur) ---
-Route::prefix('distributeur')->name('distributeur.')->group(function () {
-    Route::get('/dashboard', [DistributeurController::class, 'dashboard'])->name('dashboard');
-    Route::get('/profile', [DistributeurController::class, 'profile'])->name('profile');
-    Route::post('/profile/update', [DistributeurController::class, 'updateProfile'])->name('profile.update');
-    
-    Route::post('/products/store', [DistributeurController::class, 'store'])->name('store');
-    Route::get('/marche', [DistributeurController::class, 'market'])->name('market');
-    // التعديل الصحيح داخل المجموعة (Group)
-    Route::post('/order', [DistributeurController::class, 'storeOrder'])->name('market.store');
-    Route::get('/commandes-recues', [DistributeurController::class, 'incomingOrders'])->name('incoming.orders');
-    Route::get('/mes-commandes', [DistributeurController::class, 'myOrders'])->name('my.orders');
-    // روابط تحديث حالة الطلب
-    Route::patch('/order/{order}/accept', [DistributeurController::class, 'acceptOrder'])->name('order.accept');
-    Route::patch('/order/{order}/reject', [DistributeurController::class, 'rejectOrder'])->name('order.reject');
-    Route::get('/mes-commandes', [DistributeurController::class, 'myOrders'])->name('my_orders');
-
-    // تصحيح مسار الاقتراحات - احذف السطر القديم وضع هذا:
-    Route::get('/suggestions', [DistributeurController::class, 'getProductSuggestions'])->name('suggestions');
-});
     // --- إدارة الملف الشخصي العامة ---
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

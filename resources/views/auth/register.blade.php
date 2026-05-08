@@ -105,7 +105,8 @@ button:hover {
             <option value="eleveur">🐄 فلاح</option>
             <option value="veterinaire">🩺 بيطري</option>
             <option value="distributeur">🚚 موزع</option>
-        </select>
+             <option value="admin">مدير النظام (Admin)</option>
+     </select>
     </div>
 
     <!-- PASSWORD -->

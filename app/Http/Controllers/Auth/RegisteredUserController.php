@@ -20,24 +20,22 @@ class RegisteredUserController extends Controller
 
     public function store(Request $request)
     {
-        //  validation
+        // 1. التثبت من البيانات (Validation)
         $request->validate([
             'name' => 'required|string',
             'email' => 'required|email|unique:users',
             'password' => 'required|confirmed|min:6',
-            'role' => 'required|in:eleveur,veterinaire,distributeur',
+            'role' => 'required|in:eleveur,veterinaire,distributeur,admin', // تأكدنا من وجود admin هنا
             'telephone' => 'required',
             'address' => 'required',
-
             
             // GPS 
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
         ]);
 
-        //  create user
+        // 2. إنشاء المستخدم (User)
         $user = new User();
-
         $user->name = $request->name;
         $user->email = $request->email;
         $user->password = Hash::make($request->password);
@@ -45,13 +43,13 @@ class RegisteredUserController extends Controller
         $user->address = $request->address;
         $user->role = $request->role;
 
-        //  حفظ الموقع
+        // حفظ الموقع
         $user->latitude = $request->latitude;
         $user->longitude = $request->longitude;
 
         $user->save();
 
-        //  role
+        // 3. إنشاء السجل في الجدول التابع للرول (إلا الأدمن لا يحتاج جدول إضافي)
         if ($request->role === 'distributeur') {
             Distributeur::create([
                 'user_id' => $user->id,
@@ -78,17 +76,18 @@ class RegisteredUserController extends Controller
                 'telephone' => $request->telephone,
                 'address' => $request->address,
             ]);
-        }
-
-        //  login
+        } 
+        
+        // 4. تسجيل الدخول تلقائياً
         Auth::login($user);
 
-        //  توجيه حسب role
+        // 5. التوجيه الذكي حسب الـ Role (التعديل هنا)
         return match ($user->role) {
-            'veterinaire' => redirect()->route('veterinaire.dashboard'),
+            'admin'        => redirect()->route('admin.panel'), // يذهب لجدول الأدمن الأخضر
+            'veterinaire'  => redirect()->route('veterinaire.dashboard'),
             'distributeur' => redirect()->route('distributeur.dashboard'),
-            'eleveur' => redirect()->route('eleveur.dashboard'),
-            default => redirect('/'),
+            'eleveur'      => redirect()->route('eleveur.dashboard'),
+            default        => redirect('/'),
         };
     }
 }
