@@ -58,39 +58,38 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // --- قسم البيطري (Veterinaire) ---
-    Route::prefix('veterinaire')->name('veterinaire.')->group(function () {
+// تم إضافة 'auth' لضمان أن المسجلين فقط يدخلون، ويمكنك إضافة 'checkRole:veterinaire' إذا كان لديك Middleware للأدوار
+Route::middleware(['auth'])->prefix('veterinaire')->name('veterinaire.')->group(function () {
     
-    // لوحة التحكم والبروفايل
+    // 1. لوحة التحكم والبروفايل
     Route::get('/dashboard', [VeterinaireController::class, 'dashboard'])->name('dashboard');
     Route::get('/profile', [VeterinaireController::class, 'profile'])->name('profile');
     
-    // إدارة الاستشارات (الطبيب مع الفلاح)
+    // 2. إدارة الاستشارات (الطبيب مع الفلاح)
     Route::get('/consultations', [ConsultationController::class, 'indexVet'])->name('consultations');
     Route::post('/consultations/{id}/status', [ConsultationController::class, 'updateStatus'])->name('consultations.status');
-    Route::put('/consultation/{id}', [ConsultationController::class, 'update'])->name('consultations.update');
+    Route::put('/consultations/{id}', [ConsultationController::class, 'update'])->name('consultations.update');
 
-    // --- نظام طلب الأدوية (الطبيب يطلب من الموزع) ---
-    Route::get('/api/medicines/suggestions', [VeterinaireController::class, 'getSuggestions']);
-    // 1. سوق الأدوية والبحث (Market)
+    // 3. نظام البحث وطلب الأدوية (Market & Autocomplete)
+    // ✅ ملاحظة: هذا المسار سيصبح: /veterinaire/api/medicines/suggestions
+    Route::get('/api/medicines/suggestions', [VeterinaireController::class, 'getSuggestions'])->name('api.suggestions');
+    
+    // صفحة نتائج البحث
     Route::get('/market', [VeterinaireController::class, 'market'])->name('market');
     
-    // 2. اقتراحات البحث (Ajax) - إذا كنتِ تستخدمين البحث الذكي
-    Route::get('/suggestions', [VeterinaireController::class, 'getSuggestions'])->name('suggestions');
-
-    // 3. إرسال الطلب للموزع
+    // إرسال الطلب للموزع
     Route::post('/order/store', [VeterinaireController::class, 'storeOrder'])->name('order.store');
 
-    // 4. صفحة "طلباتي" لتتبع حالة الطلب (مقبول/مرفوض)
+    // 4. سجل الطلبات (لتتبع حالة الطلب وتصفير الإشعارات)
     Route::get('/mes-commandes', [VeterinaireController::class, 'myOrders'])->name('my_orders');
 
-    // --- التبليغ عن الأوبئة ---
+    // 5. التبليغ عن الأوبئة
     Route::get('/report', [VeterinaireController::class, 'report'])->name('report');
     Route::post('/report/send', [VeterinaireController::class, 'sendReport'])->name('report.send');
 
-    // --- المحادثات ---
+    // 6. الدردشة (رسائل الفلاحين)
     Route::get('/chats', [MessageController::class, 'index'])->name('chats');
 });
-
    // --- قسم الموزع (Distributeur) ---
 Route::prefix('distributeur')->name('distributeur.')->group(function () {
     Route::get('/dashboard', [DistributeurController::class, 'dashboard'])->name('dashboard');

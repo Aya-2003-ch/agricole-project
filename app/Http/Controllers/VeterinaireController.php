@@ -36,82 +36,104 @@ class VeterinaireController extends Controller
     }
 
     // 2. البحث عن الأدوية المتاحة عند الموزعين (Market)
-    public function market(Request $request)
-    {
-        $searchQuery = $request->input('medicine'); // تأكدي أن الاسم في الفورم هو medicine
+ public function market(Request $request)
+{
+    $searchQuery = $request->input('medicine');
 
-        $results = DB::table('produits')
-            ->join('users', 'produits.user_id', '=', 'users.id')
-            ->select(
-                'users.id as distributeur_id',
-                'users.name as distributeur_name',
-                'users.address as distributeur_address',
-                'users.latitude as lat', // مهم للخريطة
-                'users.longitude as lng', // مهم للخريطة
-                'produits.id as produit_id',
-                'produits.nom as medicine_name',
-                'produits.prix as prix'
-            )
-            ->where('produits.nom', 'LIKE', '%' . $searchQuery . '%') 
-            ->latest('produits.created_at')
-            ->get();
+    $results = DB::table('produits')
+        // 1. الربط مع جدول المخزن باستخدام produit_id
+        ->join('stores', 'produits.id', '=', 'stores.produit_id')
+        
+        // 2. الربط مع جدول الموزعين (الوسيط) باستخدام distributeur_id
+        ->join('distributeurs', 'stores.distributeur_id', '=', 'distributeurs.id')
+        
+        // 3. الربط مع جدول المستخدمين لجلب الاسم والعنوان والإحداثيات
+        // ملاحظة: افترضي أن جدول distributeurs فيه حقل اسمه user_id يربطه بجدول users
+        ->join('users', 'distributeurs.user_id', '=', 'users.id')
+        
+        ->select(
+            'users.id as distributeur_id',
+            'users.name as distributeur_name',
+            'users.address as distributeur_address',
+            'users.latitude as lat',
+            'users.longitude as lng',
+            'produits.id as produit_id',
+            'produits.nom as medicine_name',
+            'stores.prix as prix',
+            'stores.quantite as stock'
+        )
+        ->where('produits.nom', 'LIKE', '%' . $searchQuery . '%')
+        ->get();
 
-        // نحتاج أيضاً لجلب الموزعين في صفحة النتائج لتبقى الخريطة تعمل
-        $allDistributors = User::where('role', 'distributeur')->get(['name', 'latitude', 'longitude', 'address']);
+    $allDistributors = User::where('role', 'distributeur')->get(['name', 'latitude', 'longitude', 'address']);
 
-        return view('veterinaire.dashboard', compact('results', 'searchQuery', 'allDistributors'));
-    }
-
+    return view('veterinaire.dashboard', compact('results', 'searchQuery', 'allDistributors'));
+}
     // 3. إرسال طلب شراء للموزع
     public function storeOrder(Request $request)
-    {
-        $request->validate([
-            'produit_id' => 'required|exists:produits,id',
-            'receiver_id' => 'required|exists:users,id',
-            'quantity' => 'required|integer|min:1',
-        ]);
+{
+    // 1. التحقق من البيانات (تأكد أن الاسم هنا يطابق الـ input في الـ Modal)
+    $request->validate([
+        'produit_id'  => 'required|exists:produits,id',
+        'receiver_id' => 'required',
+        'quantity'    => 'required|integer|min:1',
+        'phone'       => 'required|string',
+        'address'     => 'required|string',
+    ]);
 
-        Commande::create([
-            'sender_id'   => auth()->id(),
-            'receiver_id' => $request->receiver_id,
-            'produit_id'  => $request->produit_id,
-            'quantity'    => $request->quantity,
-            'status'      => 'pending',
-            'is_seen'     => false,
-        ]);
+    // 2. الحفظ في قاعدة البيانات
+    \App\Models\Commande::create([
+        'sender_id'   => auth()->id(),
+        'receiver_id' => $request->receiver_id,
+        
+        // التعديل هنا: نرسل القيمة للعمود الذي تطلبه قاعدة البيانات
+        'product_id'  => $request->produit_id, 
+        
+        'quantity'    => $request->quantity,
+        'phone'       => $request->phone,
+        'address'     => $request->address,
+        'status'      => 'pending',
+    ]);
 
-        return back()->with('success', 'تم إرسال طلب الدواء للموزع بنجاح');
-    }
+    return back()->with('success', 'تم إرسال طلبك بنجاح');
+}
 
     // 4. عرض سجل طلباتي وتصفير الإشعارات عند الدخول
-    public function myOrders()
-    {
-        // تصفير الإشعارات عند دخول الصفحة
-        Commande::where('sender_id', auth()->id())
-                ->whereIn('status', ['accepted', 'rejected'])
-                ->where('is_seen', false)
-                ->update(['is_seen' => true]);
+   public function myOrders()
+{
+    $userId = auth()->id();
 
-        $commandes = Commande::where('sender_id', auth()->id())
-            ->with(['produit', 'receiver'])
-            ->latest()
-            ->get();
-            
-        return view('veterinaire.my_orders', compact('commandes'));
-    }
+    // 1. تحديث "تمت الرؤية" فقط للطلبات التي انتهى الموزع من معالجتها
+    // ولا نقوم بتغيير الـ status هنا أبداً
+    Commande::where('sender_id', $userId)
+            ->whereIn('status', ['accepted', 'rejected']) 
+            ->where('is_seen', false)
+            ->update(['is_seen' => true]);
+
+    // 2. جلب الطلبات مع التأكد من جلب العلاقات الصحيحة
+    // ملاحظة: تأكدي هل اسم العلاقة 'produit' أم 'product' في الموديل
+    $orders = Commande::where('sender_id', $userId)
+                ->with(['produit', 'receiver']) 
+                ->latest()
+                ->get();
+
+    return view('veterinaire.my_orders', compact('orders'));
+}
 
     // 5. اقتراحات البحث (Ajax) لخاصية Autocomplete
-    public function getSuggestions(Request $request)
-    {
-        $term = $request->q; // استخدام q كما في كود الـ JavaScript
-        $suggestions = Produit::where('nom', 'LIKE', '%'.$term.'%')
-                            ->select('nom')
-                            ->distinct()
-                            ->limit(10)
-                            ->get();
+  public function getSuggestions(Request $request)
+{
+    $query = $request->q;
 
-        return response()->json($suggestions);
-    }
+    // استخدام الـ % قبل وبعد الكلمة لضمان إيجادها في أي مكان، 
+    // أو إبقاء % في الأخير فقط حسب رغبتك
+    $suggestions = Produit::where('nom', 'LIKE', '%' . $query . '%') 
+                        ->distinct()
+                        ->limit(10)
+                        ->pluck('nom'); 
+
+    return response()->json($suggestions);
+}
 
     // 6. التبليغ عن الأوبئة
     public function report() { return view('veterinaire.report'); }

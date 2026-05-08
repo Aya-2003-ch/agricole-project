@@ -25,6 +25,7 @@
             color: var(--text-main);
             margin: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: right;
         }
 
         /* SIDEBAR */
@@ -68,11 +69,12 @@
         .search-bar-custom {
             background: white; border-radius: 15px; padding: 8px;
             display: flex; max-width: 800px; margin: 20px auto 0;
+            border: 2px solid transparent;
         }
 
         .search-bar-custom input {
             border: none; flex: 1; padding: 10px 20px; outline: none;
-            font-size: 16px; border-radius: 15px;
+            font-size: 16px; border-radius: 15px; color: #333;
         }
 
         .search-bar-custom button {
@@ -81,7 +83,6 @@
             cursor: pointer; transition: 0.3s;
         }
 
-        /* NOTIFICATION BADGE */
         .badge-notify {
             background: #ef4444; color: white; font-size: 11px;
             padding: 3px 7px; border-radius: 50%; position: relative;
@@ -137,25 +138,28 @@
         <div class="col-md-12">
             <div class="p-4 bg-white rounded-4 shadow-sm border-end border-5 border-success">
                 <h2 class="fw-bold">مرحباً، دكتور {{ Auth::user()->name }} 👋</h2>
-                <p class="text-muted">نظام AgroDz يساعدك في الوصول للأدوية وتلقي استشارات الفلاحين في منطقتك.</p>
+                <p class="text-muted">ابحث عن الأدوية، تواصل مع الموزعين، وتابع استشارات الفلاحين.</p>
             </div>
         </div>
     </div>
 
     <div class="search-container shadow-sm">
         <h3 class="fw-bold"><i class="fas fa-search me-2"></i> ابحث عن الأدوية عند الموزعين</h3>
-        <p class="opacity-75">اكتب اسم الدواء وستظهر لك قائمة بالموزعين القريبين منك</p>
+        <p class="opacity-75">اكتب اسم الدواء لتظهر لك الاقتراحات وأماكن الموزعين</p>
         
         <form action="{{ route('veterinaire.market') }}" method="GET" class="search-bar-custom shadow">
             <input type="text" name="medicine" id="medicineInput" list="medicinesList" 
-                   placeholder="اكتب حرفين من اسم المنتج..." value="{{ request('medicine') }}" autocomplete="off">
+                   placeholder="اكتب حرفين مثل (Pi)..." value="{{ request('medicine') }}" autocomplete="off">
+            
             <datalist id="medicinesList"></datalist>
+            
             <button type="submit">بحث الآن</button>
         </form>
     </div>
 
     @if(isset($results))
     <div class="row mb-5">
+        <h4 class="fw-bold mb-4">نتائج البحث عن: {{ $searchQuery }}</h4>
         @forelse($results as $item)
         <div class="col-md-4 mb-4">
             <div class="card medicine-card h-100 shadow-sm">
@@ -165,7 +169,7 @@
                         <span class="fw-bold text-success">{{ $item->prix }} د.ج</span>
                     </div>
                     <h5 class="fw-bold text-primary">{{ $item->medicine_name }}</h5>
-                    <p class="small text-muted"><i class="fas fa-truck"></i> الموزع: {{ $item->distributeur_name }}</p>
+                    <p class="small text-muted mb-1"><i class="fas fa-truck"></i> الموزع: {{ $item->distributeur_name }}</p>
                     <p class="small text-muted"><i class="fas fa-map-marker-alt"></i> {{ $item->distributeur_address }}</p>
 
                     <button class="btn btn-success w-100 fw-bold rounded-3" data-bs-toggle="modal" data-bs-target="#orderModal{{ $loop->index }}">
@@ -176,35 +180,56 @@
         </div>
 
         <div class="modal fade" id="orderModal{{ $loop->index }}" tabindex="-1">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content rounded-4 border-0">
-                    <div class="modal-header">
-                        <h5 class="modal-title fw-bold">تأكيد الطلبية</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <form action="{{ route('veterinaire.order.store') }}" method="POST">
-                        @csrf
-                        <div class="modal-body text-center">
-                            <p>طلب شراء <strong>{{ $item->medicine_name }}</strong> من الموزع {{ $item->distributeur_name }}</p>
-                            <input type="hidden" name="produit_id" value="{{ $item->produit_id }}">
-                            <input type="hidden" name="receiver_id" value="{{ $item->distributeur_id }}">
-                            <input type="number" name="quantity" class="form-control text-center mx-auto mt-3" value="1" min="1" style="max-width: 100px;">
-                        </div>
-                        <div class="modal-footer justify-content-center">
-                            <button type="submit" class="btn btn-success px-5">إرسال الطلب</button>
-                        </div>
-                    </form>
-                </div>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0">
+            <div class="modal-header bg-success text-white rounded-top-4">
+                <h5 class="modal-title fw-bold">تأكيد طلب الشراء</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
+            <form action="{{ route('veterinaire.order.store') }}" method="POST">
+                @csrf
+                <div class="modal-body">
+                    <div class="text-center mb-4">
+                        <p class="mb-1">أنت بصدد طلب <strong>{{ $item->medicine_name }}</strong></p>
+                        <p class="text-muted small">الموزع: {{ $item->distributeur_name }}</p>
+                    </div>
+
+                    <input type="hidden" name="produit_id" value="{{ $item->produit_id }}">
+                    <input type="hidden" name="receiver_id" value="{{ $item->distributeur_id }}">
+
+                    <div class="mb-3 text-end">
+                        <label class="form-label fw-bold">رقم الهاتف للتواصل:</label>
+                        <input type="text" name="phone" class="form-control" placeholder="0XXXXXXXXX" required>
+                    </div>
+
+                    <div class="mb-3 text-end">
+                        <label class="form-label fw-bold">عنوان التوصيل:</label>
+                        <textarea name="address" class="form-control" rows="2" placeholder="اكتب عنوان العيادة بالتفصيل..." required></textarea>
+                    </div>
+
+                    <div class="mb-3 text-end">
+                        <label class="form-label fw-bold">الكمية المطلوبة:</label>
+                        <input type="number" name="quantity" class="form-control text-center" value="1" min="1" required>
+                    </div>
+                </div>
+                <div class="modal-footer justify-content-center border-0 pb-4">
+                    <button type="submit" class="btn btn-success px-5 rounded-pill fw-bold">إرسال الطلب الآن</button>
+                </div>
+            </form>
         </div>
+    </div>
+</div>
         @empty
-        <div class="col-12 text-center text-muted">لم نجد نتائج مطابقة لبحثك.</div>
+        <div class="col-12 text-center py-5">
+            <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
+            <p class="text-muted">عذراً، لم نجد أي منتج بهذا الاسم حالياً.</p>
+        </div>
         @endforelse
     </div>
     @endif
 
-    <div class="bg-white p-4 rounded-4 shadow-sm">
-        <h4 class="fw-bold mb-3">📍 خريطة الموزعين المعتمدين</h4>
+    <div class="bg-white p-4 rounded-4 shadow-sm mt-4">
+        <h4 class="fw-bold mb-3"><i class="fas fa-map-marked-alt text-success"></i> مواقع الموزعين في منطقتك</h4>
         <div id="map"></div>
     </div>
 
@@ -214,17 +239,19 @@
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 <script>
-    // 1. الخريطة الأساسية
+    // 1. إعداد الخريطة
     const userLat = {{ Auth::user()->latitude ?? 36.4621 }};
     const userLng = {{ Auth::user()->longitude ?? 7.4311 }};
     const map = L.map('map').setView([userLat, userLng], 10);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© AgroDz'
+    }).addTo(map);
 
-    // أيقونة الطبيب (أخضر)
-    L.marker([userLat, userLng]).addTo(map).bindPopup("<b>أنت هنا</b>").openPopup();
+    // علامة موقع الطبيب (أخضر)
+    L.marker([userLat, userLng]).addTo(map).bindPopup("<b>موقعك الحالي</b>").openPopup();
 
-    // 2. عرض جميع الموزعين (النقاط الزرقاء)
+    // 2. عرض الموزعين على الخريطة
     @if(isset($allDistributors))
         const allDists = @json($allDistributors);
         allDists.forEach(dist => {
@@ -232,6 +259,7 @@
                 L.marker([dist.latitude, dist.longitude], {
                     icon: L.icon({
                         iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png',
+                        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
                         iconSize: [25, 41], iconAnchor: [12, 41]
                     })
                 }).addTo(map).bindPopup(`<b>الموزع: ${dist.name}</b><br>${dist.address}`);
@@ -239,25 +267,35 @@
         });
     @endif
 
-    // 3. نظام الاقتراحات (Autocomplete)
+    // 3. نظام الاقتراحات التلقائي (Autocomplete)
     const medInput = document.getElementById('medicineInput');
     const medList = document.getElementById('medicinesList');
 
-    medInput.addEventListener('input', function() {
-        const query = this.value;
-        if (query.length < 2) return;
-
-        fetch(`/api/medicines/suggestions?q=${query}`)
-            .then(res => res.json())
-            .then(data => {
+    if (medInput) {
+        medInput.addEventListener('input', function() {
+            const query = this.value;
+            
+            if (query.length < 2) {
                 medList.innerHTML = '';
-                data.forEach(item => {
-                    const option = document.createElement('option');
-                    option.value = item.nom;
-                    medList.appendChild(option);
-                });
-            });
-    });
+                return;
+            }
+
+            // جلب البيانات من الـ API الذي أنشأناه في الـ Controller
+            fetch("{{ route('veterinaire.api.suggestions') }}?q=" + encodeURIComponent(query))
+                .then(res => res.json())
+                .then(data => {
+                    medList.innerHTML = ''; // تنظيف القائمة قبل إضافة الجديد
+                    
+                    data.forEach(item => {
+                        const option = document.createElement('option');
+                        // نضع اسم الدواء في الـ value ليختاره المستخدم
+                        option.value = (typeof item === 'object') ? item.nom : item; 
+                        medList.appendChild(option);
+                    });
+                })
+                .catch(err => console.error("خطأ في الاتصال بالخادم:", err));
+        });
+    }
 </script>
 </body>
 </html>
