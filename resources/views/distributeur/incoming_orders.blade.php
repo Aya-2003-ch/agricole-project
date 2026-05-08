@@ -21,7 +21,7 @@
             padding: 0;
         }
         
-        .container-fluid { padding: 40px; max-width: 1200px; }
+        .container-fluid { padding: 40px; max-width: 1300px; }
         
         .order-card {
             background: white; border-radius: 20px; padding: 30px;
@@ -35,6 +35,16 @@
         .status-pending { background: #fff3cd; color: #856404; }
         .status-accepted { background: #d1e7dd; color: #0f5132; }
         .status-rejected { background: #f8d7da; color: #842029; }
+
+        .role-badge {
+            font-size: 12px;
+            font-weight: 600;
+            padding: 5px 12px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
 
         .back-btn {
             width: 40px; height: 40px;
@@ -54,7 +64,7 @@
 <body>
 
     <div class="container-fluid mx-auto">
-        <div class="order-card">
+        <div class="order-card shadow border-0">
             
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div class="d-flex align-items-center gap-3">
@@ -63,7 +73,7 @@
                     </a>
                     <div>
                         <h3 class="text-success fw-bold mb-0">قائمة الطلبات الواردة</h3>
-                        <p class="text-muted small mb-0">إدارة طلبات الموزعين والمنتجات</p>
+                        <p class="text-muted small mb-0">إدارة طلبات الموزعين والأطباء البياطرة</p>
                     </div>
                 </div>
                 <div class="text-start">
@@ -85,8 +95,8 @@
                         <tr>
                             <th>المنتج</th>
                             <th>الكمية</th>
-                            <th>المشتري</th>
-                            <th>رقم الهاتف</th>
+                            <th>المرسل</th>
+                            <th>نوع الجهة</th> <th>رقم الهاتف</th>
                             <th>التاريخ</th>
                             <th>الحالة</th>
                             <th>الإجراءات</th>
@@ -95,10 +105,23 @@
                     <tbody>
                         @forelse($orders as $order)
                         <tr>
-                            <td class="fw-bold">{{ $order->produit?->nom ?? 'منتج غير متوفر' }}</td>
+                            <td class="fw-bold text-dark">{{ $order->produit?->nom ?? 'منتج غير متوفر' }}</td>
                             <td><span class="badge bg-light text-dark border px-3">{{ $order->quantity }}</span></td>
-                            <td>{{ $order->sender->name }}</td>
-                            <td>{{ $order->phone }}</td>
+                            <td class="fw-medium text-secondary">{{ $order->sender->name }}</td>
+                            
+                            <td>
+                                @if($order->sender->role == 'veterinaire')
+                                    <span class="role-badge bg-info-subtle text-info border border-info">
+                                        <i class="fas fa-user-md"></i> طبيب بيطري
+                                    </span>
+                                @else
+                                    <span class="role-badge bg-primary-subtle text-primary border border-primary">
+                                        <i class="fas fa-truck-moving"></i> موزع
+                                    </span>
+                                @endif
+                            </td>
+
+                            <td>{{ $order->phone ?? 'لا يوجد' }}</td>
                             <td class="text-muted small">{{ $order->created_at->format('Y-m-d') }}</td>
                             <td>
                                 @if($order->status == 'pending')
@@ -135,10 +158,10 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="7" class="text-center py-5">
+                            <td colspan="8" class="text-center py-5">
                                 <div class="opacity-50">
-                                    <i class="fas fa-folder-open fa-3x mb-3"></i>
-                                    <p>لا توجد طلبات جديدة واردة في الوقت الحالي.</p>
+                                    <i class="fas fa-inbox fa-3x mb-3 text-muted"></i>
+                                    <p class="fw-bold">لا توجد طلبات جديدة واردة في الوقت الحالي.</p>
                                 </div>
                             </td>
                         </tr>

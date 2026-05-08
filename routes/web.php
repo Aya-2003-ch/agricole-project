@@ -42,7 +42,7 @@ Route::middleware(['auth'])->group(function () {
     })->name('dashboard');
 
     // --- قسم الفلاح (Eleveur) ---
-    Route::prefix('eleveur')->name('eleveur.')->group(function () {
+        Route::prefix('eleveur')->name('eleveur.')->group(function () {
         Route::get('/dashboard', [EleveurController::class, 'dashboard'])->name('dashboard');
         Route::post('/update-location', [EleveurController::class, 'updateLocation'])->name('updateLocation');
         Route::get('/search-medicine', [EleveurController::class, 'search'])->name('search');
@@ -59,26 +59,37 @@ Route::middleware(['auth'])->group(function () {
 
     // --- قسم البيطري (Veterinaire) ---
     Route::prefix('veterinaire')->name('veterinaire.')->group(function () {
-        Route::get('/dashboard', [VeterinaireController::class, 'dashboard'])->name('dashboard');
-        Route::get('/profile', [VeterinaireController::class, 'profile'])->name('profile');
-        
-        // إدارة الاستشارات الواصلة للبيطري
-        Route::get('/consultations', [ConsultationController::class, 'indexVet'])->name('consultations');
-        Route::post('/consultations/{id}/status', [ConsultationController::class, 'updateStatus'])->name('consultations.status');
+    
+    // لوحة التحكم والبروفايل
+    Route::get('/dashboard', [VeterinaireController::class, 'dashboard'])->name('dashboard');
+    Route::get('/profile', [VeterinaireController::class, 'profile'])->name('profile');
+    
+    // إدارة الاستشارات (الطبيب مع الفلاح)
+    Route::get('/consultations', [ConsultationController::class, 'indexVet'])->name('consultations');
+    Route::post('/consultations/{id}/status', [ConsultationController::class, 'updateStatus'])->name('consultations.status');
+    Route::put('/consultation/{id}', [ConsultationController::class, 'update'])->name('consultations.update');
 
-        Route::put('/consultation/{id}', [ConsultationController::class, 'update']);
-        // طلب الأدوية من الموزعين
-        Route::get('/search-medicines', [VeterinaireController::class, 'searchMedicines'])->name('searchMedicines');
-        Route::post('/order/place', [VeterinaireController::class, 'placeOrder'])->name('order.place');
-        Route::get('/my-orders', [VeterinaireController::class, 'myOrders'])->name('commandes');
+    // --- نظام طلب الأدوية (الطبيب يطلب من الموزع) ---
+    Route::get('/api/medicines/suggestions', [VeterinaireController::class, 'getSuggestions']);
+    // 1. سوق الأدوية والبحث (Market)
+    Route::get('/market', [VeterinaireController::class, 'market'])->name('market');
+    
+    // 2. اقتراحات البحث (Ajax) - إذا كنتِ تستخدمين البحث الذكي
+    Route::get('/suggestions', [VeterinaireController::class, 'getSuggestions'])->name('suggestions');
 
-        // التبليغ عن الأوبئة
-        Route::get('/report', [VeterinaireController::class, 'report'])->name('report');
-        Route::post('/report/send', [VeterinaireController::class, 'sendReport'])->name('report.send');
+    // 3. إرسال الطلب للموزع
+    Route::post('/order/store', [VeterinaireController::class, 'storeOrder'])->name('order.store');
 
-        // المحادثات (البيطري مع الفلاح)
-        Route::get('/chats', [MessageController::class, 'index'])->name('chats');
-    });
+    // 4. صفحة "طلباتي" لتتبع حالة الطلب (مقبول/مرفوض)
+    Route::get('/mes-commandes', [VeterinaireController::class, 'myOrders'])->name('my_orders');
+
+    // --- التبليغ عن الأوبئة ---
+    Route::get('/report', [VeterinaireController::class, 'report'])->name('report');
+    Route::post('/report/send', [VeterinaireController::class, 'sendReport'])->name('report.send');
+
+    // --- المحادثات ---
+    Route::get('/chats', [MessageController::class, 'index'])->name('chats');
+});
 
    // --- قسم الموزع (Distributeur) ---
 Route::prefix('distributeur')->name('distributeur.')->group(function () {

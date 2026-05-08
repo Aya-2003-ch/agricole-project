@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Consultation extends Model
 {
@@ -30,5 +31,10 @@ public function eleveur()
 {
     return $this->belongsTo(User::class, 'eleveur_id');
 }
+public function user(): BelongsTo
+    {
+        // تأكدي أن الحقل في قاعدة البيانات اسمه user_id
+        return $this->belongsTo(User::class);
+    }
 
 }

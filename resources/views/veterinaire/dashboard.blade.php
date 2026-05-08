@@ -7,6 +7,7 @@
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
 
     <style>
         :root {
@@ -36,135 +37,64 @@
             padding: 30px 15px;
             right: 0;
             box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+            z-index: 1000;
         }
 
         .sidebar-brand {
-            text-align: center;
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 40px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            text-align: center; font-size: 24px; font-weight: bold;
+            margin-bottom: 40px; border-bottom: 1px solid rgba(255,255,255,0.1);
             padding-bottom: 15px;
         }
 
         .sidebar a {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 14px;
-            margin-bottom: 8px;
-            color: #ecfdf5;
-            text-decoration: none;
-            border-radius: 12px;
-            transition: 0.3s;
+            display: flex; align-items: center; gap: 12px; padding: 14px;
+            margin-bottom: 8px; color: #ecfdf5; text-decoration: none;
+            border-radius: 12px; transition: 0.3s;
         }
 
         .sidebar a:hover, .sidebar a.active {
-            background: var(--accent-green);
-            transform: translateX(-5px);
+            background: var(--accent-green); transform: translateX(-5px); color: white;
         }
 
-        .report-link { color: #fca5a5 !important; margin-top: 20px !important; }
-        .report-link:hover { background: var(--warning-red) !important; color: white !important; }
+        .main-content { margin-right: 260px; padding: 30px; }
 
-        /* CONTENT */
-        .main-content {
-            margin-right: 260px;
-            padding: 30px;
+        /* SEARCH SECTION */
+        .search-container {
+            background: linear-gradient(135deg, #14532d, #166534);
+            color: white; border-radius: 20px; padding: 40px;
+            margin-bottom: 30px; box-shadow: var(--shadow); text-align: center;
         }
 
-        /* HEADER CARDS */
-        .top-bar {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 20px;
-            margin-bottom: 30px;
+        .search-bar-custom {
+            background: white; border-radius: 15px; padding: 8px;
+            display: flex; max-width: 800px; margin: 20px auto 0;
         }
 
-        .welcome-card {
-            background: var(--white);
-            padding: 25px;
-            border-radius: 20px;
-            box-shadow: var(--shadow);
-            border-right: 8px solid var(--accent-green);
+        .search-bar-custom input {
+            border: none; flex: 1; padding: 10px 20px; outline: none;
+            font-size: 16px; border-radius: 15px;
         }
 
-        /* SEARCH AREA */
-        .search-section {
-            background: var(--white);
-            padding: 20px;
-            border-radius: 20px;
-            box-shadow: var(--shadow);
-            margin-bottom: 30px;
+        .search-bar-custom button {
+            background: var(--accent-green); color: white; border: none;
+            padding: 10px 30px; border-radius: 12px; font-weight: bold;
+            cursor: pointer; transition: 0.3s;
         }
 
-        .search-input-wrapper {
-            position: relative;
-            display: flex;
-            gap: 10px;
+        /* NOTIFICATION BADGE */
+        .badge-notify {
+            background: #ef4444; color: white; font-size: 11px;
+            padding: 3px 7px; border-radius: 50%; position: relative;
+            top: -2px; font-weight: bold;
         }
 
-        .search-input-wrapper input {
-            flex: 1;
-            padding: 15px 20px;
-            border-radius: 12px;
-            border: 2px solid #e2e8f0;
-            outline: none;
-            font-size: 16px;
+        #map { height: 450px; border-radius: 20px; z-index: 1; border: 1px solid #e2e8f0; }
+
+        .medicine-card {
+            border: none; border-radius: 18px; transition: 0.3s;
+            background: white; box-shadow: 0 5px 15px rgba(0,0,0,0.05);
         }
-
-        /* MAP BOX */
-        .map-card {
-            background: var(--white);
-            padding: 20px;
-            border-radius: 20px;
-            box-shadow: var(--shadow);
-            margin-bottom: 30px;
-        }
-
-        #map { height: 400px; border-radius: 15px; }
-
-        /* GRID SERVICES */
-        .actions-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 20px;
-        }
-
-        .action-card {
-            background: var(--white);
-            padding: 25px;
-            border-radius: 20px;
-            text-align: center;
-            text-decoration: none;
-            color: var(--text-main);
-            box-shadow: var(--shadow);
-            transition: 0.3s;
-            border: 1px solid transparent;
-        }
-
-        .action-card:hover {
-            transform: translateY(-10px);
-            border-color: var(--accent-green);
-        }
-
-        .action-card i {
-            font-size: 45px;
-            color: var(--accent-green);
-            margin-bottom: 15px;
-            display: block;
-        }
-
-        .action-card.alert i { color: var(--warning-red); }
-
-        .badge {
-            background: var(--warning-red);
-            color: white;
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-size: 12px;
-            margin-right: 5px;
-        }
+        .medicine-card:hover { transform: translateY(-5px); }
     </style>
 </head>
 <body>
@@ -172,141 +102,162 @@
 <nav class="sidebar">
     <div class="sidebar-brand">🌿 AgroDz البيطري</div>
     
-    <a href="#" class="active"><i class="fas fa-th-large"></i> الرئيسية</a>
-    <a href="{{ route('veterinaire.consultations') }}"><i class="fas fa-stethoscope"></i> الاستشارات الميدانية</a>
-    <a href="{{ route('veterinaire.consultations') }}" class="nav-link">
-    <i class="fas fa-user-md"></i> استشارات بيطرية
-    @php $count = \App\Models\Consultation::where('veterinaire_id', auth()->id())->where('status', 'pending')->count(); @endphp
-    @if($count > 0)
-        <span class="badge" style="background: red; color: white; border-radius: 50%; padding: 2px 6px;">{{ $count }}</span>
-    @endif
-</a>
-    <a href="{{ route('veterinaire.commandes') }}"><i class="fas fa-shopping-basket"></i> سجل الطلبات</a>
-    <a href="{{ route('veterinaire.chats') }}"><i class="fas fa-comments"></i> دردشة الفلاحين <span class="badge">3</span></a>
+    <a href="{{ route('veterinaire.dashboard') }}" class="active"><i class="fas fa-th-large"></i> الرئيسية</a>
+    
+    <a href="{{ route('veterinaire.consultations') }}">
+        <i class="fas fa-stethoscope"></i> الاستشارات
+        @if(isset($consultations) && $consultations->count() > 0)
+            <span class="badge-notify">{{ $consultations->count() }}</span>
+        @endif
+    </a>
+
+    <a href="{{ route('veterinaire.my_orders') }}">
+        <i class="fas fa-shopping-basket"></i> سجل الطلبات
+        @if(isset($orderNotifications) && $orderNotifications > 0)
+            <span class="badge-notify">{{ $orderNotifications }}</span>
+        @endif
+    </a>
+
+    <a href="{{ route('veterinaire.chats') }}"><i class="fas fa-comments"></i> الدردشة</a>
     <a href="{{ route('veterinaire.profile') }}"><i class="fas fa-user-md"></i> الملف الشخصي</a>
     
-    <a href="{{ route('veterinaire.report') }}" class="report-link">
+    <a href="{{ route('veterinaire.report') }}" class="text-danger mt-4 fw-bold">
         <i class="fas fa-biohazard"></i> التبليغ عن وباء
     </a>
 
     <a href="{{ route('logout') }}" style="margin-top: auto;" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-        <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
+        <i class="fas fa-sign-out-alt"></i> خروج
     </a>
     <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">@csrf</form>
 </nav>
 
 <div class="main-content">
     
-    <div class="top-bar">
-        <div class="welcome-card">
-            <h2>مرحباً، دكتور {{ Auth::user()->name }} 👋</h2>
-            <p style="color: #64748b;">لديك اليوم 4 استشارات مجدولة وتنبيه بخصوص صحة المواشي في منطقتك.</p>
-        </div>
-        <div class="welcome-card" style="border-right-color: #ef4444;">
-            <h3 style="color: #ef4444;"><i class="fas fa-exclamation-triangle"></i> حالة الطوارئ</h3>
-            <p>تم تسجيل حالة اشتباه "حمى قلاعية" على بعد 10 كم.</p>
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="p-4 bg-white rounded-4 shadow-sm border-end border-5 border-success">
+                <h2 class="fw-bold">مرحباً، دكتور {{ Auth::user()->name }} 👋</h2>
+                <p class="text-muted">نظام AgroDz يساعدك في الوصول للأدوية وتلقي استشارات الفلاحين في منطقتك.</p>
+            </div>
         </div>
     </div>
 
-    <div class="search-section" id="med-search-section">
-        <h3><i class="fas fa-search"></i> نظام البحث وطلب الأدوية</h3>
-        <p style="font-size: 14px; color: #64748b; margin-bottom: 15px;">ابحث عن الأدوية والمواد البيطرية في مخازن الموزعين واطلبها لعيادتك مباشرة.</p>
+    <div class="search-container shadow-sm">
+        <h3 class="fw-bold"><i class="fas fa-search me-2"></i> ابحث عن الأدوية عند الموزعين</h3>
+        <p class="opacity-75">اكتب اسم الدواء وستظهر لك قائمة بالموزعين القريبين منك</p>
         
-        <form action="{{ route('veterinaire.searchMedicines') }}" method="GET" class="search-input-wrapper">
-            <input type="text" name="medicine" placeholder="ابحث عن دواء (مثال: أومنيسين، لقاحات...)" value="{{ $searchQuery ?? '' }}" required>
-            <button type="submit" class="action-card" style="padding: 10px 30px; margin: 0; background: #2d6a4f; color: white; cursor: pointer; border: none;">
-                بحث في المخازن
-            </button>
+        <form action="{{ route('veterinaire.market') }}" method="GET" class="search-bar-custom shadow">
+            <input type="text" name="medicine" id="medicineInput" list="medicinesList" 
+                   placeholder="اكتب حرفين من اسم المنتج..." value="{{ request('medicine') }}" autocomplete="off">
+            <datalist id="medicinesList"></datalist>
+            <button type="submit">بحث الآن</button>
         </form>
+    </div>
 
-        <div id="search-results" style="margin-top: 20px;">
-            @if(isset($results))
-                @if($results->isEmpty())
-                    <p style="text-align: center; color: #ef4444; padding: 20px;">عذراً، هذا المنتج غير متوفر حالياً عند الموزعين المسجلين.</p>
-                @else
-                    <div class="results-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;">
-                        @foreach($results as $item)
-                        <div class="action-card" style="text-align: right; border: 1px solid #e2e8f0; background: white; cursor: default; transition: 0.3s;">
-                            <div style="display: flex; justify-content: space-between; align-items: start;">
-                                <h4 style="margin: 0; color: #1b4332;">{{ $item->distributeur_name }}</h4>
-                                <span style="background: #f0fdf4; color: #16a34a; padding: 3px 10px; border-radius: 15px; font-size: 11px; font-weight: bold;">
-                                    <i class="fas fa-truck"></i> {{ $item->distance }} كم
-                                </span>
-                            </div>
-                            
-                            <p style="font-size: 13px; color: #64748b; margin: 10px 0;"><i class="fas fa-pills"></i> المنتج: {{ $item->medicine_name }}</p>
-                            
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding-top: 10px; border-top: 1px solid #f1f5f9;">
-                                <strong style="color: #2d6a4f; font-size: 1.1rem;">{{ $item->prix }} د.ج</strong>
-                                <a href="https://www.google.com/maps?q={{ $item->lat }},{{ $item->lng }}" target="_blank" style="color: #007bff; text-decoration: none; font-size: 12px;">
-                                    <i class="fas fa-map-marked-alt"></i> الموقع
-                                </a>
-                            </div>
-                            
-                            <form action="{{ route('veterinaire.commandes') }}" method="POST" style="margin-top: 12px;">
-                                @csrf
-                                <input type="hidden" name="medicine_name" value="{{ $item->medicine_name }}">
-                                <input type="hidden" name="distributeur_id" value="{{ $item->distributeur_name }}">
-                                <button type="submit" style="width: 100%; padding: 10px; background: #2d6a4f; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;">
-                                    <i class="fas fa-cart-plus"></i> تأكيد طلب الشراء
-                                </button>
-                            </form>
-                        </div>
-                        @endforeach
+    @if(isset($results))
+    <div class="row mb-5">
+        @forelse($results as $item)
+        <div class="col-md-4 mb-4">
+            <div class="card medicine-card h-100 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="badge bg-success-subtle text-success">متوفر</span>
+                        <span class="fw-bold text-success">{{ $item->prix }} د.ج</span>
                     </div>
-                @endif
-            @endif
+                    <h5 class="fw-bold text-primary">{{ $item->medicine_name }}</h5>
+                    <p class="small text-muted"><i class="fas fa-truck"></i> الموزع: {{ $item->distributeur_name }}</p>
+                    <p class="small text-muted"><i class="fas fa-map-marker-alt"></i> {{ $item->distributeur_address }}</p>
+
+                    <button class="btn btn-success w-100 fw-bold rounded-3" data-bs-toggle="modal" data-bs-target="#orderModal{{ $loop->index }}">
+                        <i class="fas fa-cart-plus me-1"></i> طلب شراء
+                    </button>
+                </div>
+            </div>
         </div>
+
+        <div class="modal fade" id="orderModal{{ $loop->index }}" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content rounded-4 border-0">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold">تأكيد الطلبية</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <form action="{{ route('veterinaire.order.store') }}" method="POST">
+                        @csrf
+                        <div class="modal-body text-center">
+                            <p>طلب شراء <strong>{{ $item->medicine_name }}</strong> من الموزع {{ $item->distributeur_name }}</p>
+                            <input type="hidden" name="produit_id" value="{{ $item->produit_id }}">
+                            <input type="hidden" name="receiver_id" value="{{ $item->distributeur_id }}">
+                            <input type="number" name="quantity" class="form-control text-center mx-auto mt-3" value="1" min="1" style="max-width: 100px;">
+                        </div>
+                        <div class="modal-footer justify-content-center">
+                            <button type="submit" class="btn btn-success px-5">إرسال الطلب</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        @empty
+        <div class="col-12 text-center text-muted">لم نجد نتائج مطابقة لبحثك.</div>
+        @endforelse
     </div>
+    @endif
 
-    <div class="map-card">
-        <h3>📍 خريطة الموزعين والنشاط الرعوي</h3>
-        <div id="map" style="height: 400px; border-radius: 15px; border: 1px solid #e2e8f0;"></div>
-    </div>
-
-    <div class="actions-grid">
-        <a href="{{ route('veterinaire.consultations') }}" class="action-card">
-            <i class="fas fa-clipboard-list" style="color: #2d6a4f;"></i>
-            <h3>الاستشارات</h3>
-            <p>إدارة مواعيد الكشوفات الميدانية</p>
-        </a>
-
-        <a href="{{ route('veterinaire.chats') }}" class="action-card">
-            <i class="fas fa-headset" style="color: #007bff;"></i>
-            <h3>الدعم الفني</h3>
-            <p>تواصل مباشر مع المربين</p>
-        </a>
-
-        <a href="{{ route('veterinaire.report') }}" class="action-card alert" style="background: #fff5f5;">
-            <i class="fas fa-bullhorn" style="color: #ef4444;"></i>
-            <h3 style="color: #ef4444;">تبليغ عن وباء</h3>
-            <p>إخطار المصالح الفلاحية فوراً</p>
-        </a>
+    <div class="bg-white p-4 rounded-4 shadow-sm">
+        <h4 class="fw-bold mb-3">📍 خريطة الموزعين المعتمدين</h4>
+        <div id="map"></div>
     </div>
 
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
 <script>
-    const lat = {{ Auth::user()->latitude ?? 36.4621 }};
-    const lng = {{ Auth::user()->longitude ?? 7.4311 }};
-    
-    const map = L.map('map').setView([lat, lng], 11);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; AgroDz'
-    }).addTo(map);
+    // 1. الخريطة الأساسية
+    const userLat = {{ Auth::user()->latitude ?? 36.4621 }};
+    const userLng = {{ Auth::user()->longitude ?? 7.4311 }};
+    const map = L.map('map').setView([userLat, userLng], 10);
 
-    L.marker([lat, lng]).addTo(map).bindPopup("<b>دكتور {{ Auth::user()->name }}</b>").openPopup();
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-    @if(isset($results))
-        const searchResults = @json($results);
-        searchResults.forEach(res => {
-            L.marker([res.lat, res.lng])
-              .addTo(map)
-              .bindPopup(`<b>${res.distributeur_name}</b><br>متوفر: ${res.medicine_name}<br>السعر: ${res.price} د.ج`);
+    // أيقونة الطبيب (أخضر)
+    L.marker([userLat, userLng]).addTo(map).bindPopup("<b>أنت هنا</b>").openPopup();
+
+    // 2. عرض جميع الموزعين (النقاط الزرقاء)
+    @if(isset($allDistributors))
+        const allDists = @json($allDistributors);
+        allDists.forEach(dist => {
+            if(dist.latitude && dist.longitude) {
+                L.marker([dist.latitude, dist.longitude], {
+                    icon: L.icon({
+                        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png',
+                        iconSize: [25, 41], iconAnchor: [12, 41]
+                    })
+                }).addTo(map).bindPopup(`<b>الموزع: ${dist.name}</b><br>${dist.address}`);
+            }
         });
     @endif
-</script>
 
+    // 3. نظام الاقتراحات (Autocomplete)
+    const medInput = document.getElementById('medicineInput');
+    const medList = document.getElementById('medicinesList');
+
+    medInput.addEventListener('input', function() {
+        const query = this.value;
+        if (query.length < 2) return;
+
+        fetch(`/api/medicines/suggestions?q=${query}`)
+            .then(res => res.json())
+            .then(data => {
+                medList.innerHTML = '';
+                data.forEach(item => {
+                    const option = document.createElement('option');
+                    option.value = item.nom;
+                    medList.appendChild(option);
+                });
+            });
+    });
+</script>
 </body>
 </html>

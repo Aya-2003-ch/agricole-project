@@ -1,118 +1,134 @@
 <?php
 
 namespace App\Http\Controllers; 
+
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\Consultation;
 use App\Models\Commande; 
-use App\Models\Produit; // يمثل الأدوية المعروضة من الموزعين
+use App\Models\Produit; 
+use App\Models\User; // أضفت هذا السطر لاستخدام موديل المستخدمين
 use Illuminate\Http\Request;
 
 class VeterinaireController extends Controller
 {
-    // 1. الداشبورد: عرض الاستشارات والطلبات التي قام بها البيطري
+    // 1. الداشبورد: عرض الاستشارات، التنبيهات، والخريطة
     public function dashboard()
     {
         // استشارات الفلاحين الموجهة لهذا البيطري
         $consultations = Consultation::where('veterinaire_id', auth()->id())
             ->with('user') 
             ->latest()
+            ->take(5)
             ->get();
         
-        // عدد طلبات الأدوية التي أرسلها البيطري للموزعين وما زالت قيد الانتظار
-        $newOrdersCount = Commande::where('id_user', auth()->id()) // البيطري هنا هو صاحب الطلب
-            ->where('statut', 'pending')
+        // جلب كل الموزعين لعرضهم على الخريطة فوراً
+        $allDistributors = User::where('role', 'distributeur')
+            ->get(['name', 'latitude', 'longitude', 'address']);
+
+        // حساب الإشعارات للطلبات (accepted/rejected) التي لم يراها البيطري بعد
+        $orderNotifications = Commande::where('sender_id', auth()->id())
+            ->whereIn('status', ['accepted', 'rejected'])
+            ->where('is_seen', false)
             ->count(); 
 
-        return view('veterinaire.dashboard', compact('consultations', 'newOrdersCount'));
+        return view('veterinaire.dashboard', compact('consultations', 'orderNotifications', 'allDistributors'));
     }
 
-    // 2. صفحة البحث عن الأدوية (عرض فقط بدون تعديل)
-    public function searchMedicines(Request $request)
-{
-    $searchQuery = $request->input('medicine');
-    $veto = Auth::user(); // نستخدم موقع البيطري من جدول users
+    // 2. البحث عن الأدوية المتاحة عند الموزعين (Market)
+    public function market(Request $request)
+    {
+        $searchQuery = $request->input('medicine'); // تأكدي أن الاسم في الفورم هو medicine
 
-    // إحداثيات البيطري
-    $lat = $veto->latitude ?? 36.4621;
-    $lng = $veto->longitude ?? 7.4311;
+        $results = DB::table('produits')
+            ->join('users', 'produits.user_id', '=', 'users.id')
+            ->select(
+                'users.id as distributeur_id',
+                'users.name as distributeur_name',
+                'users.address as distributeur_address',
+                'users.latitude as lat', // مهم للخريطة
+                'users.longitude as lng', // مهم للخريطة
+                'produits.id as produit_id',
+                'produits.nom as medicine_name',
+                'produits.prix as prix'
+            )
+            ->where('produits.nom', 'LIKE', '%' . $searchQuery . '%') 
+            ->latest('produits.created_at')
+            ->get();
 
-    $results = DB::table('stores')
-        ->join('users', 'stores.distributeur_id', '=', 'users.id')
-        ->join('produits', 'stores.produit_id', '=', 'produits.id') 
-        ->select(
-            'users.name as distributeur_name',
-            'users.address',
-            'users.latitude as lat',
-            'users.longitude as lng',
-            'produits.nom as medicine_name', 
-            'stores.prix',
-            DB::raw("ROUND(6371 * acos(cos(radians($lat)) * cos(radians(users.latitude)) * cos(radians(users.longitude) - radians($lng)) + sin(radians($lat)) * sin(radians(users.latitude))), 1) AS distance")
-        )
-        ->where('produits.nom', 'LIKE', '%' . $searchQuery . '%') 
-        ->orderBy('distance', 'asc') // ترتيب حسب الأقرب
-        ->get();
+        // نحتاج أيضاً لجلب الموزعين في صفحة النتائج لتبقى الخريطة تعمل
+        $allDistributors = User::where('role', 'distributeur')->get(['name', 'latitude', 'longitude', 'address']);
 
-    // نرجع لصفحة الداشبورد الخاصة بالبيطري مع النتائج
-    return view('veterinaire.dashboard', compact('results', 'searchQuery'));
-}
+        return view('veterinaire.dashboard', compact('results', 'searchQuery', 'allDistributors'));
+    }
 
-    //  دالة إرسال طلب شراء دواء من موزع
-    public function placeOrder(Request $request)
+    // 3. إرسال طلب شراء للموزع
+    public function storeOrder(Request $request)
     {
         $request->validate([
             'produit_id' => 'required|exists:produits,id',
-            'quantite' => 'required|integer|min:1',
+            'receiver_id' => 'required|exists:users,id',
+            'quantity' => 'required|integer|min:1',
         ]);
 
-        // إنشاء طلب جديد في جدول Commandes
         Commande::create([
-            'user_id' => auth()->id(), // معرف البيطري
-            'produit_id' => $request->produit_id,
-            'quantite' => $request->quantite,
-            'statut' => 'pending',
-            'date_commande' => now(),
+            'sender_id'   => auth()->id(),
+            'receiver_id' => $request->receiver_id,
+            'produit_id'  => $request->produit_id,
+            'quantity'    => $request->quantity,
+            'status'      => 'pending',
+            'is_seen'     => false,
         ]);
 
         return back()->with('success', 'تم إرسال طلب الدواء للموزع بنجاح');
     }
 
-    //  عرض تاريخ طلبات الأدوية التي قام بها البيطري
+    // 4. عرض سجل طلباتي وتصفير الإشعارات عند الدخول
     public function myOrders()
     {
-        $commandes = Commande::where('id_user', auth()->id())
-            ->with('produit')
+        // تصفير الإشعارات عند دخول الصفحة
+        Commande::where('sender_id', auth()->id())
+                ->whereIn('status', ['accepted', 'rejected'])
+                ->where('is_seen', false)
+                ->update(['is_seen' => true]);
+
+        $commandes = Commande::where('sender_id', auth()->id())
+            ->with(['produit', 'receiver'])
             ->latest()
             ->get();
             
-        return view('veterinaire.orders', compact('commandes'));
+        return view('veterinaire.my_orders', compact('commandes'));
     }
 
-    // . التبليغ عن الأوبئة 
-    public function report()
+    // 5. اقتراحات البحث (Ajax) لخاصية Autocomplete
+    public function getSuggestions(Request $request)
     {
-        return view('veterinaire.report');
+        $term = $request->q; // استخدام q كما في كود الـ JavaScript
+        $suggestions = Produit::where('nom', 'LIKE', '%'.$term.'%')
+                            ->select('nom')
+                            ->distinct()
+                            ->limit(10)
+                            ->get();
+
+        return response()->json($suggestions);
     }
+
+    // 6. التبليغ عن الأوبئة
+    public function report() { return view('veterinaire.report'); }
 
     public function sendReport(Request $request)
     {
         $request->validate([
             'disease_name' => 'required|string',
-            'description' => 'required',
-            'location' => 'required'
+            'description'  => 'required',
+            'location'     => 'required'
         ]);
 
-        //  إرسال التبليغ
-        return redirect()->route('veterinaire.dashboard')->with('success', 'تم التبليغ بنجاح');
+        // كود الحفظ (اختياري حسب مشروعك)
+        return redirect()->route('veterinaire.dashboard')->with('success', 'تم التبليغ عن الوباء بنجاح');
     }
 
-    //  الاستشارات والبروفايل والشات 
-    public function consultations() 
-    { 
-        $consultations = Consultation::where('veterinaire_id', auth()->id())->with('user')->latest()->get();
-        return view('veterinaire.consultations', compact('consultations')); 
-    }
-
+    // 7. البروفايل والشات
     public function profile() { return view('veterinaire.profile', ['user' => auth()->user()]); }
     public function chats() { return view('veterinaire.chats'); }
 }
