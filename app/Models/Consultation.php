@@ -18,7 +18,8 @@ class Consultation extends Model
     'motif',
     'degree',
     'status',
-    'diagnostique'
+    'diagnostique',
+    'is_accepted_by_eleveur'
 ];
 
 // العلاقات

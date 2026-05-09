@@ -65,9 +65,10 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/dashboard', [EleveurController::class, 'dashboard'])->name('dashboard');
         Route::post('/update-location', [EleveurController::class, 'updateLocation'])->name('updateLocation');
         Route::get('/search-medicine', [EleveurController::class, 'search'])->name('search');
+        Route::get('/isticharati', [ConsultationController::class, 'indexEleveur'])->name('isticharati');
+        Route::post('/isticharati/{id}/confirm', [ConsultationController::class, 'confirmReservation'])->name('consultations.confirm');
 
         // الاستشارات الخاصة بالفلاح
-        Route::get('/consultations', [ConsultationController::class, 'index'])->name('consultations');
         Route::post('/consultations/store', [ConsultationController::class, 'store'])->name('consultations.store');
         Route::get('/nearby-vets', [ConsultationController::class, 'getNearbyVets'])->name('nearby.vets');
 
