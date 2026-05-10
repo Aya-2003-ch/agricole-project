@@ -7,32 +7,19 @@
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
-    
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
     <style>
         :root {
-            --primary-dark: #344e41; 
+            --primary-dark: #1e2d24; 
             --primary-green: #588157;
-            --accent-green: #a3b18a;
             --light-bg: #f4f7f6;
             --white: #ffffff;
-            --text-main: #2d3436;
             --sidebar-width: 260px;
         }
 
-        /* تنسيقات إضافية لقائمة الاقتراحات */
-        .suggestions-list {
-            position: absolute; top: 100%; right: 0; left: 0;
-            background: white; border: 1px solid #ddd; border-radius: 0 0 12px 12px;
-            z-index: 2000; list-style: none; max-height: 200px; overflow-y: auto;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1); display: none;
-        }
-        .suggestions-list li { padding: 12px 15px; cursor: pointer; border-bottom: 1px solid #eee; text-align: right; }
-        .suggestions-list li:hover { background-color: #f8f9fa; color: var(--primary-green); }
-
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
-        body { background-color: var(--light-bg); color: var(--text-main); display: flex; }
+        body { background-color: var(--light-bg); display: flex; }
 
         /* --- SIDEBAR --- */
         .sidebar {
@@ -49,27 +36,19 @@
         .sidebar a {
             display: flex; align-items: center; gap: 12px; padding: 14px 20px;
             margin-bottom: 10px; color: #dad7cd; text-decoration: none;
-            border-radius: 12px; transition: all 0.3s ease; position: relative;
+            border-radius: 12px; transition: all 0.3s ease;
         }
         .sidebar a:hover, .sidebar a.active { background: var(--primary-green); color: white; transform: translateX(-5px); }
         
-        /* تصميم الإشعار الأحمر (Badge) */
-        .nav-badge { 
-            background: #e74c3c; color: white; font-size: 11px; font-weight: bold;
-            min-width: 18px; height: 18px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            position: absolute; left: 15px; top: 50%; transform: translateY(-50%);
-            box-shadow: 0 0 10px rgba(231, 76, 60, 0.4);
-            animation: pulse-red 2s infinite;
-        }
-        
-        @keyframes pulse-red {
-            0% { transform: translateY(-50%) scale(0.95); }
-            70% { transform: translateY(-50%) scale(1.1); box-shadow: 0 0 15px rgba(231, 76, 60, 0); }
-            100% { transform: translateY(-50%) scale(0.95); }
+        .logout-btn { 
+            margin-top: 30px; 
+            background: rgba(231, 76, 60, 0.1) !important; 
+            color: #e74c3c !important; 
+            border: none;
+            width: 100%;
+            cursor: pointer;
         }
 
-        .logout-btn { margin-top: 30px; background: rgba(231, 76, 60, 0.1) !important; color: #e74c3c !important; }
         .content { margin-right: var(--sidebar-width); width: calc(100% - var(--sidebar-width)); padding: 40px; }
 
         /* --- SEARCH SECTION --- */
@@ -87,7 +66,15 @@
         }
         .btn-search { background: var(--primary-green); color: white; border: none; padding: 0 30px; border-radius: 12px; cursor: pointer; font-weight: bold; }
 
-        /* --- CARDS --- */
+        .suggestions-list {
+            position: absolute; top: 100%; right: 0; left: 0;
+            background: white; border: 1px solid #ddd; border-radius: 0 0 12px 12px;
+            z-index: 2000; list-style: none; max-height: 200px; overflow-y: auto;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); display: none;
+        }
+        .suggestions-list li { padding: 12px 15px; cursor: pointer; border-bottom: 1px solid #eee; text-align: right; }
+
+        /* --- STAT CARDS --- */
         .cards-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
         .stat-card { background: var(--white); padding: 25px; border-radius: 20px; display: flex; align-items: center; gap: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.03); border: 1px solid #eee; }
         .card-icon { width: 50px; height: 50px; background: #f0f4f2; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; color: var(--primary-green); }
@@ -103,29 +90,10 @@
         <div class="sidebar-brand"><i class="fas fa-seedling"></i> <span>AgroDz</span></div>
         <a href="{{ route('distributeur.dashboard') }}" class="active"><i class="fas fa-th-large"></i> <span>الرئيسية</span></a>
         <a href="{{ route('produits.index') }}"><i class="fas fa-box-open"></i> <span>منتجاتي</span></a>
-        
-        <a href="{{ route('distributeur.incoming.orders') }}">
-            <i class="fas fa-hand-holding-medical"></i> <span>الطلبات الواردة</span>
-            @if($incomingOrdersCount > 0)
-                <span class="nav-badge">{{ $incomingOrdersCount }}</span>
-            @endif
-        </a>
-
+        <a href="{{ route('distributeur.incoming.orders') }}"><i class="fas fa-hand-holding-medical"></i> <span>الطلبات الواردة</span></a>
         <a href="{{ route('distributeur.profile') }}"><i class="fas fa-user-circle"></i> <span>الملف الشخصي</span></a>
-
-        @php
-            $myOrdersNotifications = \App\Models\Commande::where('sender_id', auth()->id())
-                ->whereIn('status', ['accepted', 'rejected'])
-                ->where('is_seen', false)
-                ->count();
-        @endphp
-        <a href="{{ route('distributeur.my_orders') }}">
-            <i class="fas fa-shopping-cart"></i> <span>طلباتي</span>
-            @if($myOrdersNotifications > 0)
-                <span class="nav-badge" style="background: #27ae60;">{{ $myOrdersNotifications }}</span>
-            @endif
-        </a>
-
+        <a href="{{ route('distributeur.my_orders') }}"><i class="fas fa-shopping-cart"></i> <span>طلباتي</span></a>
+        
         <a href="{{ route('logout') }}" class="logout-btn" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
             <i class="fas fa-sign-out-alt"></i> <span>خروج</span>
         </a>
@@ -157,16 +125,6 @@
             </div>
 
             <div class="stat-card">
-                <div class="card-icon"><i class="fas fa-file-import"></i></div>
-                <div class="stat-info">
-                    <h3 style="font-size: 13px; color: #b2bec3;">طلبات بانتظاري</h3>
-                    <div style="font-size: 22px; font-weight: 700; color: {{ $incomingOrdersCount > 0 ? '#e67e22' : '#2d3436' }};">
-                        {{ $incomingOrdersCount }}
-                    </div>
-                </div>
-            </div>
-
-            <div class="stat-card">
                 <div class="card-icon"><i class="fas fa-map-marker-alt"></i></div>
                 <div class="stat-info">
                     <h3 style="font-size: 13px; color: #b2bec3;">الموزعون المسجلون</h3>
@@ -185,49 +143,58 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
     <script>
-    $(document).ready(function() {
-        $('#productSearch').on('keyup', function() {
-            let term = $(this).val();
-            if (term.length >= 2) {
-                $.ajax({
-                    url: "{{ route('distributeur.suggestions') }}", 
-                    method: "GET",
-                    data: { term: term },
-                    success: function(data) {
-                        let list = $('#suggestions');
-                        list.empty().show();
-                        if(data.length > 0) {
-                            data.forEach(function(item) {
-                                list.append(`<li>${item}</li>`);
-                            });
-                        } else {
-                            list.hide();
+        $(document).ready(function() {
+            // منطق شريط البحث
+            $('#productSearch').on('keyup', function() {
+                let term = $(this).val();
+                if (term.length >= 2) {
+                    $.ajax({
+                        url: "{{ route('distributeur.suggestions') }}", 
+                        method: "GET",
+                        data: { term: term },
+                        success: function(data) {
+                            let list = $('#suggestions');
+                            list.empty().show();
+                            data.forEach(item => list.append(`<li>${item}</li>`));
                         }
-                    }
-                });
-            } else {
+                    });
+                } else { $('#suggestions').hide(); }
+            });
+
+            $(document).on('click', '#suggestions li', function() {
+                $('#productSearch').val($(this).text());
                 $('#suggestions').hide();
+                $('#searchForm').submit();
+            });
+        });
+
+        // --- إعداد الخريطة مع الإحداثيات المصححة ---
+        var map = L.map('map').setView([36.7525, 3.0420], 6); 
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+        var locations = @json($allDistributors);
+        var markersGroup = L.featureGroup();
+
+        locations.forEach(function(dist) {
+            // استخدامlatitude و longitude كما هما في جدولك
+            var lat = parseFloat(dist.latitude);
+            var lng = parseFloat(dist.longitude);
+
+            if(!isNaN(lat) && !isNaN(lng) && lat !== 0) {
+                var marker = L.marker([lat, lng]).addTo(map)
+                    .bindPopup(`
+                        <div style="text-align: right; direction: rtl;">
+                            <b style="color:var(--primary-green);">${dist.nom || dist.name}</b><br>
+                            <span style="font-size:12px;">${dist.address || 'العنوان غير متوفر'}</span>
+                        </div>
+                    `);
+                markersGroup.addLayer(marker);
             }
         });
 
-        $(document).on('click', '#suggestions li', function() {
-            $('#productSearch').val($(this).text());
-            $('#suggestions').hide();
-            $('#searchForm').submit();
-        });
-    });
-
-    // --- إعداد الخريطة ---
-    var map = L.map('map').setView([36.7525, 3.0420], 6); 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-
-    var locations = @json($allDistributors);
-    locations.forEach(function(dist) {
-        if(dist.lat && dist.lng) {
-            L.marker([dist.lat, dist.lng]).addTo(map)
-                .bindPopup(`<b>${dist.name}</b><br>${dist.address}`);
+        if (markersGroup.getLayers().length > 0) {
+            map.fitBounds(markersGroup.getBounds().pad(0.5));
         }
-    });
     </script>
 </body>
 </html>

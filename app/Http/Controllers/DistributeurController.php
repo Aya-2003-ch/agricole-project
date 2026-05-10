@@ -27,14 +27,14 @@ class DistributeurController extends Controller
         }
 
         // 3. جلب جميع الموزعين للخريطة
-        $allDistributors = Distributeur::with('user')->get()->map(function($dist) {
-            return [
-                'name' => $dist->nom,
-                'lat'  => $dist->latitude,
-                'lng'  => $dist->longitude,
-                'address' => $dist->localisation,
-            ];
-        });
+        $allDistributors = Distributeur::all()->map(function($dist) {
+    return [
+        'nom'       => $dist->nom,
+        'latitude'  => $dist->latitude,
+        'longitude' => $dist->longitude,
+        'address'   => $dist->address, // تأكدي أن الحقل في القاعدة اسمه address أو localisation
+    ];
+});
 
         return view('distributeur.dashboard', compact('totalProduits', 'allDistributors','incomingOrdersCount'));
     }
@@ -47,16 +47,21 @@ class DistributeurController extends Controller
 public function market(Request $request) {
     $query = $request->input('query');
 
-    // نجلب المنتجات التي يطابق اسمها البحث
-    $results = Store::whereHas('produit', function($q) use ($query) {
-        $q->where('nom', 'LIKE', "%{$query}%");
-    })
-    ->where('distributeur_id', '!=', auth()->user()->distributeur->id) // استثناء مخزنك الشخصي
-    ->get();
+    // 1. يجب التأكد من وجود موزع مسجل للمستخدم الحالي لتفادي خطأ في الـ ID
+    $distributeurId = auth()->user()->distributeur->id;
+
+    // 2. نجلب المنتجات مع بيانات الموزع والمنتج (Eager Loading)
+    $results = Store::with(['produit', 'distributeur']) 
+        ->whereHas('produit', function($q) use ($query) {
+            if ($query) {
+                $q->where('nom', 'LIKE', "%{$query}%");
+            }
+        })
+        ->where('distributeur_id', '!=', $distributeurId) // لا يظهر منتجاته الخاصة
+        ->get();
 
     return view('distributeur.market', compact('results'));
 }
-
     // عرض الطلبات الواردة
   public function incomingOrders()
 {
@@ -151,21 +156,26 @@ public function getProductSuggestions(Request $request)
 
     return response()->json($suggestions);
 }
-  public function acceptOrder(Commande $order)
+public function acceptOrder(Commande $order)
 {
-    // التأكد أن الموزع الحالي هو الذي استلم الطلب (البائع)
+    // 1. التأكد أنكِ أنتِ من استلمتِ الطلب
     if ($order->receiver_id !== auth()->id()) {
         abort(403);
     }
 
-    $order->update([
-        'status' => 'accepted',
-        'is_seen' => false // نجعلها false لكي يظهر الإشعار للمشتري
-    ]);
+    // 2. تحديث الحالة فقط بدون المساس بالمخزن
+    try {
+        $order->update([
+            'status' => 'accepted',
+            'is_seen' => false 
+        ]);
 
-    return back()->with('success', 'تم قبول الطلب بنجاح.');
+        return back()->with('success', 'تم قبول الطلب بنجاح (تحديث الحالة فقط).');
+
+    } catch (\Exception $e) {
+        return back()->with('error', 'حدث خطأ أثناء قبول الطلب.');
+    }
 }
-
 public function rejectOrder(Commande $order)
 {
     // التأكد أن الموزع الحالي هو الذي استلم الطلب (البائع)

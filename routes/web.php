@@ -106,7 +106,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/marche', [DistributeurController::class, 'market'])->name('market');
         Route::post('/order', [DistributeurController::class, 'storeOrder'])->name('market.store');
         Route::get('/commandes-recues', [DistributeurController::class, 'incomingOrders'])->name('incoming.orders');
-        Route::get('/mes-commandes', [DistributeurController::class, 'myOrders'])->name('my.orders');
+        Route::get('/my-orders', [DistributeurController::class, 'myOrders'])->name('my_orders');
         
         Route::patch('/order/{order}/accept', [DistributeurController::class, 'acceptOrder'])->name('order.accept');
         Route::patch('/order/{order}/reject', [DistributeurController::class, 'rejectOrder'])->name('order.reject');
