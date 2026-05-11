@@ -12,32 +12,46 @@ use Illuminate\Support\Facades\Auth;
 class DistributeurController extends Controller
 {
     public function dashboard()
-    {
-        // 1. جلب بيانات الموزع الحالي
-        $distributeur = Distributeur::where('user_id', auth()->id())->first();
-        
-        // 2. حساب إجمالي المنتجات في المخزن
-        $totalProduits = 0;
-        $incomingOrdersCount = 0;
-        if ($distributeur) {
-            $totalProduits = Store::where('distributeur_id', $distributeur->id)->count();
-            $incomingOrdersCount = Commande::where('receiver_id', auth()->id())
+{
+    // 1. جلب بيانات الموزع الحالي
+    $distributeur = Distributeur::where('user_id', auth()->id())->first();
+    
+    $totalProduits = 0;
+    $incomingOrdersCount = 0; // إجمالي الطلبات المنتظرة (للمربعات الإحصائية)
+    $unreadOrdersCount = 0;   // الطلبات الجديدة التي لم تُشاهد بعد (للرقم الأحمر)
+
+    if ($distributeur) {
+        // حساب إجمالي أنواع المنتجات في مخزن هذا الموزع
+        $totalProduits = Store::where('distributeur_id', $distributeur->id)->count();
+
+        // حساب جميع الطلبات التي حالتها "قيد الانتظار"
+        $incomingOrdersCount = Commande::where('receiver_id', auth()->id())
                                         ->where('status', 'pending')
                                         ->count();
-        }
 
-        // 3. جلب جميع الموزعين للخريطة
-        $allDistributors = Distributeur::all()->map(function($dist) {
-    return [
-        'nom'       => $dist->nom,
-        'latitude'  => $dist->latitude,
-        'longitude' => $dist->longitude,
-        'address'   => $dist->address, // تأكدي أن الحقل في القاعدة اسمه address أو localisation
-    ];
-});
-
-        return view('distributeur.dashboard', compact('totalProduits', 'allDistributors','incomingOrdersCount'));
+        // حساب الطلبات الجديدة التي لم يفتحها الموزع بعد (is_seen = false)
+        $unreadOrdersCount = Commande::where('receiver_id', auth()->id())
+                                      ->where('is_seen', false)
+                                      ->count();
     }
+
+    // 3. جلب جميع الموزعين للخريطة
+    $allDistributors = Distributeur::all()->map(function($dist) {
+        return [
+            'nom'       => $dist->nom,
+            'latitude'  => $dist->latitude,
+            'longitude' => $dist->longitude,
+            'address'   => $dist->address,
+        ];
+    });
+
+    return view('distributeur.dashboard', compact(
+        'totalProduits', 
+        'allDistributors', 
+        'incomingOrdersCount', 
+        'unreadOrdersCount' // نمرر هذا المتغير لعرض الرقم الأحمر
+    ));
+}
 
     // --- الميزات الجديدة (Marche et Commandes) ---
 
@@ -65,8 +79,13 @@ public function market(Request $request) {
     // عرض الطلبات الواردة
   public function incomingOrders()
 {
+    // 1. تحديث كافة الطلبات غير المقروءة لهذا الموزع لتصبح "مقروءة" بمجرد دخول الصفحة
+    \App\Models\Commande::where('receiver_id', auth()->id())
+        ->where('is_seen', false)
+        ->update(['is_seen' => true]);
+
+    // 2. جلب الطلبات لعرضها في الجدول
     $orders = \App\Models\Commande::where('receiver_id', auth()->id())
-                // جلب الطلبات التي لها منتج فقط لتجنب الخطأ
                 ->whereHas('produit') 
                 ->with(['produit', 'sender'])
                 ->latest()
@@ -158,22 +177,53 @@ public function getProductSuggestions(Request $request)
 }
 public function acceptOrder(Commande $order)
 {
-    // 1. التأكد أنكِ أنتِ من استلمتِ الطلب
+    // 1. التأكد من الصلاحية (أن المستخدم الحالي هو مستلم الطلب)
     if ($order->receiver_id !== auth()->id()) {
         abort(403);
     }
 
-    // 2. تحديث الحالة فقط بدون المساس بالمخزن
-    try {
-        $order->update([
-            'status' => 'accepted',
-            'is_seen' => false 
-        ]);
+    // 2. جلب بيانات الموزع المرتبطة بالمستخدم الحالي
+    // لأن جدول Store يحتاج distributeur_id وليس user_id
+    $distributeur = \App\Models\Distributeur::where('user_id', auth()->id())->first();
 
-        return back()->with('success', 'تم قبول الطلب بنجاح (تحديث الحالة فقط).');
+    if (!$distributeur) {
+        return back()->with('error', 'لم يتم العثور على ملف موزع لهذا الحساب.');
+    }
+
+    // 3. البحث عن المخزون الخاص بهذا الموزع وهذا المنتج
+    $inventory = \App\Models\Store::where('produit_id', $order->product_id)
+                                  ->where('distributeur_id', $distributeur->id) // استخدام ID الموزع هنا
+                                  ->first();
+
+    if (!$inventory) {
+        return back()->with('error', 'هذا المنتج غير موجود في مخزنك.');
+    }
+
+    // 4. التحقق من الكمية
+    $requested = (int) $order->quantity;
+    $available = (int) $inventory->quantite;
+
+    if ($available < $requested) {
+        return back()->with('error', "مخزونك لا يكفي. المتوفر: $available");
+    }
+
+    try {
+        \DB::transaction(function () use ($order, $inventory, $requested) {
+            
+            // 5. نقص الكمية من المتجر
+            $inventory->decrement('quantite', $requested);
+
+            // 6. تحديث حالة الطلب
+            $order->update([
+                'status' => 'accepted',
+                'is_seen' => false 
+            ]);
+        });
+
+        return back()->with('success', 'تم قبول الطلب وتحديث المخزن بنجاح.');
 
     } catch (\Exception $e) {
-        return back()->with('error', 'حدث خطأ أثناء قبول الطلب.');
+        return back()->with('error', 'حدث خطأ تقني: ' . $e->getMessage());
     }
 }
 public function rejectOrder(Commande $order)

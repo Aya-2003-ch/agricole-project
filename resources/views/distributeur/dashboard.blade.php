@@ -16,6 +16,7 @@
             --light-bg: #f4f7f6;
             --white: #ffffff;
             --sidebar-width: 260px;
+            --danger-red: #e74c3c;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
@@ -34,19 +35,29 @@
             border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px;
         }
         .sidebar a {
-            display: flex; align-items: center; gap: 12px; padding: 14px 20px;
+            display: flex; align-items: center; justify-content: space-between; padding: 14px 20px;
             margin-bottom: 10px; color: #dad7cd; text-decoration: none;
             border-radius: 12px; transition: all 0.3s ease;
         }
+        .sidebar a div { display: flex; align-items: center; gap: 12px; }
         .sidebar a:hover, .sidebar a.active { background: var(--primary-green); color: white; transform: translateX(-5px); }
         
+        /* --- BADGE & ANIMATION --- */
+        .badge-count {
+            background-color: var(--danger-red); color: white; font-size: 11px;
+            padding: 2px 8px; border-radius: 50px; font-weight: bold;
+        }
+        .anim-pulse { animation: pulse-red 2s infinite; }
+        @keyframes pulse-red {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(231, 76, 60, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
+        }
+
         .logout-btn { 
-            margin-top: 30px; 
-            background: rgba(231, 76, 60, 0.1) !important; 
-            color: #e74c3c !important; 
-            border: none;
-            width: 100%;
-            cursor: pointer;
+            margin-top: 30px; background: rgba(231, 76, 60, 0.1) !important; 
+            color: #e74c3c !important; border: none; width: 100%; cursor: pointer;
+            justify-content: center !important;
         }
 
         .content { margin-right: var(--sidebar-width); width: calc(100% - var(--sidebar-width)); padding: 40px; }
@@ -76,9 +87,11 @@
 
         /* --- STAT CARDS --- */
         .cards-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
-        .stat-card { background: var(--white); padding: 25px; border-radius: 20px; display: flex; align-items: center; gap: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.03); border: 1px solid #eee; }
+        .stat-card { background: var(--white); padding: 25px; border-radius: 20px; display: flex; align-items: center; gap: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.03); border: 1px solid #eee; transition: 0.3s; }
+        .stat-card:hover { transform: translateY(-5px); }
         .card-icon { width: 50px; height: 50px; background: #f0f4f2; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; color: var(--primary-green); }
-        
+        .card-icon.orders { color: var(--danger-red); background: #fdf2f2; }
+
         .map-card { background: var(--white); padding: 20px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); margin-top: 35px; }
         #map { height: 400px; width: 100%; border-radius: 15px; z-index: 1; }
     </style>
@@ -88,11 +101,26 @@
 
     <nav class="sidebar">
         <div class="sidebar-brand"><i class="fas fa-seedling"></i> <span>AgroDz</span></div>
-        <a href="{{ route('distributeur.dashboard') }}" class="active"><i class="fas fa-th-large"></i> <span>الرئيسية</span></a>
-        <a href="{{ route('produits.index') }}"><i class="fas fa-box-open"></i> <span>منتجاتي</span></a>
-        <a href="{{ route('distributeur.incoming.orders') }}"><i class="fas fa-hand-holding-medical"></i> <span>الطلبات الواردة</span></a>
-        <a href="{{ route('distributeur.profile') }}"><i class="fas fa-user-circle"></i> <span>الملف الشخصي</span></a>
-        <a href="{{ route('distributeur.my_orders') }}"><i class="fas fa-shopping-cart"></i> <span>طلباتي</span></a>
+        <a href="{{ route('distributeur.dashboard') }}" class="active">
+            <div><i class="fas fa-th-large"></i> <span>الرئيسية</span></div>
+        </a>
+        <a href="{{ route('produits.index') }}">
+            <div><i class="fas fa-box-open"></i> <span>منتجاتي</span></div>
+        </a>
+        
+        <a href="{{ route('distributeur.incoming.orders') }}">
+            <div><i class="fas fa-hand-holding-medical"></i> <span>الطلبات الواردة</span></div>
+            @if(isset($unreadOrdersCount) && $unreadOrdersCount > 0)
+                <span class="badge-count anim-pulse">{{ $unreadOrdersCount }}</span>
+            @endif
+        </a>
+
+        <a href="{{ route('distributeur.profile') }}">
+            <div><i class="fas fa-user-circle"></i> <span>الملف الشخصي</span></div>
+        </a>
+        <a href="{{ route('distributeur.my_orders') }}">
+            <div><i class="fas fa-shopping-cart"></i> <span>طلباتي</span></div>
+        </a>
         
         <a href="{{ route('logout') }}" class="logout-btn" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
             <i class="fas fa-sign-out-alt"></i> <span>خروج</span>
@@ -125,6 +153,14 @@
             </div>
 
             <div class="stat-card">
+                <div class="card-icon orders"><i class="fas fa-bell"></i></div>
+                <div class="stat-info">
+                    <h3 style="font-size: 13px; color: #b2bec3;">طلبات بانتظار الرد</h3>
+                    <div style="font-size: 22px; font-weight: 700; color: var(--danger-red);">{{ $incomingOrdersCount }}</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
                 <div class="card-icon"><i class="fas fa-map-marker-alt"></i></div>
                 <div class="stat-info">
                     <h3 style="font-size: 13px; color: #b2bec3;">الموزعون المسجلون</h3>
@@ -144,7 +180,7 @@
     
     <script>
         $(document).ready(function() {
-            // منطق شريط البحث
+            // منطق البحث والاقتراحات كما كان في كودك الأصلي
             $('#productSearch').on('keyup', function() {
                 let term = $(this).val();
                 if (term.length >= 2) {
@@ -168,7 +204,7 @@
             });
         });
 
-        // --- إعداد الخريطة مع الإحداثيات المصححة ---
+        // --- إعداد الخريطة ---
         var map = L.map('map').setView([36.7525, 3.0420], 6); 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
@@ -176,7 +212,6 @@
         var markersGroup = L.featureGroup();
 
         locations.forEach(function(dist) {
-            // استخدامlatitude و longitude كما هما في جدولك
             var lat = parseFloat(dist.latitude);
             var lng = parseFloat(dist.longitude);
 
@@ -184,7 +219,7 @@
                 var marker = L.marker([lat, lng]).addTo(map)
                     .bindPopup(`
                         <div style="text-align: right; direction: rtl;">
-                            <b style="color:var(--primary-green);">${dist.nom || dist.name}</b><br>
+                            <b style="color:var(--primary-green);">${dist.nom}</b><br>
                             <span style="font-size:12px;">${dist.address || 'العنوان غير متوفر'}</span>
                         </div>
                     `);
