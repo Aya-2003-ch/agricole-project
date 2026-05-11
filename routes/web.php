@@ -58,6 +58,7 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/panel', [AdminController::class, 'index'])->name('panel');
         Route::get('/delete/{id}', [AdminController::class, 'delete'])->name('user.delete');
+        Route::get('/admin/statistics', [AdminController::class, 'stats'])->name('admin.stats');
     });
 
     // --- قسم الفلاح (Eleveur) ---
