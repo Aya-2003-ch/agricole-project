@@ -95,6 +95,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/report', [VeterinaireController::class, 'report'])->name('report');
         Route::post('/report/send', [VeterinaireController::class, 'sendReport'])->name('report.send');
         Route::get('/chats', [MessageController::class, 'index'])->name('chats');
+        Route::post('/report/store', [VeterinaireController::class, 'storeReport'])->name('epidemic.report.store');
+        Route::get('/epidemic-reports', [VeterinaireController::class, 'indexReports'])->name('epidemic.reports.index');
     });
 
     // --- قسم الموزع (Distributeur) ---

@@ -106,6 +106,25 @@
             background: white; box-shadow: 0 5px 15px rgba(0,0,0,0.05);
         }
         .medicine-card:hover { transform: translateY(-5px); }
+        .anim-pulse {
+        animation: pulse-red 2s infinite;
+    }
+
+    @keyframes pulse-red {
+        0% { transform: translate(-50%, -50%) scale(0.95); box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
+        70% { transform: translate(-50%, -50%) scale(1.1); box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
+        100% { transform: translate(-50%, -50%) scale(0.95); box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+    }
+
+    /* تحسين شكل الأيقونة عند المرور عليها */
+    .notification-icon-wrapper {
+        transition: all 0.3s ease;
+        border: 1px solid #f1f3f5;
+    }
+    .notification-icon-wrapper:hover {
+        background-color: #fff1f1 !important;
+        transform: translateY(-3px);
+    }
     </style>
 </head>
 <body>
@@ -149,13 +168,35 @@
 <div class="main-content">
     
     <div class="row mb-4">
-        <div class="col-md-12">
-            <div class="p-4 bg-white rounded-4 shadow-sm border-end border-5 border-success">
+    <div class="col-md-12">
+        <div class="p-4 bg-white rounded-4 shadow-sm border-end border-5 border-success d-flex justify-content-between align-items-center">
+            
+            <!-- النص والترحيب -->
+            <div>
                 <h2 class="fw-bold">مرحباً، دكتور {{ Auth::user()->name }} 👋</h2>
-                <p class="text-muted">ابحث عن الأدوية، تواصل مع الموزعين، وتابع استشارات الفلاحين.</p>
+                <p class="text-muted mb-0">ابحث عن الأدوية، تواصل مع الموزعين، وتابع استشارات الفلاحين.</p>
             </div>
+
+            <!-- أيقونة التنبيهات الجديدة (وباء) -->
+            <div class="notification-area" style="position: relative;">
+                <a href="{{ route('epidemic.reports.index') }}" class="text-decoration-none">
+                    <div class="notification-icon-wrapper p-3 rounded-circle bg-light d-flex align-items-center justify-content-center shadow-sm" style="width: 60px; height: 60px; position: relative;">
+                        <!-- أيقونة الوباء كما في الصورة -->
+                        <i class="fas fa-biohazard text-danger fs-3"></i>
+                        
+                        <!-- الرقم الأحمر (يظهر فقط إذا كان هناك بلاغ جديد) -->
+                        @if(isset($unreadReportsCount) && $unreadReportsCount > 0)
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger shadow-sm anim-pulse" style="font-size: 12px; border: 2px solid white;">
+                                {{ $unreadReportsCount }}
+                            </span>
+                        @endif
+                    </div>
+                </a>
+            </div>
+
         </div>
     </div>
+</div>
 
     <!-- التعديل: شريط بحث بسيط بدون خلفية خضراء -->
     <div class="search-container shadow-sm">

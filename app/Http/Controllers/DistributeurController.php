@@ -34,6 +34,7 @@ class DistributeurController extends Controller
                                       ->where('is_seen', false)
                                       ->count();
     }
+    $unreadReportsCount = \App\Models\RapportEpidemie::where('created_at', '>=', now()->subDays(3))->count();
 
     // 3. جلب جميع الموزعين للخريطة
     $allDistributors = Distributeur::all()->map(function($dist) {
@@ -49,15 +50,11 @@ class DistributeurController extends Controller
         'totalProduits', 
         'allDistributors', 
         'incomingOrdersCount', 
-        'unreadOrdersCount' // نمرر هذا المتغير لعرض الرقم الأحمر
+        'unreadOrdersCount' ,'unreadReportsCount'
     ));
 }
 
-    // --- الميزات الجديدة (Marche et Commandes) ---
-
-    // 1. تغيير اسم هذه الدالة من store إلى market لمنع التكرار مع دالة الحفظ
-    // app/Http/Controllers/DistributeurController.php
-
+    
 public function market(Request $request) {
     $query = $request->input('query');
 

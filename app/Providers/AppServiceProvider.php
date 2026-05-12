@@ -27,8 +27,13 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Bootstrap any application services.
      */
-    public function boot(): void
-    {
-        //
-    }
+    public function boot()
+{
+    view()->composer('*', function ($view) {
+        // نحسب التقارير المرسلة في آخر 24 ساعة مثلاً أو غير المقروءة
+        $unreadReportsCount = \App\Models\RapportEpidemie::where('created_at', '>=', now()->subDays(2))->count();
+        $view->with('unreadReportsCount', $unreadReportsCount);
+    });
+}
+   
 }

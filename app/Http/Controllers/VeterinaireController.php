@@ -25,14 +25,14 @@ class VeterinaireController extends Controller
         // جلب كل الموزعين لعرضهم على الخريطة فوراً
         $allDistributors = User::where('role', 'distributeur')
             ->get(['name', 'latitude', 'longitude', 'address']);
-
+         $unreadReportsCount = \App\Models\RapportEpidemie::where('created_at', '>=', now()->subDays(3))->count();
         // حساب الإشعارات للطلبات (accepted/rejected) التي لم يراها البيطري بعد
         $orderNotifications = Commande::where('sender_id', auth()->id())
             ->whereIn('status', ['accepted', 'rejected'])
             ->where('is_seen', false)
             ->count(); 
 
-        return view('veterinaire.dashboard', compact('consultations', 'orderNotifications', 'allDistributors'));
+        return view('veterinaire.dashboard', compact('consultations', 'orderNotifications', 'allDistributors','unreadReportsCount'));
     }
 
     // 2. البحث عن الأدوية المتاحة عند الموزعين (Market)
@@ -153,4 +153,33 @@ class VeterinaireController extends Controller
     // 7. البروفايل والشات
     public function profile() { return view('veterinaire.profile', ['user' => auth()->user()]); }
     public function chats() { return view('veterinaire.chats'); }
+
+    public function storeReport(Request $request)
+{
+    $request->validate([
+        'nom_maladie'    => 'required|string|max:255',
+        'localisation'   => 'required|string|max:255',
+        'type_animal'    => 'required|string',
+        'nombre_cas'     => 'required|integer|min:0',
+        'symptomes'      => 'required|string',
+    ]);
+
+    $report = EpidemicReport::create([
+        'nom_maladie'    => $request->nom_maladie,
+        'localisation'   => $request->localisation,
+        'type_animal'    => $request->type_animal,
+        'nombre_cas'     => $request->nombre_cas,
+        'symptomes'      => $request->symptomes,
+        'veterinaire_id' => auth()->id(),
+    ]);
+
+    return back()->with('success', 'Rapport envoyé avec succès.');
+}
+  public function indexReports()
+{
+    // جلب كل التقارير مرتبة من الأحدث إلى الأقدم
+    $reports = \App\Models\RapportEpidemie::with('veterinaire')->latest()->get();
+
+    return view('veterinaire.reports_index', compact('reports'));
+}
 }

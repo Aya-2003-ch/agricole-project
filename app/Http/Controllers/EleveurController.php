@@ -13,9 +13,11 @@ class EleveurController extends Controller
     {
         // نجلب بيانات المربي الحالي
         $user = Auth::user();
+        $unreadReportsCount = \App\Models\RapportEpidemie::where('created_at', '>=', now()->subDays(3))->count();
         
         // يمكننا هنا جلب عدد استشاراته النشطة لعرضها في الإحصائيات
-        return view('eleveur.dashboard', compact('user'));
+        return view('eleveur.dashboard', compact('user','unreadReportsCount'));
+
     }
 
     // تحديث الموقع الجغرافي (ضروري لإيجاد أقرب بيطري)
