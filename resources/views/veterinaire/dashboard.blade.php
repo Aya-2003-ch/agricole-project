@@ -179,7 +179,7 @@
 
             <!-- أيقونة التنبيهات الجديدة (وباء) -->
             <div class="notification-area" style="position: relative;">
-                <a href="{{ route('epidemic.reports.index') }}" class="text-decoration-none">
+                <a href="{{ route('veterinaire.epidemic.reports.index') }}" class="text-decoration-none">
                     <div class="notification-icon-wrapper p-3 rounded-circle bg-light d-flex align-items-center justify-content-center shadow-sm" style="width: 60px; height: 60px; position: relative;">
                         <!-- أيقونة الوباء كما في الصورة -->
                         <i class="fas fa-biohazard text-danger fs-3"></i>

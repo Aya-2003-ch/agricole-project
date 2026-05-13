@@ -76,6 +76,8 @@ Route::middleware(['auth'])->group(function () {
         // المحادثات (الفلاح مع البيطري)
         Route::get('/chats/{receiver_id?}', [MessageController::class, 'index'])->name('chats');
         Route::post('/messages/send', [MessageController::class, 'send'])->name('messages.send');
+        Route::get('/epidemic-reports', [EleveurController::class, 'viewEpidemics'])
+         ->name('epidemic.reports');
     });
 
     // --- قسم البيطري (Veterinaire) ---
@@ -115,6 +117,10 @@ Route::middleware(['auth'])->group(function () {
         Route::patch('/order/{order}/reject', [DistributeurController::class, 'rejectOrder'])->name('order.reject');
         
         Route::get('/suggestions', [DistributeurController::class, 'getProductSuggestions'])->name('suggestions');
+        Route::get('/epidemic-reports', [DistributeurController::class, 'epidemicReports'])->name('epidemic.reports');
+        Route::get('/orders/{id}/edit', [DistributeurController::class, 'editOrder'])->name('order.edit');
+        Route::patch('/orders/{id}', [DistributeurController::class, 'updateOrder'])->name('order.update');  
+    Route::delete('/orders/{id}', [DistributeurController::class, 'destroyOrder'])->name('order.destroy');
     });
 
     // --- إدارة الملف الشخصي العامة ---

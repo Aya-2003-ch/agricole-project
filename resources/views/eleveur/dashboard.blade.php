@@ -21,10 +21,45 @@
         body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); display: flex; }
 
         /* Sidebar */
-        .sidebar { width: 260px; height: 100vh; background: var(--secondary); color: white; position: fixed; right: 0; z-index: 1000; }
+        .sidebar { 
+            width: 260px; 
+            height: 100vh; 
+            background: var(--secondary); 
+            color: white; 
+            position: fixed; 
+            right: 0; 
+            z-index: 1000; 
+            display: flex; 
+            flex-direction: column; 
+        }
         .sidebar h2 { text-align: center; padding: 20px; border-bottom: 1px solid #2d6a4f; }
         .sidebar a { display: block; padding: 15px 25px; color: #d1d1d1; text-decoration: none; transition: 0.3s; }
         .sidebar a:hover, .sidebar a.active { background: var(--primary); color: white; }
+
+        /* تسجيل الخروج */
+        .logout-section {
+            margin-top: auto;
+            border-top: 1px solid #2d6a4f;
+        }
+        .btn-logout {
+            width: 100%;
+            background: none;
+            border: none;
+            color: #ffbaba;
+            padding: 15px 25px;
+            text-align: right;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: 0.3s;
+            font-family: inherit;
+        }
+        .btn-logout:hover {
+            background: var(--danger);
+            color: white;
+        }
 
         /* Main Content */
         .content { margin-right: 260px; width: calc(100% - 260px); padding: 30px; }
@@ -33,12 +68,12 @@
 
         .dashboard-grid { display: grid; grid-template-columns: 1fr 400px; gap: 20px; }
 
-        .section-card { background: var(--white); padding: 20px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .section-card { background: var(--white); padding: 20px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 20px; }
         
         #map { height: 450px; width: 100%; border-radius: 12px; margin-bottom: 15px; }
 
         /* Vet Cards */
-        .vets-list-container { max-height: 500px; overflow-y: auto; }
+        .vets-list-container { max-height: 400px; overflow-y: auto; }
         .vet-card { 
             border: 1px solid #eee; padding: 15px; border-radius: 12px; margin-bottom: 15px; transition: 0.3s; 
         }
@@ -67,6 +102,17 @@
         <a href="#" class="active"><i class="fas fa-home"></i> الرئيسية</a>
         <a href="{{ route('eleveur.isticharati') }}"><i class="fas fa-file-medical"></i> استشاراتي</a>
         <a href="{{ route('eleveur.chats') }}"><i class="fas fa-comments"></i> المحادثات</a>
+        <!-- تم الإبقاء على رابط الأوبئة هنا في السايدبار -->
+        <a href="{{ route('eleveur.epidemic.reports') }}" style="color: #ffbaba;"><i class="fas fa-biohazard"></i> بلاغات الأوبئة</a>
+        
+        <div class="logout-section">
+            <form action="{{ route('logout') }}" method="POST">
+                @csrf
+                <button type="submit" class="btn-logout">
+                    <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
+                </button>
+            </form>
+        </div>
     </div>
 
     <div class="content">
@@ -74,12 +120,6 @@
             <h3>مرحباً بك، {{ Auth::user()->name }} 🌾</h3>
             <span id="coords-display" style="font-size: 12px; color: #888;"></span>
         </div>
-
-        @if(session('success'))
-            <div style="background: #d4edda; color: #155724; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
-                {{ session('success') }}
-            </div>
-        @endif
 
         <div class="dashboard-grid">
             <div class="section-card">
@@ -93,16 +133,18 @@
                 </form>
             </div>
 
-            <div class="section-card">
-                <h4><i class="fas fa-user-md"></i> قائمة الأطباء الذكية</h4>
-                <div id="vets-list" class="vets-list-container">
-                    <p style="text-align: center; color: #999;">جاري البحث عن أقرب الأطباء...</p>
+            <div class="side-sections">
+                <div class="section-card">
+                    <h4><i class="fas fa-user-md"></i> قائمة الأطباء الذكية</h4>
+                    <div id="vets-list" class="vets-list-container">
+                        <p style="text-align: center; color: #999;">جاري البحث عن أقرب الأطباء...</p>
+                    </div>
                 </div>
+                <!-- تم حذف البطاقة الحمراء فقط من هنا -->
             </div>
         </div>
     </div>
 
-    <!-- Modal طلب استشارة -->
     <div id="consultationModal" class="modal">
         <div class="modal-content">
             <h3 style="margin-top:0;">إرسال طلب استشارة</h3>
@@ -149,7 +191,6 @@
                     vetsLayer.clearLayers();
 
                     data.forEach(vet => {
-                        // إضافة ماركر للطبيب على الخريطة
                         L.marker([vet.latitude, vet.longitude], {
                             icon: L.icon({
                                 iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
@@ -157,7 +198,6 @@
                             })
                         }).addTo(vetsLayer).bindPopup(`د. ${vet.name}`);
 
-                        // إضافة بطاقة الطبيب للقائمة
                         list.innerHTML += `
                             <div class="vet-card">
                                 <span class="vet-name">د. ${vet.name}</span>

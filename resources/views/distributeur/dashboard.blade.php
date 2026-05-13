@@ -42,7 +42,6 @@
         .sidebar a div { display: flex; align-items: center; gap: 12px; }
         .sidebar a:hover, .sidebar a.active { background: var(--primary-green); color: white; transform: translateX(-5px); }
         
-        /* --- BADGE & ANIMATION --- */
         .badge-count {
             background-color: var(--danger-red); color: white; font-size: 11px;
             padding: 2px 8px; border-radius: 50px; font-weight: bold;
@@ -86,12 +85,12 @@
         .suggestions-list li { padding: 12px 15px; cursor: pointer; border-bottom: 1px solid #eee; text-align: right; }
 
         /* --- STAT CARDS --- */
-        .cards-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
+        .cards-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
         .stat-card { background: var(--white); padding: 25px; border-radius: 20px; display: flex; align-items: center; gap: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.03); border: 1px solid #eee; transition: 0.3s; }
         .stat-card:hover { transform: translateY(-5px); }
         .card-icon { width: 50px; height: 50px; background: #f0f4f2; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; color: var(--primary-green); }
         .card-icon.orders { color: var(--danger-red); background: #fdf2f2; }
-
+        
         .map-card { background: var(--white); padding: 20px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); margin-top: 35px; }
         #map { height: 400px; width: 100%; border-radius: 15px; z-index: 1; }
     </style>
@@ -113,6 +112,11 @@
             @if(isset($unreadOrdersCount) && $unreadOrdersCount > 0)
                 <span class="badge-count anim-pulse">{{ $unreadOrdersCount }}</span>
             @endif
+        </a>
+
+        <!-- تم الإبقاء على الرابط هنا في السايدبار -->
+        <a href="{{ route('distributeur.epidemic.reports') }}" style="color: #ffbaba;">
+            <div><i class="fas fa-biohazard"></i> <span>مركز الأوبئة</span></div>
         </a>
 
         <a href="{{ route('distributeur.profile') }}">
@@ -167,6 +171,7 @@
                     <div style="font-size: 22px; font-weight: 700;">{{ count($allDistributors) }}</div>
                 </div>
             </div>
+            <!-- تم حذف البطاقة من هنا فقط -->
         </div>
 
         <div class="map-card">
@@ -180,7 +185,6 @@
     
     <script>
         $(document).ready(function() {
-            // منطق البحث والاقتراحات كما كان في كودك الأصلي
             $('#productSearch').on('keyup', function() {
                 let term = $(this).val();
                 if (term.length >= 2) {
@@ -204,7 +208,6 @@
             });
         });
 
-        // --- إعداد الخريطة ---
         var map = L.map('map').setView([36.7525, 3.0420], 6); 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 

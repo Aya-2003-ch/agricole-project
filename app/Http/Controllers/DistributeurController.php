@@ -249,4 +249,20 @@ public function rejectOrder(Commande $order)
 
     return view('distributeur.my_orders', compact('orders'));
 }
+  public function editOrder($id)
+    {
+        $order = Commande::findOrFail($id);
+        return view('distributeur.edit_order', compact('order'));
+    }
+    public function destroyOrder($id)
+    {
+        $order = Commande::findOrFail($id);
+
+        try {
+            $order->delete();
+            return redirect()->back()->with('success', 'تم حذف الطلب بنجاح من النظام.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'حدث خطأ أثناء محاولة الحذف.');
+        }
+}
 }
