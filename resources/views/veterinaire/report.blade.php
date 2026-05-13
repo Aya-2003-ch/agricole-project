@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AgroDz - التبليغ عن وباء</title>
     
-    <!-- استدعاء الأيقونات -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     
     <style>
@@ -82,7 +81,7 @@
             border: 2px solid #e2e8f0;
             border-radius: 10px;
             font-size: 16px;
-            box-sizing: border-box; /* لضمان عدم خروج المدخلات عن الحاوية */
+            box-sizing: border-box;
             transition: 0.3s;
         }
 
@@ -137,7 +136,6 @@
             <p style="color: #64748b;">نظام AgroDz لحماية الثروة الحيوانية</p>
         </div>
 
-        <!-- تنبيه النجاح -->
         @if(session('success'))
             <div style="background: #dcfce7; color: #166534; padding: 15px; border-radius: 10px; margin-bottom: 20px; text-align: center;">
                 <i class="fas fa-check-circle"></i> {{ session('success') }}
@@ -146,7 +144,7 @@
 
         <div class="alert-banner">
             <i class="fas fa-exclamation-triangle"></i>
-            <strong>تنبيه:</strong> سيتم إرسال هذا التقرير تلقائياً إلى المصالح الفلاحية التابعة لولايتك.
+            <strong>تنبيه:</strong> سيتم إرسال هذا التقرير تلقائياً إلى المصالح الفلاحية المعنية.
         </div>
 
         <form action="{{ route('veterinaire.report.send') }}" method="POST">
@@ -154,31 +152,42 @@
 
             <div class="form-group">
                 <label>اسم المرض المشتبه به:</label>
-                <input type="text" name="disease_name" class="form-control" placeholder="مثال: الجلد العقدي، طاعون المجترات..." required>
+                <!-- التعديل: nom_maladie مطابق للموديل -->
+                <input type="text" name="nom_maladie" class="form-control" placeholder="مثال: الجلد العقدي، طاعون المجترات..." required>
             </div>
 
             <div class="form-group">
                 <label>المنطقة / البلدية:</label>
-                <input type="text" name="location" class="form-control" placeholder="حدد مكان رصد الإصابة" required>
+                <!-- التعديل: region مطابق للموديل -->
+                <input type="text" name="region" class="form-control" placeholder="حدد مكان رصد الإصابة" required>
             </div>
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                 <div class="form-group">
                     <label>نوع الحيوان:</label>
-                    <select name="animal_type" class="form-control">
-                        <option value="bovins">أبقار</option>
-                        <option value="ovins">أغنام</option>
-                        <option value="caprins">ماعز</option>
+                    <select name="type_animal" class="form-control">
+                        <option value="أبقار">أبقار</option>
+                        <option value="أغنام">أغنام</option>
+                        <option value="ماعز">ماعز</option>
+                        <option value="دواجن">دواجن</option>
                     </select>
                 </div>
                 <div class="form-group">
                     <label>عدد الحالات:</label>
-                    <input type="number" name="affected_count" class="form-control" placeholder="0">
+                    <!-- التعديل: nombre_cas مطابق للموديل -->
+                    <input type="number" name="nombre_cas" class="form-control" placeholder="0" min="1">
                 </div>
             </div>
 
             <div class="form-group">
+                <label>تاريخ اكتشاف الإصابة:</label>
+                <!-- إضافة حقل التاريخ المطلوب في الـ Migration -->
+                <input type="date" name="date_decouverte" class="form-control" required>
+            </div>
+
+            <div class="form-group">
                 <label>وصف الأعراض الملاحظة:</label>
+                <!-- التعديل: description مطابق للموديل -->
                 <textarea name="description" class="form-control" rows="4" placeholder="اكتب تفاصيل الحالة الميدانية..." required></textarea>
             </div>
 

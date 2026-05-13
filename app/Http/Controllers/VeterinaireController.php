@@ -4,10 +4,13 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Models\RapportEpidemie;
+use App\Notifications\EpidemicReportCreated;
+use Illuminate\Support\Facades\Notification;
 use App\Models\Consultation;
 use App\Models\Commande; 
 use App\Models\Produit; 
-use App\Models\User; // أضفت هذا السطر لاستخدام موديل المستخدمين
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class VeterinaireController extends Controller
@@ -153,33 +156,37 @@ class VeterinaireController extends Controller
     // 7. البروفايل والشات
     public function profile() { return view('veterinaire.profile', ['user' => auth()->user()]); }
     public function chats() { return view('veterinaire.chats'); }
-
-    public function storeReport(Request $request)
-{
-    $request->validate([
-        'nom_maladie'    => 'required|string|max:255',
-        'localisation'   => 'required|string|max:255',
-        'type_animal'    => 'required|string',
-        'nombre_cas'     => 'required|integer|min:0',
-        'symptomes'      => 'required|string',
-    ]);
-
-    $report = EpidemicReport::create([
-        'nom_maladie'    => $request->nom_maladie,
-        'localisation'   => $request->localisation,
-        'type_animal'    => $request->type_animal,
-        'nombre_cas'     => $request->nombre_cas,
-        'symptomes'      => $request->symptomes,
-        'veterinaire_id' => auth()->id(),
-    ]);
-
-    return back()->with('success', 'Rapport envoyé avec succès.');
-}
   public function indexReports()
 {
     // جلب كل التقارير مرتبة من الأحدث إلى الأقدم
     $reports = \App\Models\RapportEpidemie::with('veterinaire')->latest()->get();
 
     return view('veterinaire.reports_index', compact('reports'));
+}
+public function storeReport(Request $request) 
+{
+    // 1. التحقق من صحة البيانات القادمة من الواجهة
+    $validated = $request->validate([
+        'nom_maladie'  => 'required|string',
+        'localisation' => 'required|string',
+        'type_animal'  => 'required|string',
+        'nombre_cas'   => 'required|integer',
+        'symptomes'    => 'required|string',
+    ]);
+
+    // 2. حفظ التقرير في قاعدة البيانات (Migration: rapport_epidemies)
+    $report = RapportEpidemie::create([
+        'nom_maladie'    => $validated['nom_maladie'],
+        'localisation'   => $validated['localisation'],
+        'type_animal'    => $validated['type_animal'],
+        'nombre_cas'     => $validated['nombre_cas'],
+        'symptomes'      => $validated['symptomes'],
+        'veterinaire_id' => auth()->id(), // ربط التقرير بالطبيب الحالي
+    ]);
+
+    $users = User::all();
+    Notification::send($users, new EpidemicReportCreated($report));
+
+    return back()->with('success', 'تم تسجيل التقرير وتنبيه جميع المستخدمين بنجاح.');
 }
 }

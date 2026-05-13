@@ -48,10 +48,11 @@
         }
 
         .sidebar a {
-            display: flex; align-items: center; gap: 12px; padding: 14px;
+            display: flex; align-items: center; justify-content: space-between; padding: 14px;
             margin-bottom: 8px; color: #ecfdf5; text-decoration: none;
             border-radius: 12px; transition: 0.3s;
         }
+        .sidebar a div { display: flex; align-items: center; gap: 12px; }
 
         .sidebar a:hover, .sidebar a.active {
             background: var(--accent-green); transform: translateX(-5px); color: white;
@@ -59,72 +60,56 @@
 
         .main-content { margin-right: 260px; padding: 30px; }
 
-        /* SEARCH SECTION - التعديل المطلوب: بسيط وعادي */
+        /* NOTIFICATIONS DROPDOWN */
+        .notifications-dropdown { position: relative; cursor: pointer; }
+        .notification-icon-wrapper {
+            width: 50px; height: 50px; background: var(--white); border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: var(--shadow); transition: all 0.3s ease;
+        }
+        .notification-icon-wrapper:hover { background-color: #fff1f1 !important; transform: translateY(-2px); }
+        
+        .dropdown-menu-custom {
+            display: none; position: absolute; left: 0; top: 60px; background: white;
+            min-width: 320px; box-shadow: 0px 10px 25px rgba(0,0,0,0.1); border-radius: 15px;
+            z-index: 2000; max-height: 400px; overflow-y: auto; border: 1px solid #eee;
+        }
+        .dropdown-menu-custom.show { display: block; }
+        .notif-header { padding: 15px; font-weight: bold; background: #f8f9fa; border-bottom: 1px solid #eee; border-radius: 15px 15px 0 0; }
+        .notif-item {
+            color: #333; padding: 15px; text-decoration: none; display: flex; gap: 12px;
+            border-bottom: 1px solid #f8f9fa; font-size: 13px; transition: 0.2s;
+        }
+        .notif-item:hover { background: #f9f9f9; color: var(--accent-green); }
+        
+        .anim-pulse { animation: pulse-red 2s infinite; }
+        @keyframes pulse-red {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(220, 38, 38, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+        }
+
+        /* SEARCH SECTION */
         .search-container {
-            background: var(--white);
-            color: var(--text-main); 
-            border-radius: 20px; 
-            padding: 30px;
-            margin-bottom: 30px; 
-            box-shadow: var(--shadow); 
-            text-align: center;
-            border: 1px solid #e2e8f0;
+            background: var(--white); padding: 30px; border-radius: 20px;
+            margin-bottom: 30px; box-shadow: var(--shadow); text-align: center; border: 1px solid #e2e8f0;
         }
-
         .search-bar-custom {
-            background: #f1f5f9; 
-            border-radius: 15px; 
-            padding: 8px;
-            display: flex; 
-            max-width: 800px; 
-            margin: 20px auto 0;
-            border: 1px solid #cbd5e1;
+            background: #f1f5f9; border-radius: 15px; padding: 8px;
+            display: flex; max-width: 800px; margin: 20px auto 0; border: 1px solid #cbd5e1;
         }
-
         .search-bar-custom input {
             border: none; flex: 1; padding: 10px 20px; outline: none;
-            font-size: 16px; border-radius: 15px; color: #333;
-            background: transparent;
+            font-size: 16px; border-radius: 15px; background: transparent;
         }
-
         .search-bar-custom button {
             background: var(--accent-green); color: white; border: none;
-            padding: 10px 30px; border-radius: 12px; font-weight: bold;
-            cursor: pointer; transition: 0.3s;
+            padding: 10px 30px; border-radius: 12px; font-weight: bold; cursor: pointer;
         }
 
-        .badge-notify {
-            background: #ef4444; color: white; font-size: 11px;
-            padding: 3px 7px; border-radius: 50%; position: relative;
-            top: -2px; font-weight: bold;
-        }
-
-        #map { height: 450px; border-radius: 20px; z-index: 1; border: 1px solid #e2e8f0; }
-
-        .medicine-card {
-            border: none; border-radius: 18px; transition: 0.3s;
-            background: white; box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-        }
+        #map { height: 400px; border-radius: 20px; border: 1px solid #e2e8f0; }
+        .medicine-card { border: none; border-radius: 18px; transition: 0.3s; background: white; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
         .medicine-card:hover { transform: translateY(-5px); }
-        .anim-pulse {
-        animation: pulse-red 2s infinite;
-    }
-
-    @keyframes pulse-red {
-        0% { transform: translate(-50%, -50%) scale(0.95); box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
-        70% { transform: translate(-50%, -50%) scale(1.1); box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
-        100% { transform: translate(-50%, -50%) scale(0.95); box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
-    }
-
-    /* تحسين شكل الأيقونة عند المرور عليها */
-    .notification-icon-wrapper {
-        transition: all 0.3s ease;
-        border: 1px solid #f1f3f5;
-    }
-    .notification-icon-wrapper:hover {
-        background-color: #fff1f1 !important;
-        transform: translateY(-3px);
-    }
     </style>
 </head>
 <body>
@@ -132,35 +117,41 @@
 <nav class="sidebar">
     <div class="sidebar-brand">🌿 AgroDz البيطري</div>
     
-    <a href="{{ route('veterinaire.dashboard') }}" class="active"><i class="fas fa-th-large"></i> الرئيسية</a>
+    <a href="{{ route('veterinaire.dashboard') }}" class="active">
+        <div><i class="fas fa-th-large"></i> الرئيسية</div>
+    </a>
     
     <a href="{{ route('veterinaire.consultations') }}">
-        <i class="fas fa-stethoscope"></i> الاستشارات
-        {{-- التعديل: إظهار العدد الحقيقي للاستشارات الجديدة --}}
+        <div><i class="fas fa-stethoscope"></i> الاستشارات</div>
         @php
             $count = \App\Models\Consultation::where('veterinaire_id', Auth::id())->where('status', 'pending')->count();
         @endphp
         @if($count > 0)
-            <span class="badge-notify">{{ $count }}</span>
+            <span class="badge bg-danger rounded-pill">{{ $count }}</span>
         @endif
     </a>
 
     <a href="{{ route('veterinaire.my_orders') }}">
-        <i class="fas fa-shopping-basket"></i> سجل الطلبات
+        <div><i class="fas fa-shopping-basket"></i> سجل الطلبات</div>
         @if(isset($orderNotifications) && $orderNotifications > 0)
-            <span class="badge-notify">{{ $orderNotifications }}</span>
+            <span class="badge bg-danger rounded-pill">{{ $orderNotifications }}</span>
         @endif
     </a>
 
-    <a href="{{ route('veterinaire.chats') }}"><i class="fas fa-comments"></i> الدردشة</a>
-    <a href="{{ route('veterinaire.profile') }}"><i class="fas fa-user-md"></i> الملف الشخصي</a>
+    <a href="{{ route('veterinaire.chats') }}">
+        <div><i class="fas fa-comments"></i> الدردشة</div>
+    </a>
+    
+    <a href="{{ route('veterinaire.profile') }}">
+        <div><i class="fas fa-user-md"></i> الملف الشخصي</div>
+    </a>
     
     <a href="{{ route('veterinaire.report') }}" class="text-danger mt-4 fw-bold">
-        <i class="fas fa-biohazard"></i> التبليغ عن وباء
+        <div><i class="fas fa-biohazard"></i> التبليغ عن وباء</div>
     </a>
 
     <a href="{{ route('logout') }}" style="margin-top: auto;" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-        <i class="fas fa-sign-out-alt"></i> خروج
+        <div><i class="fas fa-sign-out-alt"></i> خروج</div>
     </a>
     <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">@csrf</form>
 </nav>
@@ -168,37 +159,46 @@
 <div class="main-content">
     
     <div class="row mb-4">
-    <div class="col-md-12">
-        <div class="p-4 bg-white rounded-4 shadow-sm border-end border-5 border-success d-flex justify-content-between align-items-center">
-            
-            <!-- النص والترحيب -->
-            <div>
-                <h2 class="fw-bold">مرحباً، دكتور {{ Auth::user()->name }} 👋</h2>
-                <p class="text-muted mb-0">ابحث عن الأدوية، تواصل مع الموزعين، وتابع استشارات الفلاحين.</p>
-            </div>
+        <div class="col-md-12">
+            <div class="p-4 bg-white rounded-4 shadow-sm border-end border-5 border-success d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="fw-bold">مرحباً، دكتور {{ Auth::user()->name }} 👋</h2>
+                    <p class="text-muted mb-0">تابع حالة الأوبئة، تواصل مع الموزعين، واستقبل طلبات الفلاحين.</p>
+                </div>
 
-            <!-- أيقونة التنبيهات الجديدة (وباء) -->
-            <div class="notification-area" style="position: relative;">
-                <a href="{{ route('veterinaire.epidemic.reports.index') }}" class="text-decoration-none">
-                    <div class="notification-icon-wrapper p-3 rounded-circle bg-light d-flex align-items-center justify-content-center shadow-sm" style="width: 60px; height: 60px; position: relative;">
-                        <!-- أيقونة الوباء كما في الصورة -->
-                        <i class="fas fa-biohazard text-danger fs-3"></i>
-                        
-                        <!-- الرقم الأحمر (يظهر فقط إذا كان هناك بلاغ جديد) -->
+                <!-- نظام التنبيهات المنسدل للأوبئة -->
+                <div class="notifications-dropdown" onclick="toggleNotifs()">
+                    <div class="notification-icon-wrapper">
+                        <i class="fas fa-biohazard text-danger fs-4"></i>
                         @if(isset($unreadReportsCount) && $unreadReportsCount > 0)
-                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger shadow-sm anim-pulse" style="font-size: 12px; border: 2px solid white;">
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger anim-pulse" style="font-size: 11px;">
                                 {{ $unreadReportsCount }}
                             </span>
                         @endif
                     </div>
-                </a>
+                    
+                    <div id="notif-menu" class="dropdown-menu-custom">
+                        <div class="notif-header">بلاغات الأوبئة الأخيرة</div>
+                        @if(isset($latestReports) && count($latestReports) > 0)
+                            @foreach($latestReports as $report)
+                                <a href="{{ route('veterinaire.epidemic.reports.index') }}" class="notif-item">
+                                    <i class="fas fa-exclamation-triangle text-danger mt-1"></i>
+                                    <div>
+                                        <strong>{{ $report->disease_name }}</strong><br>
+                                        <small class="text-muted">{{ $report->region }} - {{ $report->created_at->diffForHumans() }}</small>
+                                    </div>
+                                </a>
+                            @endforeach
+                        @else
+                            <div class="p-4 text-center text-muted">لا توجد بلاغات وبائية حالياً</div>
+                        @endif
+                        <a href="{{ route('veterinaire.epidemic.reports.index') }}" class="text-center p-2 d-block small text-success fw-bold" style="border-top: 1px solid #eee;">مشاهدة الكل</a>
+                    </div>
+                </div>
             </div>
-
         </div>
     </div>
-</div>
 
-    <!-- التعديل: شريط بحث بسيط بدون خلفية خضراء -->
     <div class="search-container shadow-sm">
         <h3 class="fw-bold" style="color: var(--primary-dark)"><i class="fas fa-search me-2"></i> ابحث عن الأدوية عند الموزعين</h3>
         <p class="text-muted">اكتب اسم الدواء لتظهر لك الاقتراحات وأماكن الموزعين</p>
@@ -206,9 +206,7 @@
         <form action="{{ route('veterinaire.market') }}" method="GET" class="search-bar-custom shadow-sm">
             <input type="text" name="medicine" id="medicineInput" list="medicinesList" 
                    placeholder="اكتب اسم الدواء هنا..." value="{{ request('medicine') }}" autocomplete="off">
-            
             <datalist id="medicinesList"></datalist>
-            
             <button type="submit">بحث الآن</button>
         </form>
     </div>
@@ -234,11 +232,10 @@
                 </div>
             </div>
         </div>
-        {{-- المودال الخاص بالطلب يبقى كما هو --}}
         @empty
         <div class="col-12 text-center py-5">
             <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
-            <p class="text-muted">عذراً، لم نجد أي منتج بهذا الاسم حالياً.</p>
+            <p class="text-muted">لم نجد أي منتج بهذا الاسم حالياً.</p>
         </div>
         @endforelse
     </div>
@@ -255,6 +252,18 @@
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 <script>
+    // التحكم في قائمة التنبيهات
+    function toggleNotifs() {
+        document.getElementById("notif-menu").classList.toggle("show");
+    }
+
+    window.onclick = function(event) {
+        if (!event.target.closest('.notifications-dropdown')) {
+            var menu = document.getElementById("notif-menu");
+            if (menu.classList.contains('show')) menu.classList.remove('show');
+        }
+    }
+
     const userLat = {{ Auth::user()->latitude ?? 36.4621 }};
     const userLng = {{ Auth::user()->longitude ?? 7.4311 }};
     const map = L.map('map').setView([userLat, userLng], 10);
@@ -279,6 +288,7 @@
         });
     @endif
 
+    // الاقتراحات البحثية
     const medInput = document.getElementById('medicineInput');
     const medList = document.getElementById('medicinesList');
 

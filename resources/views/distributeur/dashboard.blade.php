@@ -61,6 +61,37 @@
 
         .content { margin-right: var(--sidebar-width); width: calc(100% - var(--sidebar-width)); padding: 40px; }
 
+        /* --- HEADER & NOTIFICATIONS --- */
+        .top-header {
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;
+        }
+        .notifications-dropdown { position: relative; cursor: pointer; }
+        .notification-bell {
+            width: 45px; height: 45px; background: var(--white); border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05); color: var(--primary-green); font-size: 20px;
+            transition: 0.3s;
+        }
+        .notification-bell:hover { background: #f0f4f2; }
+        .bell-badge {
+            position: absolute; top: -5px; right: -5px; background: var(--danger-red);
+            color: white; border-radius: 50%; padding: 2px 6px; font-size: 10px; font-weight: bold;
+            border: 2px solid var(--light-bg);
+        }
+        .dropdown-content {
+            display: none; position: absolute; left: 0; top: 55px; background: white;
+            min-width: 320px; box-shadow: 0px 10px 25px rgba(0,0,0,0.1); border-radius: 15px;
+            z-index: 2000; max-height: 400px; overflow-y: auto; border: 1px solid #eee;
+        }
+        .dropdown-content .notif-header { padding: 15px; font-weight: bold; background: #f8f9fa; border-bottom: 1px solid #eee; border-radius: 15px 15px 0 0; }
+        .dropdown-content a {
+            color: #333; padding: 15px; text-decoration: none; display: flex; gap: 12px;
+            border-bottom: 1px solid #f8f9fa; font-size: 13px; transition: 0.2s;
+        }
+        .dropdown-content a:hover { background: #f9f9f9; }
+        .dropdown-content .notif-icon { color: var(--danger-red); font-size: 16px; margin-top: 3px; }
+        .show { display: block; }
+
         /* --- SEARCH SECTION --- */
         .search-section {
             background: var(--white); padding: 30px; border-radius: 20px;
@@ -114,7 +145,6 @@
             @endif
         </a>
 
-        <!-- تم الإبقاء على الرابط هنا في السايدبار -->
         <a href="{{ route('distributeur.epidemic.reports') }}" style="color: #ffbaba;">
             <div><i class="fas fa-biohazard"></i> <span>مركز الأوبئة</span></div>
         </a>
@@ -133,8 +163,35 @@
     </nav>
 
     <main class="content">
-        <div class="search-section">
+        <!-- الترويسة العلوية مع التنبيهات -->
+        <div class="top-header">
             <h2 style="color: var(--primary-dark);">مرحباً، {{ Auth::user()->name }} 👋</h2>
+            
+            <div class="notifications-dropdown" onclick="toggleNotifs()">
+                <div class="notification-bell">
+                    <i class="fas fa-bell"></i>
+                    @if(auth()->user()->unreadNotifications->count() > 0)
+                        <span class="bell-badge">{{ auth()->user()->unreadNotifications->count() }}</span>
+                    @endif
+                </div>
+                <div id="notif-menu" class="dropdown-content">
+                    <div class="notif-header">تنبيهات الأوبئة العاجلة</div>
+                    @forelse(auth()->user()->unreadNotifications as $notification)
+                        <a href="{{ route('distributeur.epidemic.reports') }}">
+                            <div class="notif-icon"><i class="fas fa-triangle-exclamation"></i></div>
+                            <div>
+                                <strong>{{ $notification->data['title'] }}</strong><br>
+                                <small style="color: #777;">{{ $notification->data['message'] }}</small>
+                            </div>
+                        </a>
+                    @empty
+                        <div style="padding: 20px; text-align: center; color: #999;">لا توجد تنبيهات جديدة</div>
+                    @endforelse
+                </div>
+            </div>
+        </div>
+
+        <div class="search-section">
             <p style="color: #636e72;">ابحث عن الأدوية والمنتجات المتوفرة في سوق الموزعين الآن.</p>
             
             <form action="{{ route('distributeur.market') }}" method="GET" class="search-group" id="searchForm">
@@ -171,7 +228,6 @@
                     <div style="font-size: 22px; font-weight: 700;">{{ count($allDistributors) }}</div>
                 </div>
             </div>
-            <!-- تم حذف البطاقة من هنا فقط -->
         </div>
 
         <div class="map-card">
@@ -184,6 +240,23 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
     <script>
+        // دالة إظهار وإخفاء التنبيهات
+        function toggleNotifs() {
+            document.getElementById("notif-menu").classList.toggle("show");
+        }
+
+        // إغلاق القائمة عند الضغط في أي مكان آخر
+        window.onclick = function(event) {
+            if (!event.target.closest('.notifications-dropdown')) {
+                var dropdowns = document.getElementsByClassName("dropdown-content");
+                for (var i = 0; i < dropdowns.length; i++) {
+                    if (dropdowns[i].classList.contains('show')) {
+                        dropdowns[i].classList.remove('show');
+                    }
+                }
+            }
+        }
+
         $(document).ready(function() {
             $('#productSearch').on('keyup', function() {
                 let term = $(this).val();
