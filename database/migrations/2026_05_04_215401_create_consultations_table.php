@@ -19,12 +19,12 @@
         $table->text('motif');
         $table->string('degree')->nullable();
 
-        // 🔥 المهم
+        //  المهم
         $table->string('status')->default('pending'); // pending / accepted / rejected
 
         $table->text('diagnostique')->nullable();
 
-        // ✔️ ربط مع users
+        //  ربط مع users
         $table->foreign('eleveur_id')->references('id')->on('users')->onDelete('cascade');
         $table->foreign('veterinaire_id')->references('id')->on('users')->onDelete('cascade');
 

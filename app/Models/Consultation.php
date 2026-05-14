@@ -34,8 +34,11 @@ public function eleveur()
 }
 public function user(): BelongsTo
     {
-        // تأكدي أن الحقل في قاعدة البيانات اسمه user_id
         return $this->belongsTo(User::class);
+    }
+    public function animal()
+    {
+    return $this->belongsTo(Animal::class, 'animal_id');
     }
 
 }
