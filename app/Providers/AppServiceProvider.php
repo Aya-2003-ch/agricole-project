@@ -3,18 +3,21 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\CommandePolicy;
-use Illuminate\Support\StorePolicy;
+use App\Models\Store;
+use App\Models\Commande;
+use App\Policies\StorePolicy;
+use App\Policies\CommandePolicy;
 
 class AppServiceProvider extends ServiceProvider
 {
-    protected $policies=[
-        Store::class=>StorePolicy::class,
-        Commande::class=>Commande::class,
+    /**
+     * سياسات الصلاحيات (Policies) للمشروع.
+     * تم تصحيح المسارات (Namespaces) لتشير إلى مجلد Models و Policies الصحيح.
+     */
+    protected $policies = [
+        Store::class => StorePolicy::class,
+        Commande::class => CommandePolicy::class, // تم تصحيح ربط السياسة هنا
     ];
-     
-        
-    
 
     /**
      * Register any application services.
@@ -27,13 +30,8 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Bootstrap any application services.
      */
-    public function boot()
-{
-    view()->composer('*', function ($view) {
-        // نحسب التقارير المرسلة في آخر 24 ساعة مثلاً أو غير المقروءة
-        $unreadReportsCount = \App\Models\RapportEpidemie::where('created_at', '>=', now()->subDays(2))->count();
-        $view->with('unreadReportsCount', $unreadReportsCount);
-    });
-}
-   
+    public function boot(): void
+    {
+    
+    }
 }

@@ -5,22 +5,18 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Animal;
 
 class EleveurController extends Controller
 {
-    // عرض لوحة تحكم المربي
-    public function dashboard()
-    {
-        // نجلب بيانات المربي الحالي
-        $user = Auth::user();
-        $unreadReportsCount = \App\Models\RapportEpidemie::where('created_at', '>=', now()->subDays(3))->count();
-        
-        // يمكننا هنا جلب عدد استشاراته النشطة لعرضها في الإحصائيات
-        return view('eleveur.dashboard', compact('user','unreadReportsCount'));
+   public function dashboard()
+{
+    $user = Auth::user();
+    $animals = \App\Models\Animal::where('eleveur_id', auth()->id())->latest()->get();
+    return view('eleveur.dashboard', compact('user', 'animals'));
+}
 
-    }
-
-    // تحديث الموقع الجغرافي (ضروري لإيجاد أقرب بيطري)
+    // update localisation pour trover des veterinaire 
     public function updateLocation(Request $request)
     {
         $request->validate([
@@ -38,12 +34,61 @@ class EleveurController extends Controller
     }
     public function indexEleveur()
 {
-    // جلب استشارات الفلاح الحالي مع بيانات الطبيب البيطري
+    // les consultations d'un elever 
     $consultations = \App\Models\Consultation::with('veterinaire')
         ->where('eleveur_id', auth()->id())
         ->orderBy('created_at', 'desc')
         ->get();
 
     return view('eleveur.isticharati', compact('consultations'));
+}
+public function animalsIndex()
+{
+    $animals = Animal::where('eleveur_id', auth()->id())->latest()->get();
+    return view('eleveur.animale', compact('animals')); // ستفتح ملف animale.blade.php الذي أنشأناه
+}
+
+// enregistrer new animale dans la base de donnee 
+public function storeAnimal(Request $request)
+{
+    $validated = $request->validate([
+        'type' => 'required|string',
+        'identification_code' => 'nullable|string',
+        'age' => 'required|string',
+    ]);
+
+    Animal::create([
+        'type' => $validated['type'],
+        'identification_code' => $validated['identification_code'],
+        'age' => $validated['age'],
+        'eleveur_id' => auth()->id(), // ربط الحيوان بالمربي الحالي
+    ]);
+
+    return back()->with('success', 'تم إضافة الحيوان إلى قطيعك بنجاح.');
+}
+
+// update les donnee d'un animale 
+public function updateAnimal(Request $request, $id)
+{
+    $animal = Animal::where('eleveur_id', auth()->id())->findOrFail($id);
+
+    $validated = $request->validate([
+        'type' => 'required|string',
+        'identification_code' => 'nullable|string',
+        'age' => 'required|string',
+    ]);
+
+    $animal->update($validated);
+
+    return back()->with('success', 'تم تحديث بيانات الحيوان بنجاح.');
+}
+
+// supprimer animales 
+public function destroyAnimal($id)
+{
+    $animal = Animal::where('eleveur_id', auth()->id())->findOrFail($id);
+    $animal->delete();
+
+    return back()->with('success', 'تم حذف الحيوان من السجل بنجاح.');
 }
 }

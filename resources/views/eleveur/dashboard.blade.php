@@ -32,7 +32,7 @@
             display: flex; 
             flex-direction: column; 
         }
-        .sidebar h2 { text-align: center; padding: 20px; border-bottom: 1px solid #2d6a4f; }
+        .sidebar h2 { text-align: center; padding: 20px; border-bottom: 1px solid #2d6a4f; margin: 0; }
         .sidebar a { display: block; padding: 15px 25px; color: #d1d1d1; text-decoration: none; transition: 0.3s; }
         .sidebar a:hover, .sidebar a.active { background: var(--primary); color: white; }
 
@@ -84,36 +84,48 @@
 
         .btn-book { 
             width: 100%; background: var(--primary); color: white; border: none; padding: 10px; 
-            border-radius: 8px; cursor: pointer; margin-top: 10px; font-weight: bold;
+            border-radius: 8px; cursor: pointer; margin-top: 10px; font-weight: bold; transition: 0.3s;
         }
+        .btn-book:hover { background: var(--secondary); }
 
         /* Modal Styles */
         .modal { display: none; position: fixed; z-index: 3000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; }
-        .modal-content { background: white; padding: 25px; border-radius: 15px; width: 400px; }
+        .modal-content { background: white; padding: 25px; border-radius: 15px; width: 460px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
         .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
-        .form-group textarea, .form-group input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; }
-
-        /* التنسيقات الجديدة للتنبيهات */
-        .notifications-dropdown { position: relative; cursor: pointer; padding: 10px; border-radius: 50%; transition: 0.3s; }
-        .notifications-dropdown:hover { background: #f0fdf4; }
-        .notification-badge {
-            position: absolute; top: 0; right: 0; background: var(--danger);
-            color: white; border-radius: 50%; padding: 2px 6px; font-size: 10px; font-weight: bold; border: 2px solid white;
+        .form-group label { display: block; margin-bottom: 6px; font-weight: bold; color: #333; }
+        .form-group textarea, .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; background: white; font-family: inherit; box-sizing: border-box; }
+        
+        /* تصميم صندوق الحيوانات المطور بالـ Checkboxes */
+        .animals-checkbox-list {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            max-height: 150px;
+            overflow-y: auto;
+            padding: 10px;
+            background: #fff;
         }
-        .dropdown-content {
-            display: none; position: absolute; left: 0; background-color: white;
-            min-width: 320px; box-shadow: 0px 10px 25px rgba(0,0,0,0.15); border-radius: 12px;
-            z-index: 2000; max-height: 450px; overflow-y: auto; border: 1px solid #eee; margin-top: 10px;
+        .animal-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px;
+            border-bottom: 1px solid #f1f5f9;
+            cursor: pointer;
+            transition: 0.2s;
         }
-        .dropdown-content .notif-header { padding: 15px; font-weight: bold; background: #f8f9fa; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
-        .dropdown-content a {
-            color: #333 !important; padding: 15px; text-decoration: none; display: flex; gap: 12px;
-            border-bottom: 1px solid #f8f9fa; font-size: 13.5px; transition: 0.2s;
+        .animal-item:hover {
+            background-color: #f0fdf4;
         }
-        .dropdown-content a:hover { background-color: #f9f9f9; }
-        .dropdown-content .notif-icon { color: var(--danger); font-size: 18px; margin-top: 3px; }
-        .show { display: block; }
+        .animal-item input[type="checkbox"] {
+            width: auto;
+            cursor: pointer;
+        }
+        .animal-item label {
+            margin: 0;
+            font-weight: normal;
+            cursor: pointer;
+            width: 100%;
+        }
     </style>
 </head>
 <body>
@@ -121,9 +133,9 @@
     <div class="sidebar">
         <h2>AgroDz 🚜</h2>
         <a href="#" class="active"><i class="fas fa-home"></i> الرئيسية</a>
+        <a href="{{ route('eleveur.animals.index') }}"><i class="fas fa-paw"></i> إدارة قطيعي</a>
         <a href="{{ route('eleveur.isticharati') }}"><i class="fas fa-file-medical"></i> استشاراتي</a>
         <a href="{{ route('eleveur.chats') }}"><i class="fas fa-comments"></i> المحادثات</a>
-        <a href="{{ route('eleveur.epidemic.reports') }}" style="color: #ffbaba;"><i class="fas fa-biohazard"></i> بلاغات الأوبئة</a>
         
         <div class="logout-section">
             <form action="{{ route('logout') }}" method="POST">
@@ -139,35 +151,6 @@
         <div class="header">
             <div style="display: flex; align-items: center; gap: 25px;">
                 <h3 style="margin:0;">مرحباً بك، {{ Auth::user()->name }} 🌾</h3>
-                
-                <!-- أيقونة التنبيهات المدمجة -->
-                <div class="notifications-dropdown" onclick="toggleNotifications()">
-                    <i class="fas fa-bell" style="font-size: 22px; color: var(--primary);"></i>
-                    @if(auth()->user()->unreadNotifications->count() > 0)
-                        <span class="notification-badge">{{ auth()->user()->unreadNotifications->count() }}</span>
-                    @endif
-                    
-                    <div id="notif-items" class="dropdown-content">
-                        <div class="notif-header">
-                            <span>الإشعارات الأخيرة</span>
-                            <span class="badge bg-success" style="font-size: 10px;">جديد</span>
-                        </div>
-                        @forelse(auth()->user()->unreadNotifications as $notification)
-                            <a href="{{ route('eleveur.epidemic.reports') }}">
-                                <div class="notif-icon"><i class="fas fa-exclamation-circle"></i></div>
-                                <div>
-                                    <strong style="display:block; margin-bottom:2px;">{{ $notification->data['title'] }}</strong>
-                                    <span class="text-muted" style="font-size: 12px;">{{ $notification->data['message'] }}</span>
-                                </div>
-                            </a>
-                        @empty
-                            <div style="padding: 30px; text-align: center; color: #999;">
-                                <i class="fas fa-bell-slash" style="display:block; font-size: 30px; margin-bottom:10px;"></i>
-                                لا توجد تنبيهات جديدة
-                            </div>
-                        @endforelse
-                    </div>
-                </div>
             </div>
             <span id="coords-display" style="font-size: 12px; color: #888;"></span>
         </div>
@@ -195,24 +178,45 @@
         </div>
     </div>
 
-    <!-- Modal الاستشارة -->
     <div id="consultationModal" class="modal">
         <div class="modal-content">
-            <h3 style="margin-top:0;">إرسال طلب استشارة</h3>
+            <h3 style="margin-top:0; color: var(--secondary);"><i class="fas fa-paper-plane"></i> إرسال طلب استشارة</h3>
             <form action="{{ route('eleveur.consultations.store') }}" method="POST">
                 @csrf
                 <input type="hidden" name="veterinaire_id" id="modal_vet_id">
+                
                 <div class="form-group">
                     <label>الطبيب المختار:</label>
-                    <input type="text" id="modal_vet_name" readonly>
+                    <input type="text" id="modal_vet_name" readonly style="background-color: #f1f5f9; font-weight: bold;">
                 </div>
+
+                <div class="form-group">
+                    <label>اختر الحيوان أو مجموعة الحيوانات المعنية بالفحص:</label>
+                    
+                    <input type="text" id="searchAnimalInput" onkeyup="filterAnimals()" placeholder="🔍 اكتب هنا للبحث السريع (نوع، كود، سن)..." style="margin-bottom: 8px; border-color: var(--primary);">
+                    
+                    <div class="animals-checkbox-list" id="animalsContainer">
+                        @foreach($animals as $animal)
+                            <div class="animal-item">
+                                <input type="checkbox" name="animal_ids[]" value="{{ $animal->id }}" id="animal_{{{ $animal->id }}}">
+                                <label for="animal_{{{ $animal->id }}}">
+                                    <strong>{{ $animal->type }}</strong> 
+                                    {{ $animal->identification_code ? '[كود: ' . $animal->identification_code . ']' : '' }}
+                                    {{ $animal->age ? '(السن: ' . $animal->age . ')' : '' }}
+                                </label>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+
                 <div class="form-group">
                     <label>سبب الاستشارة (Motif):</label>
-                    <textarea name="motif" rows="4" required placeholder="اشرح حالة الحيوان..."></textarea>
+                    <textarea name="motif" rows="4" required placeholder="اشرح حالة الحيوانات والأعراض الملاحظة..."></textarea>
                 </div>
+
                 <div style="display: flex; gap: 10px;">
-                    <button type="submit" class="btn-book">إرسال الطلب</button>
-                    <button type="button" onclick="closeModal()" class="btn-book" style="background: #ccc; color: #333;">إلغاء</button>
+                    <button type="submit" class="btn-book" style="margin-top:0;">إرسال الطلب</button>
+                    <button type="button" onclick="closeModal()" class="btn-book" style="background: #e2e8f0; color: #334155; margin-top:0;">إلغاء</button>
                 </div>
             </form>
         </div>
@@ -276,19 +280,28 @@
             document.getElementById('consultationModal').style.display = 'none';
         }
 
-        // دالة التنبيهات الجديدة
-        function toggleNotifications() {
-            document.getElementById("notif-items").classList.toggle("show");
+        // دالة الـ JavaScript المطورة لتصفية عناصر الـ Checkbox فوراً أثناء الكتابة في حقل البحث
+        function filterAnimals() {
+            var input = document.getElementById("searchAnimalInput");
+            var filter = input.value.toLowerCase();
+            var container = document.getElementById("animalsContainer");
+            var items = container.getElementsByClassName("animal-item");
+
+            for (var i = 0; i < items.length; i++) {
+                var label = items[i].getElementsByTagName("label")[0];
+                var txtValue = label.textContent || label.innerText;
+                
+                if (txtValue.toLowerCase().indexOf(filter) > -1) {
+                    items[i].style.display = "flex";
+                } else {
+                    items[i].style.display = "none";
+                }
+            }
         }
 
         window.onclick = function(event) {
-            if (!event.target.closest('.notifications-dropdown')) {
-                var dropdowns = document.getElementsByClassName("dropdown-content");
-                for (var i = 0; i < dropdowns.length; i++) {
-                    if (dropdowns[i].classList.contains('show')) {
-                        dropdowns[i].classList.remove('show');
-                    }
-                }
+            if (event.target.className === 'modal') {
+                closeModal();
             }
         }
 

@@ -78,6 +78,16 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/messages/send', [MessageController::class, 'send'])->name('messages.send');
         Route::get('/epidemic-reports', [EleveurController::class, 'viewEpidemics'])
          ->name('epidemic.reports');
+         Route::get('/animale', [EleveurController::class, 'animalsIndex'])->name('animals.index');
+    
+    // 2. مسار إضافة حيوان جديد
+       Route::post('/animale/store', [EleveurController::class, 'storeAnimal'])->name('animals.store');
+    
+    // 3. مسار تعديل بيانات حيوان
+        Route::put('/animale/{id}', [EleveurController::class, 'updateAnimal'])->name('animals.update');
+    
+    // 4. مسار حذف حيوان من القطيع
+       Route::delete('/animale/{id}', [EleveurController::class, 'destroyAnimal'])->name('animals.destroy');
     });
 
     // --- قسم البيطري (Veterinaire) ---
@@ -99,6 +109,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/chats', [MessageController::class, 'index'])->name('chats');
         Route::post('/report/store', [VeterinaireController::class, 'storeReport'])->name('epidemic.report.store');
         Route::get('/epidemic-reports', [VeterinaireController::class, 'indexReports'])->name('epidemic.reports.index');
+        Route::delete('/veterinaire/consultations/{id}', [ConsultationController::class, 'destroy'])
+     ->name('consultations.destroy');
     });
 
     // --- قسم الموزع (Distributeur) ---

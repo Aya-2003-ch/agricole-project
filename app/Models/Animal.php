@@ -12,6 +12,7 @@ class Animal extends Model
     protected $fillable = [
         'type',
         'identification_code',
+        'age',
         'eleveur_id',
     ];
     public function eleveur()

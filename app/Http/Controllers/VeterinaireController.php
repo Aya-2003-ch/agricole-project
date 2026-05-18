@@ -4,9 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use App\Models\RapportEpidemie;
-use App\Notifications\EpidemicReportCreated;
-use Illuminate\Support\Facades\Notification;
 use App\Models\Consultation;
 use App\Models\Commande; 
 use App\Models\Produit; 
@@ -28,165 +25,110 @@ class VeterinaireController extends Controller
         // جلب كل الموزعين لعرضهم على الخريطة فوراً
         $allDistributors = User::where('role', 'distributeur')
             ->get(['name', 'latitude', 'longitude', 'address']);
-         $unreadReportsCount = \App\Models\RapportEpidemie::where('created_at', '>=', now()->subDays(3))->count();
+
         // حساب الإشعارات للطلبات (accepted/rejected) التي لم يراها البيطري بعد
         $orderNotifications = Commande::where('sender_id', auth()->id())
             ->whereIn('status', ['accepted', 'rejected'])
             ->where('is_seen', false)
             ->count(); 
 
-        return view('veterinaire.dashboard', compact('consultations', 'orderNotifications', 'allDistributors','unreadReportsCount'));
+        return view('veterinaire.dashboard', compact('consultations', 'orderNotifications', 'allDistributors'));
     }
 
     // 2. البحث عن الأدوية المتاحة عند الموزعين (Market)
- public function market(Request $request)
-{
-    $searchQuery = $request->input('medicine');
-
-    $results = DB::table('produits')
-        // 1. الربط مع جدول المخزن باستخدام produit_id
-        ->join('stores', 'produits.id', '=', 'stores.produit_id')
-        
-        // 2. الربط مع جدول الموزعين (الوسيط) باستخدام distributeur_id
-        ->join('distributeurs', 'stores.distributeur_id', '=', 'distributeurs.id')
-        
-        // 3. الربط مع جدول المستخدمين لجلب الاسم والعنوان والإحداثيات
-        // ملاحظة: افترضي أن جدول distributeurs فيه حقل اسمه user_id يربطه بجدول users
-        ->join('users', 'distributeurs.user_id', '=', 'users.id')
-        
-        ->select(
-            'users.id as distributeur_id',
-            'users.name as distributeur_name',
-            'users.address as distributeur_address',
-            'users.latitude as lat',
-            'users.longitude as lng',
-            'produits.id as produit_id',
-            'produits.nom as medicine_name',
-            'stores.prix as prix',
-            'stores.quantite as stock'
-        )
-        ->where('produits.nom', 'LIKE', '%' . $searchQuery . '%')
-        ->get();
-
-    $allDistributors = User::where('role', 'distributeur')->get(['name', 'latitude', 'longitude', 'address']);
-
-    return view('veterinaire.dashboard', compact('results', 'searchQuery', 'allDistributors'));
-}
-    // 3. إرسال طلب شراء للموزع
-    public function storeOrder(Request $request)
-{
-    // 1. التحقق من البيانات (تأكد أن الاسم هنا يطابق الـ input في الـ Modal)
-    $request->validate([
-        'produit_id'  => 'required|exists:produits,id',
-        'receiver_id' => 'required',
-        'quantity'    => 'required|integer|min:1',
-        'phone'       => 'required|string',
-        'address'     => 'required|string',
-    ]);
-
-    // 2. الحفظ في قاعدة البيانات
-    \App\Models\Commande::create([
-        'sender_id'   => auth()->id(),
-        'receiver_id' => $request->receiver_id,
-        
-        // التعديل هنا: نرسل القيمة للعمود الذي تطلبه قاعدة البيانات
-        'product_id'  => $request->produit_id, 
-        
-        'quantity'    => $request->quantity,
-        'phone'       => $request->phone,
-        'address'     => $request->address,
-        'status'      => 'pending',
-    ]);
-
-    return back()->with('success', 'تم إرسال طلبك بنجاح');
-}
-
-    // 4. عرض سجل طلباتي وتصفير الإشعارات عند الدخول
-   public function myOrders()
-{
-    $userId = auth()->id();
-
-    // 1. تحديث "تمت الرؤية" فقط للطلبات التي انتهى الموزع من معالجتها
-    // ولا نقوم بتغيير الـ status هنا أبداً
-    Commande::where('sender_id', $userId)
-            ->whereIn('status', ['accepted', 'rejected']) 
-            ->where('is_seen', false)
-            ->update(['is_seen' => true]);
-
-    // 2. جلب الطلبات مع التأكد من جلب العلاقات الصحيحة
-    // ملاحظة: تأكدي هل اسم العلاقة 'produit' أم 'product' في الموديل
-    $orders = Commande::where('sender_id', $userId)
-                ->with(['produit', 'receiver']) 
-                ->latest()
-                ->get();
-
-    return view('veterinaire.my_orders', compact('orders'));
-}
-
-    // 5. اقتراحات البحث (Ajax) لخاصية Autocomplete
-  public function getSuggestions(Request $request)
-{
-    $query = $request->q;
-
-    // استخدام الـ % قبل وبعد الكلمة لضمان إيجادها في أي مكان، 
-    // أو إبقاء % في الأخير فقط حسب رغبتك
-    $suggestions = Produit::where('nom', 'LIKE', '%' . $query . '%') 
-                        ->distinct()
-                        ->limit(10)
-                        ->pluck('nom'); 
-
-    return response()->json($suggestions);
-}
-
-    // 6. التبليغ عن الأوبئة
-    public function report() { return view('veterinaire.report'); }
-
-    public function sendReport(Request $request)
+    public function market(Request $request)
     {
-        $request->validate([
-            'disease_name' => 'required|string',
-            'description'  => 'required',
-            'location'     => 'required'
-        ]);
+        $searchQuery = $request->input('medicine');
 
-        // كود الحفظ (اختياري حسب مشروعك)
-        return redirect()->route('veterinaire.dashboard')->with('success', 'تم التبليغ عن الوباء بنجاح');
+        $results = DB::table('produits')
+            // 1. الربط مع جدول المخزن باستخدام produit_id
+            ->join('stores', 'produits.id', '=', 'stores.produit_id')
+            
+            // 2. الربط مع جدول الموزعين (الوسيط) باستخدام distributeur_id
+            ->join('distributeurs', 'stores.distributeur_id', '=', 'distributeurs.id')
+            
+            // 3. الربط مع جدول المستخدمين لجلب الاسم والعنوان والإحداثيات
+            ->join('users', 'distributeurs.user_id', '=', 'users.id')
+            
+            ->select(
+                'users.id as distributeur_id',
+                'users.name as distributeur_name',
+                'users.address as distributeur_address',
+                'users.latitude as lat',
+                'users.longitude as lng',
+                'produits.id as produit_id',
+                'produits.nom as medicine_name',
+                'stores.prix as prix',
+                'stores.quantite as stock'
+            )
+            ->where('produits.nom', 'LIKE', '%' . $searchQuery . '%')
+            ->get();
+
+        $allDistributors = User::where('role', 'distributeur')->get(['name', 'latitude', 'longitude', 'address']);
+
+        return view('veterinaire.dashboard', compact('results', 'searchQuery', 'allDistributors'));
     }
 
-    // 7. البروفايل والشات
+    // 3. إرسال طلب شراء للموزع
+    public function storeOrder(Request $request)
+    {
+        // 1. التحقق من البيانات
+        $request->validate([
+            'produit_id'  => 'required|exists:produits,id',
+            'receiver_id' => 'required',
+            'quantity'    => 'required|integer|min:1',
+            'phone'       => 'required|string',
+            'address'     => 'required|string',
+        ]);
+
+        // 2. الحفظ في قاعدة البيانات
+        \App\Models\Commande::create([
+            'sender_id'   => auth()->id(),
+            'receiver_id' => $request->receiver_id,
+            'product_id'  => $request->produit_id, 
+            'quantity'    => $request->quantity,
+            'phone'       => $request->phone,
+            'address'     => $request->address,
+            'status'      => 'pending',
+        ]);
+
+        return back()->with('success', 'تم إرسال طلبك بنجاح');
+    }
+
+    // 4. عرض سجل طلباتي وتصفير الإشعارات عند الدخول
+    public function myOrders()
+    {
+        $userId = auth()->id();
+
+        // 1. تحديث "تمت الرؤية" فقط للطلبات التي انتهى الموزع من معالجتها
+        Commande::where('sender_id', $userId)
+                ->whereIn('status', ['accepted', 'rejected']) 
+                ->where('is_seen', false)
+                ->update(['is_seen' => true]);
+
+        // 2. جلب الطلبات مع العلاقات الصحيحة
+        $orders = Commande::where('sender_id', $userId)
+                    ->with(['produit', 'receiver']) 
+                    ->latest()
+                    ->get();
+
+        return view('veterinaire.my_orders', compact('orders'));
+    }
+
+    // 5. اقتراحات البحث (Ajax) لخاصية Autocomplete
+    public function getSuggestions(Request $request)
+    {
+        $query = $request->q;
+
+        $suggestions = Produit::where('nom', 'LIKE', '%' . $query . '%') 
+                            ->distinct()
+                            ->limit(10)
+                            ->pluck('nom'); 
+
+        return response()->json($suggestions);
+    }
+
+    // 6. البروفايل والشات
     public function profile() { return view('veterinaire.profile', ['user' => auth()->user()]); }
     public function chats() { return view('veterinaire.chats'); }
-  public function indexReports()
-{
-    // جلب كل التقارير مرتبة من الأحدث إلى الأقدم
-    $reports = \App\Models\RapportEpidemie::with('veterinaire')->latest()->get();
-
-    return view('veterinaire.reports_index', compact('reports'));
-}
-public function storeReport(Request $request) 
-{
-    // 1. التحقق من صحة البيانات القادمة من الواجهة
-    $validated = $request->validate([
-        'nom_maladie'  => 'required|string',
-        'localisation' => 'required|string',
-        'type_animal'  => 'required|string',
-        'nombre_cas'   => 'required|integer',
-        'symptomes'    => 'required|string',
-    ]);
-
-    // 2. حفظ التقرير في قاعدة البيانات (Migration: rapport_epidemies)
-    $report = RapportEpidemie::create([
-        'nom_maladie'    => $validated['nom_maladie'],
-        'localisation'   => $validated['localisation'],
-        'type_animal'    => $validated['type_animal'],
-        'nombre_cas'     => $validated['nombre_cas'],
-        'symptomes'      => $validated['symptomes'],
-        'veterinaire_id' => auth()->id(), // ربط التقرير بالطبيب الحالي
-    ]);
-
-    $users = User::all();
-    Notification::send($users, new EpidemicReportCreated($report));
-
-    return back()->with('success', 'تم تسجيل التقرير وتنبيه جميع المستخدمين بنجاح.');
-}
 }
