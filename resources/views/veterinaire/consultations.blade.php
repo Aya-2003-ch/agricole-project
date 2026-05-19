@@ -241,9 +241,8 @@
                                         <h5 class="modal-title fw-bold"><i class="fas fa-stethoscope me-2"></i> تقرير الفحص الطبي للقطيع</h5>
                                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </div>
-                                    <form action="{{ route('veterinaire.consultations.update', $firstCon->id) }}" method="POST">
+                                    <form action="{{ route('veterinaire.consultations.diagnosis', $firstCon->id) }}" method="POST">
                                         @csrf
-                                        @method('PUT')
                                         <div class="modal-body p-4 text-end" style="max-height: 70vh; overflow-y: auto;">
                                             <p class="text-muted small mb-4"><i class="fas fa-info-circle text-primary me-1"></i> الرجاء تعبئة التشخيص الطبي والوصفة العلاجية لكل حيوان على حدة:</p>
                                             
@@ -257,16 +256,16 @@
                                                         
                                                         <input type="hidden" name="data[{{ $con->id }}][id]" value="{{ $con->id }}">
 
-                                           <div class="row g-3">
-                                          <div class="col-md-6">
-                              <label class="form-label small fw-bold text-dark">التشخيص الطبي (Diagnostique):</label>
-                                                                 <textarea name="data[{{ $con->id }}][diagnostique]" class="form-control form-control-sm rounded-3" rows="3" placeholder="اكتب حالة الحيوان وأعراض المرض هنا..." required>{{ $con->diagnostique }}</textarea>
-                                                                 </div>
+                                                        <div class="row g-3">
                                                             <div class="col-md-6">
-                                                            <label class="form-label small fw-bold text-dark">العلاج الموصوف (Traitement):</label>
-                                                            <textarea name="data[{{ $con->id }}][traitement]" class="form-control form-control-sm rounded-3" rows="3" placeholder="الأدوية، الحقن، أو التوجيهات الطبية للحيوان..." required>{{ $con->traitement }}</textarea>
+                                                                <label class="form-label small fw-bold text-dark">التشخيص الطبي (Diagnostique):</label>
+                                                                <textarea name="data[{{ $con->id }}][diagnostique]" class="form-control form-control-sm rounded-3" rows="3" placeholder="اكتب حالة الحيوان وأعراض المرض هنا..." required>{{ $con->diagnostique }}</textarea>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <label class="form-label small fw-bold text-dark">العلاج الموصوف (Traitement):</label>
+                                                                <textarea name="data[{{ $con->id }}][traitement]" class="form-control form-control-sm rounded-3" rows="3" placeholder="الأدوية، الحقن، أو التوجيهات الطبية للحيوان..." required>{{ $con->traitement }}</textarea>
+                                                            </div>
                                                         </div>
-                                                       </div>
                                                     </div>
                                                 @endif
                                             @endforeach
