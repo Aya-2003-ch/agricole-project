@@ -91,4 +91,29 @@ public function destroyAnimal($id)
 
     return back()->with('success', 'تم حذف الحيوان من السجل بنجاح.');
 }
+public function confirmConsultation(Request $request, $id)
+{
+    $request->validate([
+        'user_decision' => 'required|in:confirmed,declined'
+    ]);
+
+    // جلب الاستشارة الحالية لمعرفة تفاصيل المجموعة
+    $currentConsultation = \App\Models\Consultation::where('eleveur_id', auth()->id())->findOrFail($id);
+
+    // تحديد الكلمة المناسبة لقاعدة البيانات بناءً على قرار الفلاح
+    // إذا وافق الفلاح نكتب 'accepted' لكي يفهمها لوحة الطبيب وتظهر "مقبولة"
+    $dbStatus = $request->user_decision == 'confirmed' ? 'accepted' : 'declined';
+
+    // تحديث المجموعة كاملة في قاعدة البيانات لكي تتغير عند الطرفين معاً
+    \App\Models\Consultation::where('eleveur_id', auth()->id())
+        ->where('date_demande', $currentConsultation->date_demande)
+        ->where('motif', $currentConsultation->motif)
+        ->update([
+            'status' => $dbStatus
+        ]);
+
+    $message = $request->user_decision == 'confirmed' ? 'تم قبول وتثبيت الموعد بنجاح!' : 'تم رفض الموعد المقترح.';
+    
+    return back()->with('success', $message);
+}
 }

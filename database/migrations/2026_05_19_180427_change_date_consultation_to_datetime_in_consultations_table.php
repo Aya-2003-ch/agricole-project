@@ -1,0 +1,30 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('consultations', function (Blueprint $table) {
+            // تعديل الحقل ليصبح datetime ويقبل قيم فارغة مع استخدام change() للتحديث
+            $table->dateTime('date_consultation')->nullable()->change();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('consultations', function (Blueprint $table) {
+            // في حال أردت التراجع، يعود الحقل إلى date فقط
+            $table->date('date_consultation')->nullable()->change();
+        });
+    }
+};

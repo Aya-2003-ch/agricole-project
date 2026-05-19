@@ -67,7 +67,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/update-location', [EleveurController::class, 'updateLocation'])->name('updateLocation');
         Route::get('/search-medicine', [EleveurController::class, 'search'])->name('search');
         Route::get('/isticharati', [ConsultationController::class, 'indexEleveur'])->name('isticharati');
-        Route::post('/isticharati/{id}/confirm', [ConsultationController::class, 'confirmReservation'])->name('consultations.confirm');
+        Route::post('/consultations/{id}/confirm', [EleveurController::class, 'confirmConsultation'])->name('consultations.confirm');
 
         // الاستشارات الخاصة بالفلاح
         Route::post('/consultations/store', [ConsultationController::class, 'store'])->name('consultations.store');
@@ -88,6 +88,7 @@ Route::middleware(['auth'])->group(function () {
     
     // 4. مسار حذف حيوان من القطيع
        Route::delete('/animale/{id}', [EleveurController::class, 'destroyAnimal'])->name('animals.destroy');
+       Route::post('/eleveur/consultations/{id}/confirm', [EleveurController::class, 'confirmConsultation'])->name('consultations.confirm');
     });
 
     // --- قسم البيطري (Veterinaire) ---
@@ -98,7 +99,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/consultations', [ConsultationController::class, 'indexVet'])->name('consultations');
         Route::post('/consultations/{id}/status', [ConsultationController::class, 'updateStatus'])->name('consultations.status');
         Route::put('/consultations/{id}', [ConsultationController::class, 'update'])->name('consultations.update');
-
+        Route::post('/veterinaire/consultations/{id}/propose', [VeterinaireController::class, 'proposeAppointment'])->name('consultations.propose');
+        Route::post('/veterinaire/consultations/{id}/reject', [VeterinaireController::class, 'rejectConsultation'])->name('consultations.reject');
         Route::get('/api/medicines/suggestions', [VeterinaireController::class, 'getSuggestions'])->name('api.suggestions');
         Route::get('/market', [VeterinaireController::class, 'market'])->name('market');
         Route::post('/order/store', [VeterinaireController::class, 'storeOrder'])->name('order.store');
@@ -111,6 +113,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/epidemic-reports', [VeterinaireController::class, 'indexReports'])->name('epidemic.reports.index');
         Route::delete('/veterinaire/consultations/{id}', [ConsultationController::class, 'destroy'])
      ->name('consultations.destroy');
+     Route::post('consultations/{id}/diagnosis', [VeterinaireController::class, 'storeDiagnosis'])->name('consultations.diagnosis');
     });
 
     // --- قسم الموزع (Distributeur) ---

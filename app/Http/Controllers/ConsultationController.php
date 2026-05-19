@@ -119,49 +119,54 @@ class ConsultationController extends Controller
     }
 
     /**
-     * تحديث حالة الاستشارة والموعد من طرف الطبيب البيطري
+     * تحديث التشخيص الطبي والتقرير (للاشتشارات المقبولة فقط)
      */
-   public function update(Request $request, $id)
-{
-    $baseConsultation = Consultation::findOrFail($id);
-
-    if ($baseConsultation->veterinaire_id != auth()->id()) {
-        return back()->with('error', 'غير مسموح لك بهذا الإجراء');
+    public function update(Request $request, $id)
+    {
+        if ($request->has('data')) {
+            foreach ($request->data as $conId => $values) {
+                $con = Consultation::find($conId);
+                if ($con && $con->veterinaire_id == auth()->id()) {
+                    $con->update([
+                        'diagnostique' => $values['diagnostique'],
+                        'traitement' => $values['traitement']
+                    ]);
+                }
+            }
+            return back()->with('success', 'تم حفظ التقارير الطبية والتشخيص بنجاح.');
+        }
+        return back()->with('error', 'لم يتم إرسال أي بيانات للتشخيص.');
     }
-
-    // تجهيز وقت الموعد بصيغة صحيحة لقاعدة البيانات
-    $dateConsultation = null;
-    if ($request->date_consultation) {
-        $dateConsultation = \Carbon\Carbon::parse($request->date_consultation)->format('Y-m-d H:i:s');
-    }
-
-    // التحديث الذكي: نعتمد على الحقول الفريدة للطلب لضمان عدم تداخل طلبين منفصلين في نفس اليوم
-    Consultation::where('eleveur_id', $baseConsultation->eleveur_id)
-        ->where('motif', $baseConsultation->motif)
-        ->where('created_at', $baseConsultation->created_at) // مطابقة دقيقة بالثانية لوقت الحفظ
-        ->update([
-            'status'            => $request->status,
-            'date_consultation' => $dateConsultation,
-        ]);
-
-    $message = $request->status == 'accepted' ? 'تم قبول الاستشارة وتحديد الموعد بنجاح.' : 'تم رفض الطلب.';
-    return back()->with('success', $message);
-}
 
     /**
-     * تغيير الحالة مباشرة
+     * 🛠️ تحديث الحالة واقتراح الموعد من طرف الطبيب البيطري
+     * تم تعديلها لحل مشكلة الموعد الأصفار وتداخل الحالات المقبولة والمرفوضة
      */
     public function updateStatus(Request $request, $id)
     {
         $baseConsultation = Consultation::findOrFail($id);
         
-        Consultation::where('eleveur_id', $baseConsultation->eleveur_id)
-            ->where('date_demande', $baseConsultation->date_demande)
-            ->update([
-                'status' => $request->status
-            ]);
+        $updateData = [];
 
-        return back()->with('success', 'تم تغيير حالة الاستشارة');
+        // إذا أرسل البيطري موعداً مقترحاً (الحالة تبقى pending قيد الانتظار حتى يقبل المربي)
+        if ($request->has('date_consultation') && $request->filled('date_consultation')) {
+            $updateData['date_consultation'] = \Carbon\Carbon::parse($request->date_consultation)->format('Y-m-d H:i:s');
+            $message = 'تم إرسال الموعد المقترح إلى الفلاح، وفي انتظار تأكيده.';
+        }
+
+        // إذا كان الإجراء رفضاُ مباشراً من البيطري تلتغي الاستشارة فوراً
+        if ($request->has('status')) {
+            $updateData['status'] = $request->status;
+            $message = $request->status == 'rejected' ? 'تم رفض طلب الاستشارة بنجاح.' : 'تم تحديث الحالة.';
+        }
+
+        // تحديث دقيق للمجموعة الحالية فقط بالاعتماد على الـ created_at لمنع تداخل الاستشارات الأخرى
+        Consultation::where('eleveur_id', $baseConsultation->eleveur_id)
+            ->where('motif', $baseConsultation->motif)
+            ->where('created_at', $baseConsultation->created_at)
+            ->update($updateData);
+
+        return back()->with('success', $message);
     }
 
     /**
@@ -171,12 +176,11 @@ class ConsultationController extends Controller
     {
         $baseConsultation = Consultation::findOrFail($id);
         
-        // 🛠️ تم التعديل هنا: لكي لا تظهر عند البيطري "مرفوضة"
-        // إذا وافق الفلاح نجعل الحالة 'accepted' ليفهمها كود البيطري مباشرة، وإذا رفض تصبح 'rejected'
         $newStatus = $request->user_decision == 'confirmed' ? 'accepted' : 'rejected';
 
         Consultation::where('eleveur_id', $baseConsultation->eleveur_id)
-            ->where('date_demande', $baseConsultation->date_demande)
+            ->where('motif', $baseConsultation->motif)
+            ->where('created_at', $baseConsultation->created_at)
             ->update(['status' => $newStatus]);
 
         $msg = $request->user_decision == 'confirmed' ? "تم تأكيد قبولك للموعد بنجاح!" : "تم رفض الموعد المقترح.";
@@ -187,15 +191,14 @@ class ConsultationController extends Controller
      * حذف طلب الاستشارة بالكامل
      */
     public function destroy(Request $request, $id)
-{
-    $baseConsultation = Consultation::findOrFail($id);
+    {
+        $baseConsultation = Consultation::findOrFail($id);
 
-    // الحذف الذكي: يحذف فقط المجموعة المرتبطة بنفس اللحظة والسبب للمربي
-    Consultation::where('eleveur_id', $baseConsultation->eleveur_id)
-        ->where('motif', $baseConsultation->motif)
-        ->where('created_at', $baseConsultation->created_at) // لضمان حذف هذه المجموعة فقط دون المساس بالطلبات الأخرى
-        ->delete();
+        Consultation::where('eleveur_id', $baseConsultation->eleveur_id)
+            ->where('motif', $baseConsultation->motif)
+            ->where('created_at', $baseConsultation->created_at)
+            ->delete();
 
-    return back()->with('success', 'تم حذف طلب الاستشارة المحدد بنجاح.');
-}
+        return back()->with('success', 'تم حذف طلب الاستشارة المحدد بنجاح.');
+    }
 }

@@ -3,157 +3,251 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AgroDz - استشاراتي</title>
+    <title>AgroDz - سجل الاستشارات الطبية</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    
     <style>
-        :root { --primary: #14532d; --primary-light: #f0fdf4; --accent: #16a34a; --bg: #f1f5f9; }
-        body { background: var(--bg); font-family: 'Segoe UI', sans-serif; text-align: right; }
-        .consultation-card { border: none; border-radius: 20px; background: white; transition: 0.3s; overflow: hidden; }
-        .status-header { padding: 10px 20px; font-weight: bold; font-size: 14px; display: flex; justify-content: space-between; }
+        :root { 
+            --primary: #14532d; 
+            --primary-light: #f0fdf4; 
+            --accent: #16a34a; 
+            --bg: #f8fafc;
+            --dark-text: #1e293b;
+        }
         
-        /* حالات الاستشارة */
-        .status-pending { background: #fef3c7; color: #92400e; } /* قيد الانتظار */
-        .status-accepted { background: #dbeafe; color: #1e40af; } /* الطبيب اقترح موعداً */
-        .status-confirmed { background: #dcfce7; color: #166534; } /* الفلاح وافق */
-        .status-declined { background: #fee2e2; color: #991b1b; } /* الفلاح رفض */
+        body { 
+            background: var(--bg); 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            text-align: right;
+            color: var(--dark-text);
+        }
 
-        .doctor-info { border-bottom: 1px solid #f1f5f9; padding-bottom: 15px; margin-bottom: 15px; }
-        .decision-box { background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 15px; padding: 20px; }
-        
-        /* شارة الحيوان المعني */
-        .animal-badge { 
+        /* حاوية الجدول الاحترافية */
+        .table-responsive-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+            padding: 10px;
+        }
+
+        .custom-table {
+            margin-bottom: 0;
+            vertical-align: middle;
+        }
+
+        .custom-table thead th {
+            background-color: var(--primary-light);
+            color: var(--primary);
+            font-weight: 700;
+            border-bottom: 2px solid #e2e8f0;
+            padding: 15px 20px;
+            white-space: nowrap;
+        }
+
+        .custom-table tbody tr {
+            transition: all 0.2s ease;
+        }
+
+        .custom-table tbody tr:hover {
+            background-color: rgba(240, 253, 244, 0.5);
+        }
+
+        .custom-table td {
+            padding: 16px 20px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        /* شارات الحالات المخصصة للجدول */
+        .status-badge {
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .badge-pending { background-color: #fef3c7; color: #b45309; }
+        .badge-confirmed { background-color: #dcfce7; color: #15803d; }
+        .badge-declined { background-color: #fee2e2; color: #b91c1c; }
+
+        /* شارات الحيوانات */
+        .animal-tag { 
             background: var(--primary-light); 
             color: var(--primary); 
             padding: 4px 10px; 
-            border-radius: 8px; 
+            border-radius: 6px; 
             font-size: 12px; 
-            font-weight: 700; 
+            font-weight: 600; 
+            border: 1px solid rgba(22, 163, 74, 0.1);
             display: inline-flex;
             align-items: center;
-            border: 1px solid rgba(22, 163, 74, 0.1);
+            gap: 4px;
+        }
+
+        .code-sub-badge {
+            background: white;
+            color: #475569;
+            font-size: 11px;
+            padding: 1px 4px;
+            border-radius: 4px;
+            border: 1px solid #cbd5e1;
+        }
+
+        /* صندوق اتخاذ القرار داخل الجدول */
+        .action-box {
+            background: #f8fafc;
+            border: 1px dashed #cbd5e1;
+            border-radius: 10px;
+            padding: 10px;
+            max-width: 280px;
         }
     </style>
 </head>
 <body>
 
 <div class="container py-5">
-    <div class="d-flex justify-content-between align-items-center mb-5">
-        <h2 class="fw-bold text-dark"><i class="fas fa-calendar-check text-success me-2"></i> استشاراتي الطبية</h2>
-        <a href="{{ route('eleveur.dashboard') }}" class="btn btn-outline-secondary rounded-pill px-4">العودة للرئيسية</a>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-dark m-0"><i class="fas fa-notes-medical text-success me-2"></i> سجل الاستشارات الطبية</h2>
+            <p class="text-muted small mb-0 mt-1">تتبع مواعيدك وحالات الفحص البيطري الخاصة بمواشيك عبر منصة AgroDz</p>
+        </div>
+        <a href="{{ route('eleveur.dashboard') }}" class="btn btn-outline-success rounded-pill px-4 fw-bold">
+            <i class="fas fa-arrow-right me-1"></i> العودة للرئيسية
+        </a>
     </div>
 
     @if(session('success'))
-        <div class="alert alert-success border-0 shadow-sm mb-4 rounded-3 p-3">{{ session('success') }}</div>
+        <div class="alert alert-success border-0 shadow-sm mb-4 rounded-3 p-3 d-flex align-items-center">
+            <i class="fas fa-check-circle me-2 fa-lg"></i>
+            <div>{{ session('success') }}</div>
+        </div>
     @endif
 
-    <div class="row">
-        {{-- 🛠️ سحر التجميع: نقوم بدمج الأسطر حسب تاريخ الطلب وسبب الاستشارة ليظهر كطلب واحد --}}
-        @forelse($consultations->groupBy(function($item) { return $item->date_demande .'-'. $item->motif; }) as $group)
-            @php 
-                // نأخذ السطر الأول لاستخراج البيانات الموحدة للطلب
-                $firstCon = $group->first(); 
-            @endphp
-            <div class="col-md-6 mb-4">
-                <div class="card consultation-card shadow-sm h-100">
-                    <div class="status-header 
-                        @if($firstCon->status == 'pending') status-pending 
-                        @elseif($firstCon->status == 'accepted') status-accepted 
-                        @elseif($firstCon->status == 'confirmed') status-confirmed 
-                        @else status-declined @endif">
-                        <span>
-                            <i class="fas fa-info-circle me-1"></i>
-                            @if($firstCon->status == 'pending') في انتظار رد الطبيب
-                            @elseif($firstCon->status == 'accepted') الطبيب حدد موعداً (ينتظر موافقتك)
-                            @elseif($firstCon->status == 'confirmed') موعد مؤكد ومثبت
-                            @else موعد مرفوض @endif
-                        </span>
-                        <span>#{{ $firstCon->id }}</span>
-                    </div>
-
-                    <div class="card-body p-4">
-                        <div class="doctor-info d-flex align-items-center gap-3">
-                            <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
-                                <i class="fas fa-user-md fa-lg"></i>
+    <div class="table-responsive-container">
+        <table class="table custom-table table-hover">
+            <thead>
+                <tr>
+                    <th scope="col" style="width: 80px;">رقم الطلب</th>
+                    <th scope="col">تاريخ الطلب</th>
+                    <th scope="col">الطبيب المعالج</th>
+                    <th scope="col">الحيوانات المعنية</th>
+                    <th scope="col" style="width: 25%;">وصف الحالة / السبب</th>
+                    <th scope="col">حالة الموعد والقرار</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($consultations->groupBy(function($item) { return $item->date_demande .'-'. $item->motif; }) as $group)
+                    @php 
+                        // أخذ السطر الأول للمعلومات الأساسية
+                        $firstCon = $group->first(); 
+                        
+                        // التقاط السطر الذي يحتوي على التوقيت الفعلي المحدث من الطبيب
+                        $consultationWithDate = $group->first(function($item) {
+                            return !is_null($item->date_consultation);
+                        });
+                    @endphp
+                    <tr>
+                        <td class="fw-bold text-secondary">#{{ $firstCon->id }}</td>
+                        
+                        <td class="small text-muted">
+                            <i class="far fa-calendar me-1"></i>
+                            {{ $firstCon->date_demande ?? $firstCon->created_at->format('Y-m-d') }}
+                        </td>
+                        
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;">
+                                    <i class="fas fa-user-md fa-sm"></i>
+                                </div>
+                                <div>
+                                    <span class="fw-bold d-block text-dark">د. {{ $firstCon->veterinaire->name }}</span>
+                                    <small class="text-muted">
+                                        <i class="fas fa-map-marker-alt fa-xs"></i> {{ $firstCon->veterinaire->address ?? 'غير محدد' }}
+                                    </small>
+                                </div>
                             </div>
-                            <div>
-                                <h5 class="fw-bold mb-0">دكتور: {{ $firstCon->veterinaire->name }}</h5>
-                                <small class="text-muted"><i class="fas fa-map-marker-alt"></i> {{ $firstCon->veterinaire->address ?? 'العنوان غير محدد' }}</small>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <strong class="text-dark d-block mb-2">الحيوانات المعنية بالفحص:</strong>
-                            <div class="d-flex flex-wrap gap-2">
+                        </td>
+                        
+                        <td>
+                            <div class="d-flex flex-wrap gap-1" style="max-width: 200px;">
                                 @foreach($group as $item)
                                     @if($item->animal)
-                                        <div class="animal-badge">
-                                            <i class="fas fa-paw fa-sm me-1"></i> {{ $item->animal->type }}
+                                        <div class="animal-tag">
+                                            <i class="fas fa-paw fa-xs"></i> {{ $item->animal->type }}
                                             @if($item->animal->identification_code)
-                                                <span class="badge bg-white text-dark border ms-1" style="font-size: 10px;">كود: {{ $item->animal->identification_code }}</span>
+                                                <span class="code-sub-badge">{{ $item->animal->identification_code }}</span>
                                             @endif
                                         </div>
                                     @endif
                                 @endforeach
                             </div>
-                        </div>
-
-                        <p class="mb-3 text-secondary"><strong>وصف الحالة والسبب:</strong> {{ $firstCon->motif }}</p>
+                        </td>
                         
-                        <p class="small text-muted mb-3"><i class="fas fa-clock me-1"></i> تاريخ إرسال الطلب: {{ $firstCon->date_demande ?? $firstCon->created_at->format('Y-m-d H:i') }}</p>
+                        <td class="text-secondary small">{{ $firstCon->motif }}</td>
+                        
+                        <td>
+                            {{-- الحالة 1: الفلاح وافق مسبقاً وتأكد الموعد (الحالة أصبحت accepted في قاعدة البيانات لكي تظهر مقبولة عند الطبيب) --}}
+                            @if($firstCon->status == 'accepted')
+                                <div class="d-flex flex-column gap-1">
+                                    <span class="status-badge badge-confirmed">
+                                        <i class="fas fa-check-circle"></i> موعد مؤكد ومثبت
+                                    </span>
+                                    <small class="text-muted px-2" style="font-size: 11px;">
+                                        <i class="far fa-clock"></i> {{ \Carbon\Carbon::parse($consultationWithDate ? $consultationWithDate->date_consultation : $firstCon->date_consultation)->format('Y-m-d H:i') }}
+                                    </small>
+                                </div>
 
-                        {{-- الحالة 1: الطبيب اقترح موعداً والفلاح يجب أن يقرر --}}
-                        @if($firstCon->status == 'accepted')
-                        <div class="decision-box">
-                            <h6 class="fw-bold text-primary mb-3"><i class="fas fa-clock"></i> الموعد المقترح من الطبيب:</h6>
-                            <div class="fs-4 fw-bold mb-3 text-dark">
-                                {{ \Carbon\Carbon::parse($firstCon->date_consultation)->format('Y-m-d H:i') }} <br>
-                                <span class="text-muted small">على الساعة: {{ \Carbon\Carbon::parse($firstCon->date_consultation)->format('H:i') }}</span>
-                            </div>
-                            
-                            @if($firstCon->diagnostique)
-                                <p class="small bg-white p-2 rounded border mb-3"><strong>ملاحظة الطبيب الأولية:</strong> {{ $firstCon->diagnostique }}</p>
+                            {{-- الحالة 2: الفلاح أو الطبيب قام بالرفض --}}
+                            @elseif($firstCon->status == 'declined')
+                                <span class="status-badge badge-declined">
+                                    <i class="fas fa-times-circle"></i> طلب مرفوض
+                                </span>
+
+                            {{-- الحالة 3: الطبيب حدد موعداً (يوجد تاريخ) ولكن الفلاح لم يضغط بعد (الحالة ما زالت pending) --}}
+                            @elseif($consultationWithDate && $firstCon->status == 'pending')
+                                <div class="action-box">
+                                    <div class="small fw-bold text-primary mb-2">
+                                        <i class="far fa-clock"></i> موعد مقترح من الطبيب: <br>
+                                        <span class="text-dark">{{ \Carbon\Carbon::parse($consultationWithDate->date_consultation)->format('Y-m-d H:i') }}</span>
+                                    </div>
+
+                                    <div class="d-flex gap-1">
+                                        <form action="{{ route('eleveur.consultations.confirm', $consultationWithDate->id) }}" method="POST" class="flex-grow-1">
+                                            @csrf
+                                            <input type="hidden" name="user_decision" value="confirmed">
+                                            <button type="submit" class="btn btn-success btn-sm w-100 fw-bold py-1 rounded-2">قبول</button>
+                                        </form>
+                                        
+                                        <form action="{{ route('eleveur.consultations.confirm', $consultationWithDate->id) }}" method="POST" class="flex-grow-1">
+                                            @csrf
+                                            <input type="hidden" name="user_decision" value="declined">
+                                            <button type="submit" class="btn btn-outline-danger btn-sm w-100 fw-bold py-1 rounded-2" onclick="return confirm('هل أنت متأكد من رفض الموعد؟')">رفض</button>
+                                        </form>
+                                    </div>
+                                </div>
+
+                            {{-- الحالة 4: الطلب جديد تماماً وقيد الانتظار الأصلي قبل رد الطبيب --}}
+                            @else
+                                <span class="status-badge badge-pending">
+                                    <i class="fas fa-hourglass-half"></i> في انتظار رد الطبيب
+                                </span>
                             @endif
-
-                            <div class="d-flex gap-2 mt-4">
-                                {{-- عند قبول الفلاح، نرسل المعرّف الرئيسي للطلب المجمع لتحديث كافة الأسطر المرتبطة به --}}
-                                <form action="{{ route('eleveur.consultations.confirm', $firstCon->id) }}" method="POST" class="flex-grow-1">
-                                    @csrf
-                                    <input type="hidden" name="user_decision" value="confirmed">
-                                    <button type="submit" class="btn btn-success w-100 fw-bold rounded-3 py-2">قبول الموعد</button>
-                                </form>
-                                
-                                <form action="{{ route('eleveur.consultations.confirm', $firstCon->id) }}" method="POST" class="flex-grow-1">
-                                    @csrf
-                                    <input type="hidden" name="user_decision" value="declined">
-                                    <button type="submit" class="btn btn-outline-danger w-100 fw-bold rounded-3 py-2" onclick="return confirm('هل تريد رفض هذا الموعد؟')">رفض</button>
-                                </form>
-                            </div>
-                        </div>
-                        @endif
-
-                        {{-- الحالة 2: الموعد تم تأكيده نهائياً --}}
-                        @if($firstCon->status == 'confirmed')
-                        <div class="alert alert-success border-0 py-3 mb-0 rounded-3 shadow-sm">
-                            <h6 class="fw-bold mb-1"><i class="fas fa-check-circle"></i> الموعد مثبت نهائياً!</h6>
-                            <p class="small mb-0">يرجى انتظار الطبيب في الوقت المحدد: <strong>{{ \Carbon\Carbon::parse($firstCon->date_consultation)->format('d/m/Y - H:i') }}</strong></p>
-                        </div>
-                        @endif
-
-                        {{-- الحالة 3: الفلاح رفض الموعد --}}
-                        @if($firstCon->status == 'declined')
-                        <div class="alert alert-danger border-0 py-3 mb-0 rounded-3 shadow-sm">
-                            <i class="fas fa-times-circle me-1"></i> لقد قمت برفض هذا الموعد المقترح. 
-                        @endif
-                    </div>
-                </div>
-            </div>
-        @empty
-            <div class="col-12 text-center py-5">
-                <div class="mb-3"><i class="fas fa-calendar-times text-muted fs-1" style="opacity: 0.3;"></i></div>
-                <h4 class="text-muted">لا توجد استشارات طبية مسجلة حالياً</h4>
-            </div>
-        @endforelse
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="6" class="text-center py-5">
+                            <div class="text-muted mb-2"><i class="fas fa-calendar-times fs-2" style="opacity: 0.4;"></i></div>
+                            <h5 class="text-muted">لا توجد استشارات طبية مسجلة حالياً</h5>
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
     </div>
 </div>
 

@@ -24,7 +24,6 @@
             color: var(--dark-blue);
         }
         
-        /* Sidebar العصري */
         .sidebar-mini { 
             width: 280px; 
             height: 100vh; 
@@ -55,10 +54,8 @@
             transform: translateX(-5px);
         }
 
-        /* منطقة المحتوى */
         .content-area { margin-right: 280px; padding: 45px; }
         
-        /* البطاقة الرئيسية للجدول */
         .main-card { 
             border: none; 
             border-radius: 24px; 
@@ -68,7 +65,6 @@
             border: 1px solid rgba(0,0,0,0.03);
         }
         
-        /* تنسيق الجدول الاحترافي */
         .table thead { background: #f8fafc; }
         .table th { 
             border: none; 
@@ -82,13 +78,11 @@
         .table td { vertical-align: middle; padding: 18px 15px; border-bottom: 1px solid #f1f5f9; }
         .table tbody tr:hover { background-color: #fafafa; }
         
-        /* شارات الحالة الملونة */
         .status-badge { padding: 6px 14px; border-radius: 50px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
         .status-pending { background: #fef3c7; color: #d97706; }
         .status-accepted { background: #dcfce7; color: #15803d; }
         .status-rejected { background: var(--danger-light); color: #b91c1c; }
         
-        /* شارة الحيوان المعني */
         .animal-spec { 
             background: var(--primary-light); 
             color: var(--primary); 
@@ -125,16 +119,16 @@
             <i class="fas fa-list-ol text-success me-1"></i> إجمالي الطلبات: 
             <strong class="text-success">
                 {{ $consultations->groupBy(function($item) { 
-                    return $item->eleveur_id . '-' . $item->created_at->format('Y-m-d H:i:s') . '-' . $item->motif; 
+                    return $item->eleveur_id . '-' . $item->created_at->format('Y-m-d H:i:s') . '-' . $item->motif . '-' . $item->status; 
                 })->count() }}
             </strong>
         </div>
     </div>
 
     @if(session('success'))
-        <div class="alert alert-success border-0 shadow-sm rounded-4 p-3 d-flex align-items-center gap-2">
-            <i class="fas fa-check-circle"></i>
-            <div>{{ session('success') }}</div>
+        <div class="alert alert-success border-0 shadow-sm rounded-4 p-3 d-flex align-items-center gap-2 mb-4">
+            <i class="fas fa-check-circle text-success fs-5"></i>
+            <div class="fw-bold text-success">{{ session('success') }}</div>
         </div>
     @endif
 
@@ -149,21 +143,23 @@
                         <th>سبب الاستشارة</th>
                         <th>الحالة</th>
                         <th>الموعد المحدد</th>
+                        <th class="text-center">الملف الطبي / الإجراءات</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($consultations->groupBy(function($item) { 
-                        return $item->eleveur_id . '-' . $item->created_at->format('Y-m-d H:i:s') . '-' . $item->motif; 
+                        return $item->eleveur_id . '-' . $item->created_at->format('Y-m-d H:i:s') . '-' . $item->motif . '-' . $item->status; 
                     }) as $groupKey => $group)
                         @php 
                             $firstCon = $group->first(); 
+                            $loopId = $loop->index;
                         @endphp
                         <tr>
                             <td>
-                                <div class="fw-bold text-dark" style="font-size: 15px;">{{ $firstCon->eleveur->name }}</div>
+                                <div class="fw-bold text-dark" style="font-size: 15px;">{{ $firstCon->eleveur->name ?? 'مربي غير معروف' }}</div>
                                 <small class="text-muted">
                                     <i class="fas fa-phone-alt me-1" style="font-size: 11px;"></i> 
-                                    {{ $firstCon->eleveur->phone_number ?? $firstCon->eleveur->phone ?? 'لا يوجد هاتف' }}
+                                    {{ $firstCon->eleveur->phone_number ?? $firstCon->eleveur->phone ?? $firstCon->eleveur->telephone ?? 'لا يوجد هاتف' }}
                                 </small>
                             </td>
                             
@@ -213,13 +209,125 @@
                                         <i class="fas fa-calendar-alt me-1"></i> {{ \Carbon\Carbon::parse($firstCon->date_consultation)->format('Y-m-d H:i') }}
                                     </span>
                                 @else
-                                    <span class="text-muted small">---</span>
+                                    <span class="text-muted small">بانتظار تحديد موعد</span>
+                                @endif
+                            </td>
+
+                            <td class="text-center">
+                                @if($firstCon->status == 'pending')
+                                    <div class="d-flex justify-content-center gap-2">
+                                        <button class="btn btn-sm btn-success rounded-3 px-3 fw-bold" data-bs-toggle="modal" data-bs-target="#acceptModal{{ $loopId }}">
+                                            <i class="fas fa-calendar-plus me-1"></i> اقتراح موعد
+                                        </button>
+                                        <button class="btn btn-sm btn-warning rounded-3 px-3 fw-bold text-white" data-bs-toggle="modal" data-bs-target="#rejectModal{{ $loopId }}">
+                                            <i class="fas fa-times me-1"></i> رفض
+                                        </button>
+                                    </div>
+                                @elseif($firstCon->status == 'accepted')
+                                    <button class="btn btn-sm btn-primary rounded-3 px-3 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#diagnosticModal{{ $loopId }}">
+                                        <i class="fas fa-file-medical me-1"></i> إدخال التشخيص
+                                    </button>
+                                @else
+                                    <span class="text-muted small border d-inline-block px-2 py-1 bg-light rounded-3" style="font-style: italic; font-size: 11px;">غير متاح</span>
                                 @endif
                             </td>
                         </tr>
+
+                        @if($firstCon->status == 'accepted')
+                        <div class="modal fade" id="diagnosticModal{{ $loopId }}" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-lg modal-dialog-centered">
+                                <div class="modal-content rounded-4 border-0 shadow-lg">
+                                    <div class="modal-header bg-primary text-white rounded-top-4 py-3">
+                                        <h5 class="modal-title fw-bold"><i class="fas fa-stethoscope me-2"></i> تقرير الفحص الطبي للقطيع</h5>
+                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <form action="{{ route('veterinaire.consultations.update', $firstCon->id) }}" method="POST">
+                                        @csrf
+                                        @method('PUT')
+                                        <div class="modal-body p-4 text-end" style="max-height: 70vh; overflow-y: auto;">
+                                            <p class="text-muted small mb-4"><i class="fas fa-info-circle text-primary me-1"></i> الرجاء تعبئة التشخيص الطبي والوصفة العلاجية لكل حيوان على حدة:</p>
+                                            
+                                            @foreach($group as $index => $con)
+                                                @if($con->animal)
+                                                    <div class="p-3 mb-4 rounded-3 border bg-light shadow-sm">
+                                                        <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                                                            <span class="fw-bold text-success"><i class="fas fa-paw me-1"></i> الحيوان #{{ $index + 1 }}: {{ $con->animal->type }}</span>
+                                                            <span class="badge bg-dark-subtle text-dark fw-bold">كود: {{ $con->animal->identification_code ?? '---' }}</span>
+                                                        </div>
+                                                        
+                                                        <input type="hidden" name="data[{{ $con->id }}][id]" value="{{ $con->id }}">
+
+                                           <div class="row g-3">
+                                          <div class="col-md-6">
+                              <label class="form-label small fw-bold text-dark">التشخيص الطبي (Diagnostique):</label>
+                                                                 <textarea name="data[{{ $con->id }}][diagnostique]" class="form-control form-control-sm rounded-3" rows="3" placeholder="اكتب حالة الحيوان وأعراض المرض هنا..." required>{{ $con->diagnostique }}</textarea>
+                                                                 </div>
+                                                            <div class="col-md-6">
+                                                            <label class="form-label small fw-bold text-dark">العلاج الموصوف (Traitement):</label>
+                                                            <textarea name="data[{{ $con->id }}][traitement]" class="form-control form-control-sm rounded-3" rows="3" placeholder="الأدوية، الحقن، أو التوجيهات الطبية للحيوان..." required>{{ $con->traitement }}</textarea>
+                                                        </div>
+                                                       </div>
+                                                    </div>
+                                                @endif
+                                            @endforeach
+                                        </div>
+                                        <div class="modal-footer border-0 bg-light rounded-bottom-4 p-3">
+                                            <button type="button" class="btn btn-secondary px-3 rounded-3" data-bs-dismiss="modal">إلغاء</button>
+                                            <button type="submit" class="btn btn-primary px-4 rounded-3 fw-bold shadow-sm">حفظ التقارير الطبية</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+
+                        <div class="modal fade" id="acceptModal{{ $loopId }}" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content rounded-4">
+                                    <div class="modal-header bg-success text-white">
+                                        <h5 class="modal-title fw-bold"><i class="fas fa-calendar-alt me-2"></i> اقتراح موعد للفحص</h5>
+                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <form action="{{ route('veterinaire.consultations.status', $firstCon->id) }}" method="POST">
+                                        @csrf
+                                        <div class="modal-body text-end p-4">
+                                            <label class="form-label fw-bold small">حدد موعد ووقت الزيارة المقترحة للفحص الطبي:</label>
+                                            <input type="datetime-local" name="date_consultation" class="form-control rounded-3" required>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">إلغاء</button>
+                                            <button type="submit" class="btn btn-success fw-bold">إرسال الموعد للفلاح</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal fade" id="rejectModal{{ $loopId }}" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content rounded-4">
+                                    <div class="modal-header bg-warning text-white">
+                                        <h5 class="modal-title fw-bold">رفض طلب الاستشارة</h5>
+                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <form action="{{ route('veterinaire.consultations.status', $firstCon->id) }}" method="POST">
+                                        @csrf
+                                        <input type="hidden" name="status" value="rejected">
+                                        <div class="modal-body text-end p-4">
+                                            <p class="fw-bold text-dark small">هل أنت متأكد من رغبتك في رفض هذا الطلب المقدم من المربي بالكامل؟</p>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">إلغاء</button>
+                                            <button type="submit" class="btn btn-warning text-white fw-bold">تأكيد الرفض</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
                     @empty
                         <tr>
-                            <td colspan="6" class="text-center py-5 text-muted">
+                            <td colspan="7" class="text-center py-5 text-muted">
                                 <div class="mb-2"><i class="fas fa-folder-open fs-1 text-secondary" style="opacity: 0.4;"></i></div>
                                 لا توجد طلبات استشارة واردة حالياً.
                             </td>
