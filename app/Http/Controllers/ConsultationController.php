@@ -4,14 +4,13 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
-use App\Models\Consultation; // استدعاء الموديل مباشرة لتسهيل الكود
+use App\Models\Consultation; 
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class ConsultationController extends Controller
 {
     /**
-     * جلب الأطباء القريبين بناءً على إحداثيات يتم إرسالها عبر AJAX
+     * جلب الأطباء القريبين
      */
     public function getNearbyVets(Request $request)
     {
@@ -58,145 +57,145 @@ class ConsultationController extends Controller
     }
 
     /**
-     * 🛠️ تعديل دالة الحفظ عند الفلاح لدعم اختيار حيوانات متعددة
-     * تقوم بتقسيم الطلب المتعدد إلى أسطر منفصلة لكل حيوان
+     * دالة الحفظ: تفكيك المصفوفة وحفظ كل حيوان في سطر منفصل
      */
     public function store(Request $request)
     {
         $request->validate([
             'veterinaire_id' => 'required|exists:users,id',
-            'animal_ids'     => 'required|array', // التأكد من إرسال مصفوفة حيوانات
+            'motif'          => 'required|string|max:500',
+            'animal_ids'     => 'required|array',
             'animal_ids.*'   => 'exists:animals,id',
-            'motif'          => 'required|string|min:5',
         ]);
 
-        // تكرار الحفظ لكل حيوان تم تحديثه بالـ Checkbox لإنشاء سطر مستقل
-        foreach ($request->animal_ids as $animalId) {
-            Consultation::create([
-                'eleveur_id'     => auth()->id(),
-                'veterinaire_id' => $request->veterinaire_id,
-                'animal_id'      => $animalId, // 👈 ربط كل سطر بحيوان منفصل
-                'motif'          => $request->motif,
-                'date_demande'   => now(),
-                'status'         => 'pending', 
-            ]);
-        }
+        try {
+            $dateDemande = now()->format('Y-m-d H:i:s');
+            $eleveurId = auth()->id();
 
-        return redirect()->back()->with('success', 'تم إرسال طلب الاستشارة لجميع الحيوانات المحددة بنجاح!');
+            foreach ($request->animal_ids as $animalId) {
+                Consultation::create([
+                    'eleveur_id'     => $eleveurId,
+                    'veterinaire_id' => $request->veterinaire_id,
+                    'animal_id'      => $animalId,
+                    'motif'          => $request->motif,
+                    'date_demande'   => $dateDemande,
+                    'status'         => 'pending',
+                ]);
+            }
+
+            return redirect()->back()->with('success', 'تم إرسال طلب الاستشارة بنجاح إلى الطبيب البيطري!');
+
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', "خطأ أثناء الحفظ: " . $e->getMessage());
+        }
     }
 
     /**
-     * 🛠️ تحديث دالة العرض للطبيب ليشمل بيانات الحيوان (with) لمنع خطأ "غير محدد"
+     * عرض الاستشارات الخاصة بالطبيب البيطري
      */
     public function indexVet()
     {
-        $consultations = Consultation::with(['eleveur', 'animal']) // 👈 جلب الفلاح والحيوان معاً
-            ->where('veterinaire_id', auth()->id())
-            ->orderBy('created_at', 'desc')
+        $vetId = auth()->id();
+
+        $consultations = Consultation::with(['eleveur', 'animal'])
+            ->where('veterinaire_id', $vetId)
+            ->orderByRaw('COALESCE(date_demande, created_at) DESC')
             ->get();
 
         return view('veterinaire.consultations', compact('consultations'));
     }
 
     /**
-     * تحديث حالة الاستشارة من طرف الطبيب (تحديد موعد أو رفض الطلب)
-     */
-    public function update(Request $request, $id)
-    {
-        $consultation = Consultation::findOrFail($id);
-
-        if ($consultation->veterinaire_id != auth()->id()) {
-            return back()->with('error', 'غير مسموح لك بهذا الإجراء');
-        }
-
-        $consultation->update([
-            'status'            => $request->status, // 'accepted' أو 'rejected'
-            'date_consultation' => $request->date_consultation, 
-        ]);
-
-        $message = $request->status == 'accepted' ? 'تم قبول الاستشارة وتحديد الموعد المبدئي.' : 'تم رفض الطلب.';
-
-        return back()->with('success', $message);
-    }
-
-    /**
-     * دالة سريعة لتغيير الحالة مباشرة
-     */
-    public function updateStatus(Request $request, $id)
-    {
-        $consultation = Consultation::findOrFail($id);
-        
-        $consultation->update([
-            'status' => $request->status
-        ]);
-
-        return back()->with('success', 'تم تغيير حالة الاستشارة');
-    }
-
-    /**
-     * قرار الفلاح بتأكيد الموعد المقترح من الطبيب أو رفضه
-     */
-    public function confirmReservation(Request $request, $id)
-    {
-        $consultation = Consultation::findOrFail($id);
-
-        if ($request->user_decision == 'confirmed') {
-            $consultation->update(['status' => 'confirmed']);
-            $msg = "تم تأكيد قبولك للموعد بنجاح!";
-        } else {
-            $consultation->update(['status' => 'declined']);
-            $msg = "تم رفض الموعد المقترح.";
-        }
-
-        return back()->with('success', $msg);
-    }
-
-    /**
-     * 🛠️ تحديث دالة العرض للفلاح لتجلب أيضاً بيانات الحيوان المصاحب للاستشارة
+     * عرض الاستشارات الخاصة بالفلاح
      */
     public function indexEleveur()
     {
-        $consultations = Consultation::with(['veterinaire', 'animal']) // 👈 جلب الطبيب والحيوان
+        $consultations = Consultation::with(['veterinaire', 'animal'])
             ->where('eleveur_id', auth()->id())
-            ->orderBy('created_at', 'desc')
+            ->orderByRaw('COALESCE(date_demande, created_at) DESC')
             ->get();
 
         return view('eleveur.isticharati', compact('consultations'));
     }
 
     /**
-     * 🛠️ إضافة واجهة حفظ التقرير الطبي (التشخيص والدواء) لكل حيوان بعد الفحص الميداني
+     * تحديث حالة الاستشارة والموعد من طرف الطبيب البيطري
      */
-    public function saveReport(Request $request, $id)
+   public function update(Request $request, $id)
+{
+    $baseConsultation = Consultation::findOrFail($id);
+
+    if ($baseConsultation->veterinaire_id != auth()->id()) {
+        return back()->with('error', 'غير مسموح لك بهذا الإجراء');
+    }
+
+    // تجهيز وقت الموعد بصيغة صحيحة لقاعدة البيانات
+    $dateConsultation = null;
+    if ($request->date_consultation) {
+        $dateConsultation = \Carbon\Carbon::parse($request->date_consultation)->format('Y-m-d H:i:s');
+    }
+
+    // التحديث الذكي: نعتمد على الحقول الفريدة للطلب لضمان عدم تداخل طلبين منفصلين في نفس اليوم
+    Consultation::where('eleveur_id', $baseConsultation->eleveur_id)
+        ->where('motif', $baseConsultation->motif)
+        ->where('created_at', $baseConsultation->created_at) // مطابقة دقيقة بالثانية لوقت الحفظ
+        ->update([
+            'status'            => $request->status,
+            'date_consultation' => $dateConsultation,
+        ]);
+
+    $message = $request->status == 'accepted' ? 'تم قبول الاستشارة وتحديد الموعد بنجاح.' : 'تم رفض الطلب.';
+    return back()->with('success', $message);
+}
+
+    /**
+     * تغيير الحالة مباشرة
+     */
+    public function updateStatus(Request $request, $id)
     {
-        $request->validate([
-            'diagnostique' => 'required|string|max:1000',
-            'traitement'   => 'required|string|max:1000', // الوصفة الطبية
-        ]);
+        $baseConsultation = Consultation::findOrFail($id);
+        
+        Consultation::where('eleveur_id', $baseConsultation->eleveur_id)
+            ->where('date_demande', $baseConsultation->date_demande)
+            ->update([
+                'status' => $request->status
+            ]);
 
-        $consultation = Consultation::findOrFail($id);
-
-        if ($consultation->veterinaire_id != auth()->id()) {
-            return back()->with('error', 'غير مسموح لك بتعديل هذا التقرير.');
-        }
-
-        $consultation->update([
-            'diagnostique' => $request->diagnostique,
-            'traitement'   => $request->traitement, // تأكدي من إضافتها لـ $fillable في موديل Consultation
-            'status'       => 'completed', // تحويل الحالة تلقائياً إلى "مكتملة"
-        ]);
-
-        return redirect()->back()->with('success', 'تم تسجيل التشخيص الطبي والوصفة بنجاح لهذا الحيوان.');
+        return back()->with('success', 'تم تغيير حالة الاستشارة');
     }
 
     /**
-     * حذف طلب الاستشارة نهائياً
+     * قرار الفلاح بتأكيد الموعد المقترح من الطبيب
      */
-    public function destroy($id)
+    public function confirmReservation(Request $request, $id)
     {
-        $consultation = Consultation::findOrFail($id);
-        $consultation->delete();
+        $baseConsultation = Consultation::findOrFail($id);
+        
+        // 🛠️ تم التعديل هنا: لكي لا تظهر عند البيطري "مرفوضة"
+        // إذا وافق الفلاح نجعل الحالة 'accepted' ليفهمها كود البيطري مباشرة، وإذا رفض تصبح 'rejected'
+        $newStatus = $request->user_decision == 'confirmed' ? 'accepted' : 'rejected';
 
-        return redirect()->back()->with('success', 'تم حذف طلب الاستشارة بنجاح نهائياً.');
+        Consultation::where('eleveur_id', $baseConsultation->eleveur_id)
+            ->where('date_demande', $baseConsultation->date_demande)
+            ->update(['status' => $newStatus]);
+
+        $msg = $request->user_decision == 'confirmed' ? "تم تأكيد قبولك للموعد بنجاح!" : "تم رفض الموعد المقترح.";
+        return back()->with('success', $msg);
     }
+
+    /**
+     * حذف طلب الاستشارة بالكامل
+     */
+    public function destroy(Request $request, $id)
+{
+    $baseConsultation = Consultation::findOrFail($id);
+
+    // الحذف الذكي: يحذف فقط المجموعة المرتبطة بنفس اللحظة والسبب للمربي
+    Consultation::where('eleveur_id', $baseConsultation->eleveur_id)
+        ->where('motif', $baseConsultation->motif)
+        ->where('created_at', $baseConsultation->created_at) // لضمان حذف هذه المجموعة فقط دون المساس بالطلبات الأخرى
+        ->delete();
+
+    return back()->with('success', 'تم حذف طلب الاستشارة المحدد بنجاح.');
+}
 }

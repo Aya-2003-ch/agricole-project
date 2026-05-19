@@ -87,25 +87,12 @@
         .status-pending { background: #fef3c7; color: #d97706; }
         .status-accepted { background: #dcfce7; color: #15803d; }
         .status-rejected { background: var(--danger-light); color: #b91c1c; }
-
-        /* الأزرار المطورة */
-        .btn-action { 
-            border-radius: 10px; 
-            padding: 8px 14px; 
-            font-size: 13px; 
-            font-weight: 600; 
-            transition: all 0.2s ease-in-out; 
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .btn-action:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
         
         /* شارة الحيوان المعني */
         .animal-spec { 
             background: var(--primary-light); 
             color: var(--primary); 
-            padding: 5px 12px; 
+            padding: 6px 12px; 
             border-radius: 8px; 
             font-size: 13px; 
             font-weight: 700; 
@@ -135,7 +122,12 @@
             <p class="text-muted small mb-0">تابع وقم بإدارة طلبات الفحص الصحي لقطعان المربين</p>
         </div>
         <div class="bg-white px-4 py-2 rounded-4 shadow-sm border font-weight-bold" style="font-size: 14px;">
-            <i class="fas fa-list-ol text-success me-1"></i> إجمالي الطلبات: <strong class="text-success">{{ $consultations->count() }}</strong>
+            <i class="fas fa-list-ol text-success me-1"></i> إجمالي الطلبات: 
+            <strong class="text-success">
+                {{ $consultations->groupBy(function($item) { 
+                    return $item->eleveur_id . '-' . $item->created_at->format('Y-m-d H:i:s') . '-' . $item->motif; 
+                })->count() }}
+            </strong>
         </div>
     </div>
 
@@ -152,124 +144,86 @@
                 <thead>
                     <tr>
                         <th>المربي (الفلاح)</th>
-                        <th>الحيوان المعني</th>
+                        <th>الحيوانات المعنية بالفحص</th>
                         <th>تاريخ الطلب</th>
                         <th>سبب الاستشارة</th>
                         <th>الحالة</th>
                         <th>الموعد المحدد</th>
-                        <th class="text-center">الإجراءات</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($consultations as $con)
-                    <tr>
-                        <td>
-                            <div class="fw-bold text-dark" style="font-size: 15px;">{{ $con->eleveur->name }}</div>
-                            <small class="text-muted"><i class="fas fa-phone-alt me-1" style="font-size: 11px;"></i> {{ $con->eleveur->phone ?? 'لا يوجد هاتف' }}</small>
-                        </td>
-                        
-                        <td>
-                            <span class="animal-spec">
-                                <i class="fas fa-paw fa-sm me-1"></i> {{ $con->animal->type ?? 'غير محدد' }}
-                            </span>
-                            @if($con->animal && $con->animal->identification_code)
-                                <div class="small text-secondary mt-1" style="font-size: 12px;">
-                                    <strong>الكود:</strong> <code class="text-dark">{{ $con->animal->identification_code }}</code>
-                                </div>
-                            @endif
-                        </td>
+                    @forelse($consultations->groupBy(function($item) { 
+                        return $item->eleveur_id . '-' . $item->created_at->format('Y-m-d H:i:s') . '-' . $item->motif; 
+                    }) as $groupKey => $group)
+                        @php 
+                            $firstCon = $group->first(); 
+                        @endphp
+                        <tr>
+                            <td>
+                                <div class="fw-bold text-dark" style="font-size: 15px;">{{ $firstCon->eleveur->name }}</div>
+                                <small class="text-muted">
+                                    <i class="fas fa-phone-alt me-1" style="font-size: 11px;"></i> 
+                                    {{ $firstCon->eleveur->phone_number ?? $firstCon->eleveur->phone ?? 'لا يوجد هاتف' }}
+                                </small>
+                            </td>
+                            
+                            <td>
+                                <div class="d-flex flex-wrap gap-2">
+                                    @foreach($group as $con)
+                                        @if($con->animal)
+                                            <div class="animal-spec">
+                                                <i class="fas fa-paw fa-sm me-1"></i> {{ $con->animal->type }}
+                                                @if($con->animal->identification_code)
+                                                    <span class="badge bg-white text-dark border ms-1" style="font-size: 11px;">كود: {{ $con->animal->identification_code }}</span>
+                                                @endif
+                                                @if($con->animal->age)
+                                                    <small class="text-muted ms-1" style="font-size: 11px;">({{ $con->animal->age }})</small>
+                                                @endif
+                                            </div>
+                                        @endif
+                                    @endforeach
 
-                        <td class="text-muted" style="font-size: 13px;">
-                            {{ $con->date_demande ?? $con->created_at->format('Y-m-d') }}
-                        </td>
-                        
-                        <td style="max-width: 180px;">
-                            <span class="text-truncate d-inline-block text-dark small" title="{{ $con->motif }}" style="max-width: 160px; cursor: pointer;">
-                                {{ $con->motif }}
-                            </span>
-                        </td>
-                        
-                        <td>
-                            <span class="status-badge status-{{ $con->status }}">
-                                <span class="spinner-grow spinner-grow-sm d-none" role="status"></span>
-                                @if($con->status == 'pending') <i class="fas fa-clock"></i> قيد الانتظار
-                                @elseif($con->status == 'accepted') <i class="fas fa-check-circle"></i> مقبولة
-                                @else <i class="fas fa-times-circle"></i> مرفوضة @endif
-                            </span>
-                        </td>
-                        
-                        <td>
-                            @if($con->date_consultation)
-                                <span class="badge bg-light text-primary border border-primary-subtle p-2 fw-bold" style="font-size: 12px;">
-                                    <i class="fas fa-calendar-alt me-1"></i> {{ $con->date_consultation }}
+                                    @if($group->whereNotNull('animal')->count() == 0)
+                                        <span class="badge bg-secondary-subtle text-secondary p-2">غير محدد</span>
+                                    @endif
+                                </div>
+                            </td>
+
+                            <td class="text-muted" style="font-size: 13px;">
+                                {{ $firstCon->created_at->format('Y-m-d H:i') }}
+                            </td>
+                            
+                            <td style="max-width: 180px;">
+                                <span class="text-truncate d-inline-block text-dark small" title="{{ $firstCon->motif }}" style="max-width: 160px; cursor: pointer;">
+                                    {{ $firstCon->motif }}
                                 </span>
-                            @else
-                                <span class="text-muted small">---</span>
-                            @endif
-                        </td>
-                        
-                        <td>
-                            <div class="d-flex gap-2 justify-content-center">
-                                @if($con->status == 'pending')
-                                    <button class="btn btn-action btn-success text-white" data-bs-toggle="modal" data-bs-target="#acceptModal{{ $con->id }}">
-                                        <i class="fas fa-check"></i> قبول
-                                    </button>
-                                    
-                                    <form action="{{ route('veterinaire.consultations.update', $con->id) }}" method="POST" class="d-inline">
-                                        @csrf @method('PUT')
-                                        <input type="hidden" name="status" value="rejected">
-                                        <button type="submit" class="btn btn-action btn-outline-warning" onclick="return confirm('هل أنت متأكد من رفض هذا الطلب؟')">
-                                            رفض
-                                        </button>
-                                    </form>
+                            </td>
+                            
+                            <td>
+                                <span class="status-badge status-{{ $firstCon->status }}">
+                                    @if($firstCon->status == 'pending') <i class="fas fa-clock"></i> قيد الانتظار
+                                    @elseif($firstCon->status == 'accepted') <i class="fas fa-check-circle"></i> مقبولة
+                                    @else <i class="fas fa-times-circle"></i> مرفوضة @endif
+                                </span>
+                            </td>
+                            
+                            <td>
+                                @if($firstCon->date_consultation)
+                                    <span class="badge bg-light text-primary border border-primary-subtle p-2 fw-bold" style="font-size: 12px;">
+                                        <i class="fas fa-calendar-alt me-1"></i> {{ \Carbon\Carbon::parse($firstCon->date_consultation)->format('Y-m-d H:i') }}
+                                    </span>
+                                @else
+                                    <span class="text-muted small">---</span>
                                 @endif
-
-                                <form action="{{ route('veterinaire.consultations.destroy', $con->id) }}" method="POST" class="d-inline">
-                                    @csrf 
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-action btn-outline-danger" title="حذف الطلب نهائياً" onclick="return confirm('⚠️ تحذير: هل أنتِ متأكدة من حذف طلب الاستشارة هذا نهائياً من النظام؟')">
-                                        <i class="fas fa-trash-alt"></i> حذف
-                                    </button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-
-                    <div class="modal fade" id="acceptModal{{ $con->id }}" tabindex="-1" aria-hidden="true">
-                        <div class="modal-dialog modal-dialog-centered">
-                            <div class="modal-content rounded-4 border-0 shadow-lg">
-                                <div class="modal-header bg-success text-white rounded-top-4 py-3">
-                                    <h5 class="modal-title fw-bold"><i class="fas fa-calendar-plus me-2"></i> تحديد موعد الاستشارة</h5>
-                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                                </div>
-                                <form action="{{ route('veterinaire.consultations.update', $con->id) }}" method="POST">
-                                    @csrf @method('PUT')
-                                    <input type="hidden" name="status" value="accepted">
-                                    <div class="modal-body p-4 text-end">
-                                        <div class="mb-3">
-                                            <label class="form-label fw-bold text-secondary">اختر تاريخ ووقت الموعد للمربي:</label>
-                                            <input type="datetime-local" name="date_consultation" class="form-control form-control-lg rounded-3" style="font-size: 15px;" required>
-                                        </div>
-                                        <div class="mb-3">
-                                            <label class="form-label fw-bold text-secondary">ملاحظات أو توجيهات أولية (اختياري):</label>
-                                            <textarea name="diagnostique" class="form-control rounded-3" rows="3" placeholder="يرجى عزل الحيوانات المصابة حتى وصول الطبيب..."></textarea>
-                                        </div>
-                                    </div>
-                                    <div class="modal-footer border-0 bg-light rounded-bottom-4 p-3">
-                                        <button type="button" class="btn btn-light px-3 rounded-3" data-bs-dismiss="modal">إلغاء</button>
-                                        <button type="submit" class="btn btn-success px-4 rounded-3 fw-bold shadow-sm">تأكيد الموعد وإرسال</button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
+                            </td>
+                        </tr>
                     @empty
-                    <tr>
-                        <td colspan="7" class="text-center py-5 text-muted">
-                            <div class="mb-2"><i class="fas fa-folder-open fs-1 text-secondary" style="opacity: 0.4;"></i></div>
-                            لا توجد طلبات استشارة واردة حالياً.
-                        </td>
-                    </tr>
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted">
+                                <div class="mb-2"><i class="fas fa-folder-open fs-1 text-secondary" style="opacity: 0.4;"></i></div>
+                                لا توجد طلبات استشارة واردة حالياً.
+                            </td>
+                        </tr>
                     @endforelse
                 </tbody>
             </table>

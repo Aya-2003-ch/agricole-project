@@ -99,7 +99,7 @@
         .animals-checkbox-list {
             border: 1px solid #ddd;
             border-radius: 8px;
-            max-height: 150px;
+            max-height: 180px;
             overflow-y: auto;
             padding: 10px;
             background: #fff;
@@ -198,8 +198,9 @@
                     <div class="animals-checkbox-list" id="animalsContainer">
                         @foreach($animals as $animal)
                             <div class="animal-item">
-                                <input type="checkbox" name="animal_ids[]" value="{{ $animal->id }}" id="animal_{{{ $animal->id }}}">
-                                <label for="animal_{{{ $animal->id }}}">
+                                {{-- 🛠️ تم تصحيح الأقواس هنا لتصبح قوسين فقط {{ }} بدلاً من ثلاثة --}}
+                                <input type="checkbox" name="animal_ids[]" value="{{ $animal->id }}" id="animal_{{ $animal->id }}">
+                                <label for="animal_{{ $animal->id }}">
                                     <strong>{{ $animal->type }}</strong> 
                                     {{ $animal->identification_code ? '[كود: ' . $animal->identification_code . ']' : '' }}
                                     {{ $animal->age ? '(السن: ' . $animal->age . ')' : '' }}
@@ -280,7 +281,6 @@
             document.getElementById('consultationModal').style.display = 'none';
         }
 
-        // دالة الـ JavaScript المطورة لتصفية عناصر الـ Checkbox فوراً أثناء الكتابة في حقل البحث
         function filterAnimals() {
             var input = document.getElementById("searchAnimalInput");
             var filter = input.value.toLowerCase();

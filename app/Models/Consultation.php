@@ -15,6 +15,7 @@ class Consultation extends Model
     'veterinaire_id',
     'date_demande',
     'date_consultation',
+    'animal_id',
     'motif',
     'degree',
     'status',
