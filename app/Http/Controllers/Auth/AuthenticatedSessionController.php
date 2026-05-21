@@ -22,28 +22,29 @@ class AuthenticatedSessionController extends Controller
     /**
      * Handle an incoming authentication request.
      */
-    
-    
-        public function store(LoginRequest $request)
-{
-    $request->authenticate();
-    $request->session()->regenerate();
+    public function store(LoginRequest $request): RedirectResponse
+    {
+        $request->authenticate();
 
-    // التحقق من الـ role وتوجيه كل واحد لصفحته
-    $role = auth()->user()->role;
+        $request->session()->regenerate();
 
-    if ($role === 'ferme') {
-        return redirect()->route('ferme.dashboard');
-    } elseif ($role === 'veterinaire') {
-        return redirect()->route('veterinaire.dashboard');
-    } elseif ($role === 'distributeur') {
-        return redirect()->route('distributeur.dashboard');
+        // جلب دور المستخدم الحالي بعد تسجيل الدخول بنجاح
+        $role = auth()->user()->role;
+
+        // التوجيه الذكي حسب الأدوار الأربعة لمنصة AgroDz
+        if ($role === 'admin') {
+            return redirect()->route('admin.panel');
+        } elseif ($role === 'eleveur') {
+            return redirect()->route('eleveur.dashboard');
+        } elseif ($role === 'veterinaire') {
+            return redirect()->route('veterinaire.dashboard');
+        } elseif ($role === 'distributeur') {
+            return redirect()->route('distributeur.dashboard');
+        }
+
+        // التوجيه الافتراضي الاحتياطي
+        return redirect('/dashboard');
     }
-
-    // افتراضي
-    return redirect('/dashboard');
-}
-    
 
     /**
      * Destroy an authenticated session.

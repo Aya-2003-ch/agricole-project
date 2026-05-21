@@ -47,6 +47,9 @@
             text-transform: none !important;
             letter-spacing: normal !important;
             transition: 0.3s !important;
+            color: white !important;
+            display: flex;
+            align-items: center;
         }
 
         .btn-agro:hover {
@@ -61,20 +64,17 @@
         }
     </style>
 
-    <!-- Header مع أيقونة المنصة -->
     <div class="login-card-header">
         <i class="fas fa-tractor"></i>
         <h2>دخول منصة AgroDz</h2>
-        <p style="color: #64748b; font-size: 14px; margin-top: 5px;"> AgroDzمرحباً بك في </p>
+        <p style="color: #64748b; font-size: 14px; margin-top: 5px;">مرحباً بك في AgroDz</p>
     </div>
 
-    <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
     <form method="POST" action="{{ route('login') }}">
         @csrf
 
-        <!-- Email Address -->
         <div>
             <x-input-label for="email" class="auth-label" :value="__('البريد الإلكتروني')" />
             <x-text-input id="email" class="block mt-1 w-full custom-input" 
@@ -84,19 +84,17 @@
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
 
-        <!-- Password -->
         <div class="mt-4">
             <x-input-label for="password" class="auth-label" :value="__('كلمة المرور')" />
             <x-text-input id="password" class="block mt-1 w-full custom-input"
-                            type="password"
-                            name="password"
-                            required autocomplete="current-password" 
-                            placeholder="••••••••" />
+                          type="password"
+                          name="password"
+                          required autocomplete="current-password" 
+                          placeholder="••••••••" />
 
             <x-input-error :messages="$errors->get('password')" class="mt-2" />
         </div>
 
-        <!-- Remember Me & Forgot Password -->
         <div class="flex items-center justify-between mt-4">
             <label for="remember_me" class="inline-flex items-center">
                 <input id="remember_me" type="checkbox" class="rounded border-gray-300 text-green-700 shadow-sm focus:ring-green-500" name="remember">
@@ -116,7 +114,6 @@
             </x-primary-button>
         </div>
 
-        <!-- رابط لإنشاء حساب جديد -->
         <div class="text-center mt-6">
             <p style="font-size: 14px; color: #64748b;">
                 ليس لديك حساب؟ 

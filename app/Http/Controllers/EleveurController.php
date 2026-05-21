@@ -45,7 +45,7 @@ class EleveurController extends Controller
 public function animalsIndex()
 {
     $animals = Animal::where('eleveur_id', auth()->id())->latest()->get();
-    return view('eleveur.animale', compact('animals')); // ستفتح ملف animale.blade.php الذي أنشأناه
+    return view('eleveur.animale', compact('animals')); 
 }
 
 // enregistrer new animale dans la base de donnee 

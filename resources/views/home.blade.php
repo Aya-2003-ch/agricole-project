@@ -108,6 +108,17 @@
         .service-card h3 { font-size: 20px; margin-bottom: 15px; }
         .service-card p { color: var(--text-gray); font-size: 15px; line-height: 1.6; }
 
+        /* --- تنسيق قسم الأدوية المضاف --- */
+        .medicines-section { padding: 60px 80px; text-align: center; }
+        .medicines-section h2 { font-size: 30px; margin-bottom: 40px; color: var(--primary-dark); }
+        .med-card { background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.02); text-align: right; border-bottom: 4px solid #16a34a; transition: 0.3s; display: flex; flex-direction: column; }
+        .med-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+        .med-img-wrapper { width: 100%; height: 180px; background: #f1f5f9; }
+        .med-img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+        .med-body { padding: 20px; }
+        .med-body h3 { font-size: 18px; margin-bottom: 8px; color: var(--primary-dark); }
+        .med-body p { color: var(--text-gray); font-size: 14px; line-height: 1.5; }
+
         footer { background: var(--primary-dark); color: white; padding: 30px; text-align: center; font-size: 14px; }
 
         @media (max-width: 992px) {
@@ -116,6 +127,7 @@
             .hero-image-container { width: 300px; height: 300px; }
             .hero-image-container img { width: 280px; height: 280px; }
             nav { padding: 15px 30px; }
+            .services, .medicines-section { padding: 40px 20px; }
         }
     </style>
 </head>
@@ -165,6 +177,43 @@
                 <h3>ربط ذكي</h3>
                 <p>تنسيق آلي بين الفلاح والموزع والبيطري لضمان سرعة الاستجابة وتوفير المستلزمات الضرورية.</p>
             </div>
+        </div>
+    </section>
+
+    <section class="medicines-section">
+        <h2>أمثلة على الأدوية البيطرية المتوفرة</h2>
+        <div class="cards-grid">
+            
+            <div class="med-card">
+                <div class="med-img-wrapper">
+                    <img src="{{ asset('images/med1.png') }}" alt="Antibiotic">
+                </div>
+                <div class="med-body">
+                    <h3>مضادات حيوية واسعة الطيف</h3>
+                    <p>أدوية فعالة لعلاج الالتهابات التنفسية والمعوية الحادة والوقاية من العدوى البكتيرية في القطعان.</p>
+                </div>
+            </div>
+
+            <div class="med-card">
+                <div class="med-img-wrapper">
+                    <img src="{{ asset('images/med2.png') }}" alt="Vitamins">
+                </div>
+                <div class="med-body">
+                    <h3>فيتامينات ومكملات نمو</h3>
+                    <p>مركبات وفيتامينات (مثل AD3E) مخصصة لرفع مناعة الماشية وتحسين معدلات الخصوبة والإنتاج.</p>
+                </div>
+            </div>
+
+            <div class="med-card">
+                <div class="med-img-wrapper">
+                    <img src="{{ asset('images/med3.png') }}" alt="Anti-parasites">
+                </div>
+                <div class="med-body">
+                    <h3>مضادات الطفيليات والجرب</h3>
+                    <p>جرعات علاجية مركزة ومحاليل للقضاء الفوري على الطفيليات الداخلية والخارجية كالجرب والقراد.</p>
+                </div>
+            </div>
+
         </div>
     </section>
 

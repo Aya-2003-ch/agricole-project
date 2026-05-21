@@ -47,7 +47,6 @@ button:hover {
 <form method="POST" action="{{ route('register') }}">
     @csrf
 
-    <!-- NAME -->
     <div>
         <x-input-label for="name" value="الاسم" />
         <x-text-input id="name" class="block mt-1 w-full"
@@ -55,7 +54,6 @@ button:hover {
             :value="old('name')" required autofocus />
     </div>
 
-    <!-- EMAIL -->
     <div class="mt-4">
         <x-input-label for="email" value="البريد الإلكتروني" />
         <x-text-input id="email" class="block mt-1 w-full"
@@ -63,7 +61,6 @@ button:hover {
             :value="old('email')" required />
     </div>
 
-    <!-- PHONE -->
     <div class="mt-4">
         <x-input-label for="telephone" value="رقم الهاتف" />
         <x-text-input id="telephone" class="block mt-1 w-full"
@@ -71,7 +68,6 @@ button:hover {
             :value="old('telephone')" required />
     </div>
 
-    <!-- ADDRESS -->
     <div class="mt-4">
         <x-input-label for="address" value="العنوان" />
         <x-text-input id="address" class="block mt-1 w-full"
@@ -79,7 +75,6 @@ button:hover {
             :value="old('address')" required />
     </div>
 
-    <!-- LOCATION -->
     <div class="mt-4">
         <x-input-label value="📍 الموقع" />
 
@@ -92,38 +87,32 @@ button:hover {
         <p id="location-status" style="font-size:13px;color:gray;margin-top:5px;"></p>
     </div>
 
-    <!-- HIDDEN LOCATION -->
     <input type="hidden" name="latitude" id="lat">
     <input type="hidden" name="longitude" id="lng">
 
-    <!-- ROLE -->
     <div class="mt-4">
         <x-input-label for="role" value="نوع الحساب" />
 
         <select name="role" id="role" class="block mt-1 w-full" required>
-            <option value="">-- اختر --</option>
-            <option value="eleveur">🐄 فلاح</option>
-            <option value="veterinaire">🩺 بيطري</option>
-            <option value="distributeur">🚚 موزع</option>
-             <option value="admin">مدير النظام (Admin)</option>
-     </select>
+            <option value="">-- اختر نوع الحساب --</option>
+            <option value="eleveur">🐄 فلاح (Éleveur)</option>
+            <option value="veterinaire">🩺 بيطري (Vétérinaire)</option>
+            <option value="distributeur">🚚 موزع (Distributeur)</option>
+            <option value="admin">🛡️ مدير النظام (Admin)</option> </select>
     </div>
 
-    <!-- PASSWORD -->
     <div class="mt-4">
         <x-input-label for="password" value="كلمة المرور" />
         <x-text-input id="password" class="block mt-1 w-full"
             type="password" name="password" required />
     </div>
 
-    <!-- CONFIRM -->
     <div class="mt-4">
         <x-input-label for="password_confirmation" value="تأكيد كلمة المرور" />
         <x-text-input id="password_confirmation" class="block mt-1 w-full"
             type="password" name="password_confirmation" required />
     </div>
 
-    <!-- BUTTON -->
     <div class="flex items-center justify-between mt-6">
 
         <a href="{{ route('login') }}" style="color:#1e7d4f;">
@@ -131,13 +120,12 @@ button:hover {
         </a>
 
         <x-primary-button>
-            تسجيل
+            تسجيل الحساب
         </x-primary-button>
 
     </div>
 </form>
 
-<!-- OPENSTREETMAP -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
@@ -192,11 +180,11 @@ function getLocation() {
             status.innerHTML = "✅ تم تحديد الموقع بنجاح";
 
         }, function() {
-            status.innerHTML = "❌ تم رفض GPS";
+            status.innerHTML = "❌ تم رفض نظام تحديد المواقع (GPS)";
         });
 
     } else {
-        status.innerHTML = "❌ المتصفح لا يدعم GPS";
+        status.innerHTML = "❌ المتصفح لا يدعم الـ GPS";
     }
 }
 </script>

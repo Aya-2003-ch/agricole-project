@@ -10,6 +10,7 @@ use App\Models\Eleveur;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Http\RedirectResponse;
 
 class RegisteredUserController extends Controller
 {
@@ -18,14 +19,14 @@ class RegisteredUserController extends Controller
         return view('auth.register');
     }
 
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         // 1. التثبت من البيانات (Validation)
         $request->validate([
             'name' => 'required|string',
             'email' => 'required|email|unique:users',
             'password' => 'required|confirmed|min:6',
-            'role' => 'required|in:eleveur,veterinaire,distributeur,admin', // تأكدنا من وجود admin هنا
+            'role' => 'required|in:eleveur,veterinaire,distributeur,admin', // الأدمن مضاف هنا بنجاح
             'telephone' => 'required',
             'address' => 'required',
             
@@ -49,7 +50,7 @@ class RegisteredUserController extends Controller
 
         $user->save();
 
-        // 3. إنشاء السجل في الجدول التابع للرول (إلا الأدمن لا يحتاج جدول إضافي)
+        // 3. إنشاء السجل في الجدول التابع للرول (الأدمن لا يحتاج جدول إضافي)
         if ($request->role === 'distributeur') {
             Distributeur::create([
                 'user_id' => $user->id,
@@ -81,9 +82,9 @@ class RegisteredUserController extends Controller
         // 4. تسجيل الدخول تلقائياً
         Auth::login($user);
 
-        // 5. التوجيه الذكي حسب الـ Role (التعديل هنا)
+        // 5. التوجيه الذكي حسب الـ Role المتوافق مع مساراتك
         return match ($user->role) {
-            'admin'        => redirect()->route('admin.panel'), // يذهب لجدول الأدمن الأخضر
+            'admin'        => redirect()->route('admin.panel'), // سيتوجه مباشرة لصفحة الأدمين المخصصة
             'veterinaire'  => redirect()->route('veterinaire.dashboard'),
             'distributeur' => redirect()->route('distributeur.dashboard'),
             'eleveur'      => redirect()->route('eleveur.dashboard'),

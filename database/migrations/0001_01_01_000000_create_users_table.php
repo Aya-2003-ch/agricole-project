@@ -16,10 +16,7 @@ return new class extends Migration
     $table->string('name');
     $table->string('email')->unique();
     $table->timestamp('email_verified_at')->nullable();
-
     $table->enum('role', ['distributeur', 'veterinaire', 'eleveur']);
-
-    // ✅ الجدد
     $table->string('telephone')->nullable();
     $table->string('address')->nullable();
 
